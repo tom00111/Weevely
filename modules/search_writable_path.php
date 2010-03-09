@@ -1,7 +1,7 @@
 <?php
 //Author:  Carlo Satta
 //Description: Print all writable directories.
-c('.');
+c('..');
 function c($d){
 	echo "Entro in ".$d."<br>";
 	$h = opendir($d);
