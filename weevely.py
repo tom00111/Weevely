@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os, urllib2, re, urlparse, datetime
+import getopt, sys, base64, os, urllib2, re, urlparse
     
     
     
@@ -84,10 +84,9 @@ class weevely:
       if mode=='g':
 	self.generate(pwd,outfile)
     else:
-      print "- Please specify if generate (-g) backdoor file, or executing a remote command (-c) or a remote terminal (-t)"
+      print "- Please specify if generate (-g) backdoor file, executing a remote command (-c) or a remote terminal (-t)"
       sys.exit(1)
 
-      
 
      
   def crypt(self, text, key):
@@ -122,7 +121,7 @@ class weevely:
     
   def terminal(self, url, pwd, mode):
     while True:
-      print datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+" exec> ",
+      print "exec> ",
       cmnd = sys.stdin.readline()
       if cmnd!='\n':
 	self.execute(url, pwd, cmnd, mode)
