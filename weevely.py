@@ -28,7 +28,8 @@ switch($ref[2]){
 
 class weevely:
   def main(self):
-    #self.generate()
+    
+    self.banner()
   
     try:
 	opts, args = getopt.getopt(sys.argv[1:], 'tgc:u:p:o:', ['generate', 'url', 'password', 'terminal', 'command', 'output'])
@@ -84,9 +85,23 @@ class weevely:
       if mode=='g':
 	self.generate(pwd,outfile)
     else:
-      print "- Please specify if generate (-g) backdoor file, executing a remote command (-c) or a remote terminal (-t)"
+      self.usage()
       sys.exit(1)
 
+  def usage(self):
+    print """
++  Generate backdoor code with <password> in <filepath>.
++  	./weevely -g -o <filepath> -p <password>
++      
++  Execute single remote command via <url>, using <password>.
++  	./weevely -c <command> -u <url> -p <password>
++      
++  Execute remote terminal via <url>, using <password>.
++  	./weevely -t -u <url> -p <password>
+"""
+    
+  def banner(self):
+    print "+ weevely - stealth PHP backoor generator/controller.\n+\t\t\t\t\tEmilio Pinna & Carlo Satta."
 
      
   def crypt(self, text, key):
