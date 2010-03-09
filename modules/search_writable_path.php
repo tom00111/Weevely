@@ -1,18 +1,14 @@
-<?php
 //Author:  Carlo Satta
 //Description: Print all writable directories.
-c('..');
+@c($_SERVER['DOCUMENT_ROOT']);
 function c($d){
-	echo "Entro in ".$d."<br>";
-	$h = opendir($d);
-	while ($f = readdir($h)) {
+	$h = @opendir($d);
+	while ($f = @readdir($h)) {
 		$df=$d.'/'.$f; 
 		if((is_dir($df))&&($f!='.')&&($f!='..')){
-			if(is_writable($df)) echo "Writable: ".$f."<br>";
-			c($df);
-			echo "Esco da ".$df."<br>";
+			if(@is_writable($df)) echo "Writable: ".@str_replace($_SERVER['DOCUMENT_ROOT'],'',$df)."\n";
+			@c($df);
 		}
 	}
-	$h = closedir($h);
+	@closedir($h);
 }
-?>
