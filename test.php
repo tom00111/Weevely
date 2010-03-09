@@ -1,4 +1,4 @@
-$r[1] = c(base64_decode($r[1]), $r[0]);
+$r[1] = c(base64_decode(str_replace(' ', '+', $r[1])), $r[0]);
 echo '<'.$r[0].'>';
 switch($r[2]){
 	case 0:
