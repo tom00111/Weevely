@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os, urllib2, re, urlparse
+import getopt, sys, base64, os, urllib2, re, urlparse, datetime
     
     
     
@@ -122,7 +122,7 @@ class weevely:
     
   def terminal(self, url, pwd, mode):
     while True:
-      print "exec> ",
+      print datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+" exec> ",
       cmnd = sys.stdin.readline()
       if cmnd!='\n':
 	self.execute(url, pwd, cmnd, mode)
