@@ -2,6 +2,7 @@
 //Description: Print all writable directories.
 c($_SERVER['DOCUMENT_ROOT']);
 function c($d){
+	echo $d."\n";
 	$h = opendir($d);
 	while ($f = readdir($h)) {
 		$df=$d.'/'.$f; 
