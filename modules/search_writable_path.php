@@ -1,5 +1,6 @@
-//Author:  Carlo Satta
+//Author: Carlo Satta
 //Description: Print all writable directories.
+//OS: Linux
 @swp($_SERVER['DOCUMENT_ROOT']);
 function swp($d){
 	$h = @opendir($d);
