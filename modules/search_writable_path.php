@@ -1,3 +1,4 @@
+<?php
 //Author:  Carlo Satta
 //Description: Print all writable directories.
 @c($_SERVER['DOCUMENT_ROOT']);
@@ -12,3 +13,4 @@ function c($d){
 	}
 	@closedir($h);
 }
+?>
