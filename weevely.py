@@ -141,7 +141,7 @@ class weevely:
 	print self.host.execute(cmnd, 0)
 
   def generate(self,key,path):
-    f_tocrypt = file('php/text_to_crypt.php')
+    f_tocrypt = file('php/encoded_backdoor.php')
     f_back = file('php/backdoor.php')
     f_output = file(path,'w')
     
