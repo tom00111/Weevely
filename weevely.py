@@ -177,9 +177,14 @@ class weevely:
 	  sys.stdin.readline()
 	
       f = file('modules/' + modname + '.php')
-      modargsstring=str(modargs)
-      toinject = '$ar=Array(' + modargsstring[1:len(modargsstring)-1] + ');'
-      toinject = toinject + f.read()
+      modargsstring='"'+'","'.join(modargs) + '"'
+      modutext = '$ar = Array(' + modargsstring + ');\n' + f.read()
+      
+      toinject=''
+      for i in modutext.split('\n'):
+	if len(i)>2 and ( i[:2] == '//' or i[0] == '#'):
+	  continue
+	toinject=toinject+i+'\n'
       
       try:
 	ret = self.host.execute_php(toinject)

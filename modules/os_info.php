@@ -1,4 +1,3 @@
 //Author: Carlo Satta
-//Description: Print OS.
-//OS: Linux
+//Description: Print Operating System name.
 echo PHP_OS;
