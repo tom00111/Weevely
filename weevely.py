@@ -436,7 +436,7 @@ class host():
       
     #real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
     
-    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&ei=' + cmdstr[:len(cmdstr)/3] +'&usg=' + cmdstr[len(cmdstr)/3:len(cmdstr)*2/3] + '&sig2=' + cmdstr[len(cmdstr)*2/3:] 
+    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&rct=j&q=' + q + '&ei=' + cmdstr[:len(cmdstr)/3] +'&usg=' + cmdstr[len(cmdstr)/3:len(cmdstr)*2/3] + '&sig2=' + cmdstr[len(cmdstr)*2/3:] 
     
     return ''.join(real_refurl)
     
