@@ -350,7 +350,7 @@ class host():
     else:
       self.method = first
       if escape != -2:
-	print '+ Using with method ' + str(first) + ' (' + methods[first] + ').' 
+	print '+ Using method ' + str(first) + ' (' + methods[first] + ').' 
     
     return first
 
@@ -424,12 +424,19 @@ class host():
   def genRefUrl(self,cmdstr):
     #As seen in offical google blog: http://analytics.blogspot.com/2009/04/upcoming-change-to-googlecom-search.html
     # http://www.google.com/url?sa=t&source=web&ct=res&cd=7&url=http%3A%2F%2Fwww.example.com%2Fmypage.htm&ei=0SjdSa-1N5O8M_qW8dQN&rct=j&q=flowers&usg=AFQjCNHJXSUh7Vw7oubPaO3tZOzz-F-u_w&sig2=X8uCFh6IoPtnwmvGMULQfw
+    # Old
+    # refurl='http://www.google.com/url?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
     
     parsed=urlparse.urlparse(self.url)
-    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + urllib2.quote((parsed.netloc + parsed.path).replace('/',' '),'') + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
+    if not parsed.path:
+      q=parsed.netloc.replace('/',' ')
+    else:
+      simple_path=''.join(parsed.path.split('.')[:-1])
+      q=simple_path.replace('/',' ')
+      
+    real_refurl = 'http://www.google.com/url?' + 'sa=' + self.pwd[:2] + '&source=web&ct=7' + '&url=' + urllib2.quote(parsed.geturl(),'') + '&q=' + q + '&usg=' + cmdstr[:len(cmdstr)/2] + '&sig2=' + cmdstr[(len(cmdstr)/2):] 
     
     
-    refurl='http://www.google.com/url?sa=' + self.pwd[:2] + '&source=' + cmdstr[:len(cmdstr)/2] + '&ei=' + cmdstr[(len(cmdstr)/2):]
     return ''.join(real_refurl)
     
       
