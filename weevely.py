@@ -244,7 +244,6 @@ class weevely:
       
       if f.endswith('.php'):
 	
-	  
 	mod = file('modules/' + f)
 	modstr = mod.read()
 	modname = f[:-4]
