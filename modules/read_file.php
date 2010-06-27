@@ -1,5 +1,5 @@
 //Author: Hyp3rInj3cT10n, source edit for weevely by Alessio Dalla Pizza
-//Description: Read files not under webroot, where system() functions are not available.
+//Description: Read any files where system() functions are not available.
 //Arguments: path
 //OS:Linux
 $file=$ar[0];
