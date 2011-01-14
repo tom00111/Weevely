@@ -23,11 +23,11 @@ try:
     readline.parse_and_bind( 'tab: complete' )
     readline.set_completer( autoComplete )
     readline.read_history_file(history)
- 
-    atexit.register( readline.write_history_file, history )
 except IOError:
     pass
-    
+atexit.register( readline.write_history_file, history )
+
+
 methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
 
 class weevely:
