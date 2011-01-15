@@ -50,7 +50,7 @@ class weevely:
     try:
 	opts, args = getopt.getopt(sys.argv[1:], 'ltgsm:c:u:p:o:e:', ['list', 'module', 'generate', 'url', 'password', 'terminal', 'command', 'output', 'escape'])
     except getopt.error, msg:
-	print "Error:", msg
+	print "! ERROR:", msg, "\n"
 	exit(2)
     
     for o, a in opts:
@@ -70,10 +70,10 @@ class weevely:
 	  try:
 	    escape=int(a)
 	    if escape<0 or escape>8 or escape%1!=0:
-	      print "- Error: escape method is not a valid integer"
+	      print "! ERROR: escape method is not a valid integer.\n"
 	      return
 	  except ValueError:
-	    print "- Error: escape method is not a valid integer"
+	    print "! ERROR: escape method is not a valid integer.\n"
 	    return
 
 	
@@ -86,12 +86,12 @@ class weevely:
 	  if not parsed.scheme:
 	    url="http://"+url
 	  if not parsed.netloc:
-	    print "- Error: URL not valid"
+	    print "! ERROR: URL not valid\n"
 	    sys.exit(1)
 	  
 	if o in ("-p", "-password"):
 	  if len(a)<4:
-	    print "- Error: required almost 4 character long password"
+	    print "! ERROR: required almost 4 character long password\n"
 	    sys.exit(1)
 	  pwd=a
 	if o in ("-o", "-output"):
@@ -107,18 +107,17 @@ class weevely:
 	if 'pwd' not in locals():
 	  pwd=''
 	  while not pwd or len(pwd)<4:
-	    print "+ Please insert almost 4 character long password : ",
+	    print "+ Please insert almost 4 character long password: ",
 	    pwd = sys.stdin.readline().strip()
-	  
 	
 	if 'url' not in locals():
-	  print "! Please specify URL (-u)"
+	  print "! Please specify URL (-u)\n"
 	  sys.exit(1)
 	  
 	try:
 	  self.host=host(url,pwd)
 	except Exception, e:
-	  print "! Error: " + str(e) + ". Exiting."
+	  print "! ERROR: " + str(e) + ". Exiting...\n"
 	  return
 	
 	if moderun=='s':
@@ -129,7 +128,7 @@ class weevely:
 	if 'pwd' not in locals():
 	  pwd=''
 	  while not pwd or len(pwd)<4:
-	    print "+ Please insert almost 4 character long password : ",
+	    print "+ Please insert almost 4 character long password: ",
 	    pwd = sys.stdin.readline().strip()
 	
 	if 'outfile' not in locals():
@@ -163,24 +162,28 @@ class weevely:
       sys.exit(1)
 
   def usage(self):
-    print """+ Generate backdoor crypted code.
-+  weevely -g -o <filepath> -p <pass>
-+      
-+ Execute remote commands.
-+  weevely -c <command> -u <url> -p <pass>			Execute command.    
-+  weevely -t -u <url> -p <password>		 		Start terminal.	         
-+
-+ Bypass PHP hardening protections 
-+  weevely -s							Show available remote functions.
-+  weevely -e <function number> -t -u <url> -p <password> 	Execute function.
-+
-+ Execute PHP modules on remote server 
-+  weevely -l              				        List available modules.					
-+  weevely -m <module>::<1arg>::..::<Narg> -u <url> -p <pass> Execute module."""
+	print ("  Generate backdoor crypted code:\n" +
+			"\tweevely -g -o <filepath> -p <pass>\n\n" +
+			"  Execute remote commands:\n" +
+			"\tweevely -c <command> -u <url> -p <pass>\n\n" +
+			"  Start remote terminal:\n" +
+			"\tweevely -t -u <url> -p <password>\n\n" +     
+			"  Bypass PHP hardening protections.\n\n" +
+			"\tShow available remote functions:\n" +
+			"\tweevely -s -u <url> -p <password>\n\n" +
+			"\tExecute function:\n" +
+			"\tweevely -e <function number> -t -u <url> -p <password>\n\n" +
+			"  Execute PHP modules on remote server.\n\n" +
+			"\tList available modules:\n" +
+			"\tweevely -l\n\n" +
+			"\tExecute module:\n" +
+			"\tweevely -m <module>::<1arg>::..::<Narg> -u <url> -p <pass>\n");
     
   def banner(self):
-    print "+ Weevely - Generate and manage stealth PHP backdoors.\n+"
-
+    print ("\n  Weevely 0.2 - Generate and manage stealth PHP backdoors.\n" +
+			"  Copyright (c) 2010-2011 Weevely Developers\n" + 
+			"  Website: http://code.google.com/p/weevely/\n" +
+			"  Original work: Emilio Pinna\n");
     
   def terminal(self, url, pwd):
     
@@ -204,7 +207,7 @@ class weevely:
     new_str = str_back.replace('%%%BACK_CRYPTED%%%', str_crypted)
     
     f_output.write(new_str)
-    print '+ Backdoor file ' + path + ' created with password '+ key + '.'
+    print '+ Backdoor file ' + path + ' created with password '+ key + '.\n'
 
   def execmodule(self, url, pwd, modulestring, os):
     
@@ -254,17 +257,17 @@ class weevely:
       
       print '+ Module:', m['name']
       if m.has_key('OS'):
-	print '+ Supported OSs:', m['OS']
+	print '  Supported OSs:', m['OS']
       
       if m.has_key('arguments'):
-	print '+ Usage: ./weevely -m ' + m['name'] + "::<" + '>::<'.join(m['arguments']) + '>' + ' -u <url> -p <password>'
+	print '  Usage: weevely -m ' + m['name'] + "::<" + '>::<'.join(m['arguments']) + '>' + ' -u <url> -p <password>'
       else:
-	print '+ Usage: ./weevely -m ' + m['name'] + ' -u <url> -p <password>'
+	print '  Usage: weevely -m ' + m['name'] + ' -u <url> -p <password>'
 	
       if m.has_key('description'):
-	print '+ Description:', m['description'].strip()
+	print '  Description:', m['description'].strip()
 
-      print '+'
+      print ''
   
   def loadmodules(self):
     files = os.listdir('modules')
@@ -356,7 +359,7 @@ class host():
 	else:
 	  sum_no[methods[i]]=ret
       except Exception, e:
-	sum_no[methods[i]]='Error: ' + ret + " " + str(e)
+	sum_no[methods[i]]='! ERROR: ' + ret + " " + str(e)
 
 
     # Summary 
@@ -364,21 +367,21 @@ class host():
       print "+ Accepted functions:",
       for m in sum_ok:
 	  print  str(methods.index(m)) + " [" + m + "]", 
-      print ''
+      print '\n'
 	  
     if first == -1 or ( len(sum_no)>0 and escape==-2 ):
       print "- Unsupported functions: ",
       for m in sum_no:
 	print  str(methods.index(m)) + " [" + m + "]", 
-      print ''  
+      print '\n'  
 	
 
     if first==-1:
-      print '! No working functions founded on ' + self.url + '. Exiting.'
+      print '! No working functions founded on ' + self.url + '. Exiting...\n'
     else:
       self.method = first
       if escape != -2:
-	print '+ Using method ' + str(first) + ' [' + methods[first] + '] on ' + self.url 
+	print '+ Using method ' + str(first) + ' [' + methods[first] + '] on ' + self.url +'\n'
     
     return first
 
@@ -477,5 +480,9 @@ if __name__ == "__main__":
     try:
       app.main()
     except KeyboardInterrupt:
-      print '\n! Received keyboard interrupt, exiting.'
+      print '\n\n! Received keyboard interrupt. Exiting...\n'
       
+      
+    
+    
+   
