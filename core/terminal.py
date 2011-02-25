@@ -55,22 +55,29 @@ class Terminal(Shell):
 	def __handleDirectoryChange( self, cmd ):
 		cd  = self.cwd_extract.findall(cmd)
 		if cd != None and len(cd) > 0:	
-			cwd = cd[0].strip()
+			cwd  = cd[0].strip()
+			path = self.cwd
 			if cwd[0] == '/':
-				self.cwd = cwd
+				path = cwd
 			elif cwd == '..':
-				dirs = self.cwd.split('/')
+				dirs = path.split('/')
 				dirs.pop()
-				self.cwd = '/'.join(dirs)
+				path = '/'.join(dirs)
 			elif cwd == '.':
 				pass
 			elif cwd[0:3] == '../':
-				self.cwd = cwd.replace( '../', self.cwd )
+				path = cwd.replace( '../', path )
 			elif cwd[0:2] == './':
-				self.cwd = cwd.replace( './', self.cwd )
+				path = cwd.replace( './', path )
 			else:
-				self.cwd = (self.cwd + "/" + cwd).replace( '//', '/' ) 
+				path = (path + "/" + cwd).replace( '//', '/' ) 
 			
+			exists = self.execute( "( [[ -d '%s' ]] && echo 1 ) || echo 0" % path )
+			if exists == "1":
+				self.cwd = path
+			else:
+				print "! The directory '%s' does not exist or is not accessible." % path
+
 			return True
 
 		return False

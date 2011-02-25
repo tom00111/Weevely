@@ -171,22 +171,29 @@ class ClusterTerminal:
 	def __handleDirectoryChange( self, item, cmd ):
 		cd  = self.cwd_extract.findall(cmd)
 		if cd != None and len(cd) > 0:	
-			cwd = cd[0].strip()
+			cwd  = cd[0].strip()
+			path = item.cwd
 			if cwd[0] == '/':
-				item.cwd = cwd
+				path = cwd
 			elif cwd == '..':
-				dirs = item.cwd.split('/')
+				dirs = path.split('/')
 				dirs.pop()
-				item.cwd = '/'.join(dirs)
+				path = '/'.join(dirs)
 			elif cwd == '.':
 				pass
 			elif cwd[0:3] == '../':
-				item.cwd = cwd.replace( '../', item.cwd )
+				path = cwd.replace( '../', path )
 			elif cwd[0:2] == './':
-				item.cwd = cwd.replace( './', item.cwd )
+				path = cwd.replace( './', path )
 			else:
-				item.cwd = (item.cwd + "/" + cwd).replace( '//', '/' ) 
+				path = (path + "/" + cwd).replace( '//', '/' ) 
 			
+			exists = item.execute( "( [[ -d '%s' ]] && echo 1 ) || echo 0" % path )
+			if exists == "1":
+				item.cwd = path
+			else:
+				print "! The directory '%s' does not exist or is not accessible." % path
+
 			return True
 
 		return False
