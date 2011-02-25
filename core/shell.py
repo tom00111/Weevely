@@ -64,7 +64,7 @@ class Shell:
 			payload = self.payload
 
 		if payload.count( '%s' ) == 1:
-			payload = payload % cmd 
+			payload = payload % cmd.replace( "'", "\\'" )
 		else:
 			args    = "','".join( cmd.split(' ')[1:] )
 			cmd     = cmd.split()[0]
