@@ -46,7 +46,7 @@ class Terminal(Shell):
 			cmd 		= raw_input( self.prompt )
 			if cmd != '\n':
 				cmd = cmd.strip()
-				if self.handleDirectoryChange(cmd) == False:
+				if self.__handleDirectoryChange(cmd) == False:
 					readline.add_history(cmd)
 
 					cmd = "cd %s && %s" % ( self.cwd, cmd )					
