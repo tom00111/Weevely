@@ -67,3 +67,5 @@ if __name__ == "__main__":
 		
 	except KeyboardInterrupt:
 		print "\n+ Bye ^^"
+	except Exception as e:
+		print "\n! %s" % e
