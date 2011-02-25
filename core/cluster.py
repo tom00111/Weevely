@@ -52,19 +52,14 @@ class ClusterTerminal:
 	def __init_item( self, i, url, password ):
 		self.items[ "C%d" % i ] = ClusterItem( "C%d" % i, url, password )
 
-	def __init__( self, clusterfile ):	
-		self.clusterfile = clusterfile
-		self.items 		 = {}
-		self.entity      = "cluster"
-		self.prompt   	 = "[%s@weevely] " % self.entity
-		self.history 	 = os.path.expanduser( '~/.weevely_history' )
-		self.completions = {}
-		self.lock		 = threading.Lock()
-		self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+	def __reload( self ):
+		self.items  = {}
+		self.entity = "cluster"
+		self.prompt = "[%s@weevely] " % self.entity
 
 		print "+ Initializing cluster ..."
 
-		fd 	  	= open( clusterfile,'r' )
+		fd 	  	= open( self.clusterfile,'r' )
 		lines 	= fd.readlines()
 		i	  	= 0
 		threads = []
@@ -83,6 +78,19 @@ class ClusterTerminal:
 			thread.join()
 
 		print "+ Loaded %d items from '%s' .\n+ Type ':help' for a list of available commands.\n" % ( len(self.items), self.clusterfile )
+		
+
+	def __init__( self, clusterfile ):	
+		self.clusterfile = clusterfile
+		self.items 		 = {}
+		self.entity      = "cluster"
+		self.prompt   	 = "[%s@weevely] " % self.entity
+		self.history 	 = os.path.expanduser( '~/.weevely_history' )
+		self.completions = {}
+		self.lock		 = threading.Lock()
+		self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+
+		self.__reload()
 
 		try:
 			readline.parse_and_bind( 'tab: menu-complete' )
@@ -132,11 +140,21 @@ class ClusterTerminal:
 				print "! '%s' invalid cluster item id, allowed : cluster, %s" % ( value, ', '.join( self.items.keys() ) ),
 			else:
 				self.entity = item_name
+		elif cmd == 'kill':
+			item_name = args[0]
+			if item_name not in self.items.keys():
+				print "! '%s' invalid cluster item id, allowed : %s" % ( value, ', '.join( self.items.keys() ) ),
+			else:
+				self.items.pop( item_name )
 		elif cmd == 'list':	
 			print ', '.join( self.items.keys() )
+		elif cmd == 'reload':
+			self.__reload()
 		elif cmd == 'help':
 			print "\t:switch <cluster-item> - Switch to an item terminal, type ':switch cluster' to go back."
+			print "\t:kill <cluster-item>   - Remove an item from the active session given its id (see :list)."
 			print "\t:list                  - Print a list of active cluster items."
+			print "\t:reload                - Reload the cluster from '%s'." % self.clusterfile
 			print "\t:help                  - Print this menu."
 		
 	def __handleDirectoryChange( self, item, cmd ):
