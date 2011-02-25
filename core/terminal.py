@@ -46,29 +46,34 @@ class Terminal(Shell):
 			cmd 		= raw_input( self.prompt )
 			if cmd != '\n':
 				cmd = cmd.strip()
-				cd  = self.cwd_extract.findall(cmd)
-
-				if cd != None and len(cd) > 0:	
-					cwd = cd[0].strip()
-					if cwd[0] == '/':
-						self.cwd = cwd
-					elif cwd == '..':
-						dirs = self.cwd.split('/')
-						dirs.pop()
-						self.cwd = '/'.join(dirs)
-					elif cwd == '.':
-						pass
-					elif cwd[0:3] == '../':
-						self.cwd = cwd.replace( '../', self.cwd )
-					elif cwd[0:2] == './':
-						self.cwd = cwd.replace( './', self.cwd )
-					else:
-						self.cwd = (self.cwd + "/" + cwd).replace( '//', '/' ) 
-				else:
+				if self.handleDirectoryChange(cmd) == False:
 					readline.add_history(cmd)
 
 					cmd = "cd %s && %s" % ( self.cwd, cmd )					
 					print self.execute(cmd)
+
+	def __handleDirectoryChange( self, cmd ):
+		cd  = self.cwd_extract.findall(cmd)
+		if cd != None and len(cd) > 0:	
+			cwd = cd[0].strip()
+			if cwd[0] == '/':
+				self.cwd = cwd
+			elif cwd == '..':
+				dirs = self.cwd.split('/')
+				dirs.pop()
+				self.cwd = '/'.join(dirs)
+			elif cwd == '.':
+				pass
+			elif cwd[0:3] == '../':
+				self.cwd = cwd.replace( '../', self.cwd )
+			elif cwd[0:2] == './':
+				self.cwd = cwd.replace( './', self.cwd )
+			else:
+				self.cwd = (self.cwd + "/" + cwd).replace( '//', '/' ) 
+			
+			return True
+
+		return False
 
 	def __complete( self, text, state ):
 		try:
