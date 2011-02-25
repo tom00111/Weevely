@@ -20,8 +20,7 @@
 if __name__ == "__main__":
 	print ( "\n  Weevely 0.3 - Generate and manage stealth PHP backdoors.\n" + \
 			"  Copyright (c) 2011-2012 Weevely Developers\n" + \
-			"  Website: http://code.google.com/p/weevely/\n" + \
-			"  Original work: Emilio Pinna\n" );
+			"  Website: http://code.google.com/p/weevely/\n" );
 
 	from optparse import OptionParser	
 
