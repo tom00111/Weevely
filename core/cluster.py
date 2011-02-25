@@ -49,8 +49,8 @@ class ClusterThread(threading.Thread):
 		self.lock.release()
 
 class ClusterTerminal:
-	def __init_item( self, i, url, password ):
-		self.items[ "C%d" % i ] = ClusterItem( "C%d" % i, url, password )
+	def __init_item( self, name, url, password ):
+		self.items[ name ] = ClusterItem( name, url, password )
 
 	def __reload( self ):
 		self.items  = {}
@@ -66,8 +66,19 @@ class ClusterTerminal:
 		for line in lines:
 			line = line.strip()
 			if line != '' and line[0] != '#':
-				url , password = line.split(',')
-				thread = threading.Thread( target = self. __init_item, args=( i, url, password, ) )
+				items = line.split(',')
+				if len(items) == 2:
+					url 	 = items[0]
+					password = items[1]
+					name	 = "C%d" % i
+				elif len(items) == 3:
+					name	 = items[0]
+					url 	 = items[1]
+					password = items[2]
+				else:
+					raise Exception( "Invalid line found on cluster file :\n%s" % line )
+					
+				thread = threading.Thread( target = self. __init_item, args=( name, url, password, ) )
 				i += 1	
 				thread.start()
 				threads.append(thread)

