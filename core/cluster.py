@@ -18,32 +18,27 @@
 import readline, rlcompleter, atexit, urlparse, os, re, urlparse, threading
 from core.shell import Shell
 from core.threadpool import ThreadPool
+from core.terminal import Terminal
 
-class ClusterItem(Shell):
+class ClusterItem(Terminal):
 	def __init__( self, name, url, password ):
-		Shell.__init__( self, url, password )
-		self.name 		 = name
-		self.username 	 = self.execute("whoami")
-		self.hostname 	 = self.execute("hostname")
-		self.cwd		 = self.execute("pwd")
-		
-	def prompt( self ):
-		return "[%s@%s %s] " % (self.username, self.hostname, self.cwd)
+		Terminal.__init__( self, url, password, False, ':' )
+		self.name = name
 
 class ClusterThread(threading.Thread):
-	def __init__( self, item, cmd, lock ):
+	def __init__( self, terminal, cmd, lock ):
 		threading.Thread.__init__(self)
-		self.item = item
-		self.cmd  = cmd
-		self.lock = lock
+		self.terminal = terminal
+		self.cmd  	  = cmd
+		self.lock 	  = lock
 
 	def run( self ):
 		self.lock.acquire()
-		lines = self.item.execute( self.cmd ).split('\n')
+		lines = self.terminal.execute( self.cmd ).split('\n')
 		if len(lines) == 1:
-			print "[%s] : %s" % ( self.item.name, lines[0].strip() )
+			print "[%s] : %s" % ( self.terminal.name, lines[0].strip() )
 		else:
-			print "[%s] :" % self.item.name
+			print "[%s] :" % self.terminal.name
 			for line in lines:		
 				print "\t%s" % line.strip()		
 		self.lock.release()
@@ -55,7 +50,6 @@ class ClusterTerminal:
 	def __reload( self ):
 		self.items  = {}
 		self.entity = "cluster"
-		self.prompt = "[%s@weevely] " % self.entity
 
 		print "+ Initializing cluster ..."
 
@@ -78,14 +72,14 @@ class ClusterTerminal:
 				else:
 					raise Exception( "Invalid line found on cluster file :\n%s" % line )
 					
-				thread = threading.Thread( target = self. __init_item, args=( name, url, password, ) )
+				thread = threading.Thread( target = self.__init_item, args=( name, url, password, ) )
 				i += 1	
 				thread.start()
 				threads.append(thread)
 
 		fd.close()
 
-		for thread in threads:
+		for thread in threads:	
 			thread.join()
 
 		print "+ Loaded %d items from '%s' .\n+ Type ':help' for a list of available commands.\n" % ( len(self.items), self.clusterfile )
@@ -95,11 +89,9 @@ class ClusterTerminal:
 		self.clusterfile = clusterfile
 		self.items 		 = {}
 		self.entity      = "cluster"
-		self.prompt   	 = "[%s@weevely] " % self.entity
 		self.history 	 = os.path.expanduser( '~/.weevely_history' )
 		self.completions = {}
 		self.lock		 = threading.Lock()
-		self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 
 		self.__reload()
 
@@ -115,30 +107,28 @@ class ClusterTerminal:
 	def run( self ):
 		while True:
 			if self.entity == "cluster":
-				self.prompt = "[%s@weevely] " % self.entity
+				cmd = raw_input( "[%s@weevely] " % self.entity )
+				cmd = cmd.strip()
+				if cmd == '':
+					continue
 			else:
-				self.prompt = self.items[ self.entity ].prompt()
-
-			cmd = raw_input( self.prompt ).strip()
-			if cmd == '':
-				continue
+				cmd = self.items[ self.entity ].run( True )	
 
 			if cmd[0] == ':':
 				self.__parseInternalCommand(cmd)
 			elif self.entity == "cluster":
-				pool = ThreadPool( 20, ClusterThread )
-				
-				for name, item in self.items.items():
-					pool.pushArgs( item, "cd %s && %s" % ( item.cwd, cmd ), self.lock )
+				self.execute( cmd )
+			
+	def execute( self, cmd ):
+		pool = ThreadPool( 20, ClusterThread )
+		
+		for name, item in self.items.items():
+			pool.pushArgs( item, "cd %s && %s" % ( item.cwd, cmd ), self.lock )
 
-				pool.start()
-			else:
-				item = self.items[ self.entity ]
-				if self.__handleDirectoryChange( item, cmd ) == False:
-					print item.execute( "cd %s && %s" % ( item.cwd, cmd ) )				
+		pool.start()
 
-			readline.add_history(cmd)
-
+		readline.add_history(cmd)
+	
 	def __parseInternalCommand( self, cmd ):	
 		cmd   = cmd[1:]
 		items = cmd.split( ' ' )
@@ -161,43 +151,19 @@ class ClusterTerminal:
 			print ', '.join( self.items.keys() )
 		elif cmd == 'reload':
 			self.__reload()
+		elif cmd == 'exit':
+			print "+ Quitting application, bye ^^"
+			quit()
 		elif cmd == 'help':
 			print "\t:switch <cluster-item> - Switch to an item terminal, type ':switch cluster' to go back."
 			print "\t:kill <cluster-item>   - Remove an item from the active session given its id (see :list)."
 			print "\t:list                  - Print a list of active cluster items."
 			print "\t:reload                - Reload the cluster from '%s'." % self.clusterfile
+			print "\t:exit					- Quit the application."
 			print "\t:help                  - Print this menu."
+		else:
+			print "! ':%s' unknown command, type ':help' for a list of available commands." % cmd
 		
-	def __handleDirectoryChange( self, item, cmd ):
-		cd  = self.cwd_extract.findall(cmd)
-		if cd != None and len(cd) > 0:	
-			cwd  = cd[0].strip()
-			path = item.cwd
-			if cwd[0] == '/':
-				path = cwd
-			elif cwd == '..':
-				dirs = path.split('/')
-				dirs.pop()
-				path = '/'.join(dirs)
-			elif cwd == '.':
-				pass
-			elif cwd[0:3] == '../':
-				path = cwd.replace( '../', path )
-			elif cwd[0:2] == './':
-				path = cwd.replace( './', path )
-			else:
-				path = (path + "/" + cwd).replace( '//', '/' ) 
-			
-			exists = item.execute( "( [[ -d '%s' ]] && echo 1 ) || echo 0" % path )
-			if exists == "1":
-				item.cwd = path
-			else:
-				print "! The directory '%s' does not exist or is not accessible." % path
-
-			return True
-
-		return False
-
 	def __complete( self, text, state ):
 		try:
 			matches = self.completions[text]

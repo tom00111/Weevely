@@ -19,12 +19,15 @@ import readline, rlcompleter, atexit, urlparse, os, re
 from core.shell import Shell
 
 class Terminal(Shell):
-	def __init__( self, url, password ):
+	def __init__( self, url, password, verbose_init = True, ignore_char = None ):
 		Shell.__init__( self, url, password )
-		print "+ Retrieving terminal basic environment variables .\n"
+		if verbose_init == True:
+			print "+ Retrieving terminal basic environment variables .\n"
+
 		self.username 	 = self.execute("whoami")
 		self.hostname 	 = self.execute("hostname")
 		self.cwd		 = self.execute("pwd")
+		self.ignore_char = ignore_char
 		self.prompt   	 = "[%s@%s %s] " % (self.username, self.hostname, self.cwd)
 		self.history 	 = os.path.expanduser( '~/.weevely_history' )
 		self.completions = {}
@@ -40,17 +43,21 @@ class Terminal(Shell):
 
 		atexit.register( readline.write_history_file, self.history )
 
-	def run( self ):
+	def run( self, once = False ):
 		while True:
 			self.prompt = "[%s@%s %s] " % (self.username, self.hostname, self.cwd)
 			cmd 		= raw_input( self.prompt )
-			if cmd != '\n':
-				cmd = cmd.strip()
-				if self.__handleDirectoryChange(cmd) == False:
-					readline.add_history(cmd)
+			cmd			= cmd.strip()
+			if cmd != '':
+				if not (self.ignore_char != None and cmd[0] == self.ignore_char):
+					if self.__handleDirectoryChange(cmd) == False:
+						readline.add_history(cmd)
 
 					cmd = "cd %s && %s" % ( self.cwd, cmd )					
 					print self.execute(cmd)
+			
+			if once == True:
+				return cmd
 
 	def __handleDirectoryChange( self, cmd ):
 		cd  = self.cwd_extract.findall(cmd)

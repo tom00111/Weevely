@@ -42,33 +42,27 @@ class Shell:
 	def __init__( self, url, password ):
 		self.url 	  = url
 		self.password = password
-		self.allowed  = []
 		self.payload  = None
 
 		self.__searchAllowedPayloads()
 
-		if self.allowed == []:
+		if self.payload == None:
 			raise Exception( "No allowed functions found on %s." % self.url )
-		else:
-			for vect in self.vectors:
-			  self.payload = vect[ self.allowed[0] ]
-			  break
-
-			print "+ Using method '%s' ." % self.allowed[0]
-
-	def __searchAllowedPayloads( self,  ):
-
+		
+	def __searchAllowedPayloads( self ):
 		for vect in self.vectors:
+			for name, payload in vect.items():
+				try:
+					rand     = random.randint( 11111, 99999 )
+					response = self.execute( "echo %d" % rand, payload )
 
-		  for name, payload in vect.items():
-			  try:
-				  rand     = random.randint( 11111, 99999 )
-				  response = self.execute( "echo %d" % rand, vect[name] )
-
-				  if response == str(rand):
-					  self.allowed.append(name)
-			  except:
-				  pass
+					if response == str(rand):
+						self.payload = vect[name]
+						print "+ Using method '%s'." % name
+						return
+	
+				except:
+					pass
 
 	def execute( self, cmd, payload = None ):
 		if payload == None:
