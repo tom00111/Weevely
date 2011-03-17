@@ -28,7 +28,7 @@ class Terminal(Shell):
 		self.hostname 	 = self.execute("hostname")
 		self.cwd		 = self.execute("pwd")
 		self.ignore_char = ignore_char
-		self.prompt   	 = "[%s@%s %s] " % (self.username, self.hostname, self.cwd)
+		self.prompt   	 = "%s@%s:%s$ " % (self.username, self.hostname, self.cwd)
 		self.history 	 = os.path.expanduser( '~/.weevely_history' )
 		self.completions = {}
 
