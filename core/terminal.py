@@ -45,7 +45,7 @@ class Terminal(Shell):
 
 	def run( self, once = False ):
 		while True:
-			self.prompt = "[%s@%s %s] " % (self.username, self.hostname, self.cwd)
+			self.prompt = "%s@%s:%s$ " % (self.username, self.hostname, self.cwd)
 			cmd 		= raw_input( self.prompt )
 			cmd			= cmd.strip()
 			if cmd != '':
