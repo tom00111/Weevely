@@ -4,13 +4,12 @@ Created on 24/ago/2011
 @author: norby
 '''
 from core.module import Module, ModuleException
-import random
 
 classname = 'Read'
     
 class Read(Module):
     '''Read file outside the web root using different tecniquess
-    file.read <'path'>
+    files.read <path>
     '''
     
     

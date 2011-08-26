@@ -12,7 +12,7 @@ classname = 'Exec'
     
 class Exec(Module):
     '''Execute single PHP commands
-    php.exec < 'command;' >
+    php.exec <command;>
     '''
     
     def __init__(self, moddict, url, password):

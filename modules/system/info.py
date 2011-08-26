@@ -10,7 +10,7 @@ classname = 'Info'
     
 class Info(Module):
     """Collect system shell informations
-    ./weevely [ all | whoami | hostname | wd | doc_root ]
+    system.info all|whoami|hostname|basedir|doc_root
     """
     
     shell_vectors = { "whoami"       : "whoami",

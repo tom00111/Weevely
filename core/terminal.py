@@ -80,6 +80,7 @@ class Terminal():
                 
         elif cmd_split[0] == self.help_string:
             
+            print ''
             for mod_name in self.moddict.module_info:
                 if self.moddict.module_info[mod_name][0]:
                     print "%s: %s" % (mod_name, self.moddict.module_info[mod_name][1])

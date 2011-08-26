@@ -12,7 +12,7 @@ classname = 'Writable'
     
 class Writable(Module):
     '''Find writable dirs and files
-    find.writable < first | all > <file | dir | all> <'path' | .> 
+    find.writable first|all file|dir|all <path> 
     '''
     
     vectors = {

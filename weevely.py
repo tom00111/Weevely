@@ -34,6 +34,10 @@ if __name__ == "__main__":
     
     if  len(sys.argv) == 4 and sys.argv[1] == 'terminal':
         
+        print '''[+] This is a telnet-like session. Show available modules with :help
+[+] and run modules using :module <module name> <argument1> <arg2> ...
+'''
+        
         try:
             Terminal ( ModDict(), sys.argv[2], sys.argv[3]).loop()
         except KeyboardInterrupt:
@@ -56,22 +60,19 @@ if __name__ == "__main__":
 Start telnet-like session
   ./weevely.py terminal <url> <password> 
 
-Execute single command
-  ./weevely.py cmd <url> <password> "<command>" 
+Execute single shell command, run :module or show :module help
+  ./weevely.py cmd <url> <password> <command> 
+  ./weevely.py cmd <url> <password> :module <module name> <argument1> <arg2> ..
 
 Generate php backdoor
   ./weevely.py generate <password> <output path> 
 
-Use modules running ':module <module name> <argument1> <arg2> ..' as command.
-Print modules documentation running ':help'. Available modules:'''  
+Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''  
         
         i = 0
         for mod in ModDict().module_info:
-            if i == 6:
-                i = 0
-            else:
-                i+=1
-                
+            if i == 6: i = 0
+            else: i+=1
             print '[' +  mod + ']',
             
         print '' 
