@@ -40,7 +40,7 @@ class Read(Module):
     def __slack_probe(self, path):
         
         doc_root = self.modhandler.load('system.info').run('document_root')
-        writable_dir = self.modhandler.load('find.writable').run('first', 'dir', doc_root)
+        writable_dir = self.modhandler.load('find.perms').run('first', 'dir', 'w', doc_root)
         self.writable_dir = writable_dir
         
         for interpreter in self.vectors:

@@ -23,7 +23,7 @@ class ModHandler(dict):
     def load(self, module_name):
         
         if not module_name in self.modules:
-            
+            print module_name, self.module_info.keys()
             if module_name not in self.module_info.keys():
                 raise ModuleException("moduledict",  "Module not found in path %s." % (self.path_modules) )
             
