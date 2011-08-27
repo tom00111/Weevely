@@ -12,11 +12,10 @@ class_name = 'Module'
 class Module:
     '''Generic class Module to inherit'''
     
-    loaded = False
     visible = True
     
-    def __init__(self, moddict, url, password):
-        self.moddict = moddict
+    def __init__(self, modhandler, url, password):
+        self.modhandler = modhandler
         self.url = url
         self.password = password
         

