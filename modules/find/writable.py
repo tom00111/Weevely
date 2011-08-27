@@ -11,40 +11,79 @@ import random
 classname = 'Writable'
     
 class Writable(Module):
-    '''Find writable dirs and files
+    '''Find writable dirs and files for current user
     find.writable first|all file|dir|all <path> 
     '''
     
+    php_method = '''
+        @swp('%s','%s','%s');
+        function swp($d, $qty, $mod){
+            $h = @opendir($d);
+            while ($f = @readdir($h)) {
+                    $df=$d.'/'.$f;
+                    if(($mod=='file'||$mod=='all')&&(@is_file($df))&&@is_writable($df)) {
+                            print($df."\n");
+                            if($qty=="first") die();
+                    }
+                    if((@is_dir($df))&&($f!='.')&&($f!='..')){
+                            if(($mod=='dir'||$mod=='all')&&@is_writable($df)) {
+                                    print($df."\n");
+                                    if($qty=="first") die();
+                            }
+                            @swp($df, $qty, $mod);
+                    }
+            }
+            @closedir($h);
+    }'''
+    
+    sh_method = "find %s -writable %s %s 2>/dev/null"
+    
     vectors = {
-            "all" : "find %s -perm -2 %s 2>/dev/null",
-            "file" : "find %s -perm -2 -type f %s 2>/dev/null",
-            "dir" : "find %s -perm -2 -type d %s 2>/dev/null"
-              }
+               "shell.sh" : {
+                             'find' : sh_method
+                },
+               
+               "shell.php" : {
+              "php_recursive_find" : php_method
+                              }
+          }
     
     visible = True
     
-    
-    def __init__(self, moddict, url, password):
+    def __init__(self, modhandler, url, password):
         
-        Module.__init__(self, moddict, url, password)
+        Module.__init__(self, modhandler, url, password)
         
-        moddict.load('system.exec', url, password)
 
-    def run(self, qty, mode, path):
-        
-        if not mode in self.vectors.keys():
-            raise ModuleException("find.writable",  "Find failed. Use < file | dir | all > as 2nd parameter.")
+    def run(self, qty, type, path):
         
         if qty == 'first':
-            qty_string = '-print -quit'
+            qty_sh_string = '-print -quit'
         elif qty == 'all':
-            qty_string = ''
+            qty_sh_string = ''
         else:
-            raise ModuleException("find.writable",  "Find failed. Use < first | all > as first parameter.")
+            raise ModuleException("find.writable",  "Find failed. Use first|all as first parameter.")
             
-        payload = self.vectors[mode] % (path, qty_string)
-        
-        return self.moddict['system.exec'].run(payload, False)
+        if type == 'all':
+            type_sh_string = ''
+        elif type == 'file':
+            type_sh_string = '-type f'
+        elif type == 'dir':
+            type_sh_string = '-type d'
+        else:
+            raise ModuleException("find.writable",  "Find failed. Use file|dir|all as second parameter.")
+         
+            
+        for interpreter in self.vectors:
+            if interpreter in self.modhandler.loaded_shells:
+                for vector in self.vectors[interpreter]:
+                
+                    payload = self.vectors[interpreter][vector] % (path, qty_sh_string, type_sh_string)     
+                    print "[find.writable] File read using method '%s'" % (self.vector)  
+                                     
+                    return self.modhandler.load(interpreter).run(payload, False)
+                
+        raise ModuleException("find.writable",  "Find failed.")
             
 
         

