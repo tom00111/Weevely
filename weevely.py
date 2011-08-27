@@ -20,7 +20,7 @@
 
 from core.terminal import Terminal
 from core.backdoor import Backdoor
-from core.modulesdict import ModDict
+from core.modules_handler import ModHandler
 
 import sys
     
@@ -34,12 +34,14 @@ if __name__ == "__main__":
     
     if  len(sys.argv) == 4 and sys.argv[1] == 'terminal':
         
-        print '''[+] This is a telnet-like session. Show available modules with :help
+        print '''[+] Starting telnet-like session. Show available modules with :help
 [+] and run modules using :module <module name> <argument1> <arg2> ...
 '''
-        
+        url = sys.argv[2]
+        password = sys.argv[3]
+          
         try:
-            Terminal ( ModDict(), sys.argv[2], sys.argv[3]).loop()
+            Terminal ( ModHandler( url, password ) ).loop()
         except KeyboardInterrupt:
             print '\n[!] Exiting. Bye ^^'
         
@@ -52,7 +54,7 @@ if __name__ == "__main__":
         password = sys.argv[3]        
         command = sys.argv[4:]
  
-        Terminal (ModDict(), url, password, True).run_single(command)
+        Terminal (ModHandler(url, password), True).run_single(command)
 
     else:
         
@@ -70,7 +72,7 @@ Generate php backdoor
 Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''  
         
         i = 0
-        for mod in ModDict().module_info:
+        for mod in ModHandler().module_info:
             if i == 6: i = 0
             else: i+=1
             print '[' +  mod + ']',

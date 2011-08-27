@@ -28,7 +28,6 @@ class Php(Module):
     
     def run(self, cmd):
 
-        
         request = CmdRequest( self.url, self.password )
         request.setPayload(cmd)
         
