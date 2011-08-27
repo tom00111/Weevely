@@ -9,7 +9,7 @@ from core.module import Module, ModuleException
 classname = 'Perms'
     
 class Perms(Module):
-    '''Find writable|readable|executable|all file for current user
+    '''Find files by permission to write, read, execute
     find.find first|all file|dir|all w|r|x|all <path> 
     '''
     
