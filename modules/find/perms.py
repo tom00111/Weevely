@@ -6,9 +6,9 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 
-classname = 'Find'
+classname = 'Perms'
     
-class Find(Module):
+class Perms(Module):
     '''Find writable|readable|executable|all file for current user
     find.find first|all file|dir|all w|r|x|all <path> 
     '''
@@ -98,7 +98,7 @@ function swp($d, $qty, $type, $mod){
                 for vector in self.vectors[interpreter]:
                     
                     payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, qty, type, mod)
-                    print "[find.find] File read using method '%s'" % (vector)  
+                    print "[find.find] Finding using method '%s'" % (vector)  
                               
                     if interpreter == 'shell.sh':       
                         response = self.modhandler.load(interpreter).run(payload, False)
