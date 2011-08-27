@@ -12,7 +12,7 @@ classname = 'Php'
     
 class Php(Module):
     '''Execute single PHP commands
-    shell.sh <command;>
+    shell.php "<command>;"
     '''
     
     def __init__(self, modhandler, url, password):

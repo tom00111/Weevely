@@ -73,7 +73,9 @@ Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''
         
         i = 0
         for mod in ModHandler().module_info:
-            if i == 6: i = 0
+            if i == 5: 
+                i = 0
+                print ''
             else: i+=1
             print '[' +  mod + ']',
             
