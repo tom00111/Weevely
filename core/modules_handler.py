@@ -51,6 +51,36 @@ class ModHandler(dict):
                 self.module_info[f] = [ modclass.visible, modclass.__doc__ ]
                     
 
+    def print_module_infos(self):
+        
+        print ''
+        oldpart=''
+        for mod in self.module_info:
+            parts = mod.split('.')
+            
+            if parts[0] != oldpart:
+                output = '\n[%s] [%s]' % ( parts[0],  mod )
+                oldpart = parts[0]
+            else:
+                output = '\n%s[%s]' % ( ' '*(len(parts[0])+2), mod )
+            
+            print output,
+            if len(self.module_info[mod][1])>1:
+                lines = self.module_info[mod][1].split('\n')
+                usageline = lines[-1].strip()
+                titleline = lines[0].strip()
+                
+                print titleline
+                for line in lines[1:-1]:
+                    print ' '*(len(parts[0])+2), line.strip()
+                print usageline
+                    
+                
+                
+                
+                    
+                
+            
     
                 
                 

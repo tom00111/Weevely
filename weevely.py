@@ -71,7 +71,7 @@ Execute single shell command, run :module or show module :help
 Generate php backdoor
   ./weevely.py generate <password> <output path> 
 
-Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''  
+Execute :help as command to show module documentation. Modules:'''  
         
         i = 0
         for mod in ModHandler().module_info:
@@ -81,5 +81,5 @@ Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''
             else: i+=1
             print '[ :' +  mod + ' ]',
             
-        print '' 
+        print ''
     

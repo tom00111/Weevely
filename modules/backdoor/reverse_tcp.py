@@ -15,7 +15,7 @@ from core.module import Module, ModuleException
 classname = 'Reversetcp'
     
 class Reversetcp(Module):
-    """Send system shell using reverse TCP connection  
+    """Send reverse shell using TCP connection  
     :backdoor.reverse_tcp ip port 
     """
     

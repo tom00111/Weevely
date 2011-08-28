@@ -96,10 +96,7 @@ class Terminal():
             ## Help call
             if cmd_split[0] == self.help_string:
             
-                print ''
-                for mod_name in self.modhandler.module_info:
-                    if self.modhandler.module_info[mod_name][0]:
-                        print "%s: %s" % (mod_name, self.modhandler.module_info[mod_name][1])
+                self.modhandler.print_module_infos()
                 
             else:
             

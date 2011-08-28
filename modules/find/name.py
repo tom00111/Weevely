@@ -9,8 +9,9 @@ from core.module import Module, ModuleException
 classname = 'Name'
     
 class Name(Module):
-    '''Find files if name is equal, case insensitive equal, contains, match given regular expression
-    :find.name e|ei|c|ci <string> <path> 
+    '''Find files with name that match string 
+    (e=equal, ei= equal case insensitive , c= contains, ci= contains case insensitive)
+    :find.name e|ei|c|ci <string> <start path> 
     '''
     
     php_method = '''

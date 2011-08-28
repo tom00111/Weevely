@@ -13,7 +13,7 @@ from urlparse import urlparse
 classname = 'Webdir'
     
 class Webdir(Module):
-    '''Find writable web directory URL to simplify file transfer
+    '''Find writable directory in web root with corresponding URL (help file downloads)
     :find.webdir
     '''
     
@@ -79,4 +79,3 @@ class Webdir(Module):
          
         if not (self.url and self.dir):
             raise ModuleException("find.webdir",  "Writable web directory corresponding not found")
-             
