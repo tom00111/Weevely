@@ -38,6 +38,6 @@ class Module:
 class ModuleException(Exception):
     def __init__(self, module, value):
         self.module = module
-        self.parameter = value
+        self.error = value
     def __str__(self):
-        return self.parameter
+        return self.error

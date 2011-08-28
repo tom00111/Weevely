@@ -17,7 +17,7 @@ class Perms(Module):
 @swp('%s','%s','%s','%s');
 function ckmod($df, $m) { return ($m=="all")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
 function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='all'||($t=='file'&&@is_file($df))||($t=='dir'&&@is_dir($df))); }
-function swp($d, $qty, $type, $mod){
+function swp($d, $type, $mod, $qty){
             $h = @opendir($d);
             while ($f = @readdir($h)) {
                     $df=$d.'/'.$f;
@@ -26,7 +26,7 @@ function swp($d, $qty, $type, $mod){
                             if($qty=="first") return;
                     }
                     if(@cktp($df,$f,'dir')){
-                            @swp($df, $qty, $type, $mod);
+                            @swp($df, $type, $mod, $qty);
                     }
             }
             @closedir($h);
@@ -52,7 +52,7 @@ function swp($d, $qty, $type, $mod){
         Module.__init__(self, modhandler, url, password)
         
 
-    def __prepare_vector(self,interpreter, path, qty,type,mod):
+    def __prepare_vector(self,interpreter, path, type, mod, qty):
         
         if interpreter == 'shell.sh':
             if qty == 'first':
@@ -83,23 +83,18 @@ function swp($d, $qty, $type, $mod){
                 raise ModuleException("find.find",  "Find failed. Use file|dir|all as second parameter.")
              
         
-        elif interpreter == 'shell.php':
-            return (path, qty, type, mod)
         
-        
-        return (path, qty, type, mod)
+        return (path, type, mod, qty)
 
     def run(self, qty, type, mod, path):
-        
-
             
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
                     
-                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, qty, type, mod)
+                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
                     print "[find.find] Finding using method '%s'" % (vector)  
-                              
+                    
                     if interpreter == 'shell.sh':       
                         response = self.modhandler.load(interpreter).run(payload, False)
                     elif interpreter == 'shell.php':
@@ -107,7 +102,6 @@ function swp($d, $qty, $type, $mod){
                         
                     if response:
                         return response
-                
                 
                 
         raise ModuleException("find.find",  "Find failed.")

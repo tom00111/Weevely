@@ -59,7 +59,7 @@ class CmdRequest(Request):
 		
 class NoDataException(Exception):
 	def __init__(self, value):
-		self.parameter = value
+		self.error = value
 	def __str__(self):
-   		return repr(self.parameter)
+   		return repr(self.error)
 
