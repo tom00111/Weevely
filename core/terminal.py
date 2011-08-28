@@ -37,6 +37,7 @@ class Terminal():
                 readline.parse_and_bind( 'tab: menu-complete' )
                 readline.set_completer( self.__complete )
                 readline.read_history_file( self.history )
+                
             except IOError:
                 pass
     
@@ -179,18 +180,19 @@ class Terminal():
         return False
 
     def __complete( self, text, state ):
+        
         try:
             matches = self.completions[text]
         except KeyError:
+
             matches = []
-            items   = readline.get_current_history_length()
-            for i in range( items ):
-                item = readline.get_history_item(i)
-                if item != None and text in item:
-                    matches.append(item)
-        
+            for module_name in ([ ':' + x for x in self.modhandler.module_info.keys() ] + [ ':help' ]):
+                
+                if module_name.startswith(text):
+                    matches.append(module_name)
+                    
             self.completions[text] = matches
-        
+            
         try:
             return matches[state]
         except IndexError:
@@ -200,7 +202,7 @@ class Terminal():
     def run_module(self, module_name, module_arguments):
         
         if module_name not in self.modhandler.module_info.keys():
-            print '[!] [%s] Error module not found' % (module_name)
+            print '[!] Error module with name \'%s\' not found' % (module_name)
         else:
             try:
                 module_arguments_requested = self.modhandler.load(module_name).len_arguments
@@ -209,7 +211,7 @@ class Terminal():
             
             else: 
                 if module_arguments_requested != len(module_arguments): 
-                    print '[!] [%s] Error module needs %i arguments (not %i), printing documentation:\n' % (module_name, module_arguments_requested, len(module_arguments))
+                    print '[!] [%s] Error module needs %i arguments (not %i)\n' % (module_name, module_arguments_requested, len(module_arguments))
                     if self.modhandler.module_info[module_name][0]: print '%s: %s' % (module_name, self.modhandler.module_info[module_name][1])
                 
                 else:
@@ -219,6 +221,4 @@ class Terminal():
                         print '[!] [%s] Error: %s' % (e.module, e) 
         
       
-    
-    
     
