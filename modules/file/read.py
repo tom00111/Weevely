@@ -9,7 +9,7 @@ from core.http.request import Request
 classname = 'Read'
     
 class Read(Module):
-    '''Read file outside the web root using different tecniques
+    '''Read file outside web root using different tecniques
     :file.read <path>
     '''
     
