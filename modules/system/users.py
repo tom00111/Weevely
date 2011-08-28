@@ -9,8 +9,8 @@ from core.module import Module, ModuleException
 classname = 'Users'
     
 class Users(Module):
-    """Enumerate system usernames using different techniques
-    :system.users
+    """Enumerate system users informations using different techniques
+    :system.users all 
     """
     
     vectors = { 
@@ -18,7 +18,7 @@ class Users(Module):
                 },
                
                'shell.php' : { 
-                              "posix_getpwuid" : "for($n=0; $n<1000;$n++) { $uid = @posix_getpwuid($n); if ($uid) echo join(':',$uid).\'\n\';  }",
+                              "posix_getpwuid" : "for($n=0; $n<2000;$n++) { $uid = @posix_getpwuid($n); if ($uid) echo join(':',$uid).\'\n\';  }",
                               },
                'file.read' : {
                               "file.read" : "%s"
@@ -32,7 +32,7 @@ class Users(Module):
 
         Module.__init__(self, modhandler, url, password)
         
-        self.infos = {}
+        self.usersinfo = {}
         
                 
     def run(self):
@@ -47,10 +47,17 @@ class Users(Module):
                         
                     response = self.modhandler.load(interpreter).run(payload)
                     if response:
-                        print "[system.users] User enumerated using method '%s'" % vector
+                        print "[system.users] Users enumerated using method '%s'" % vector
+                        
+                        for line in response.split('\n'):
+                            userinf = line.split(':')
+                            self.usersinfo[userinf[0]]=userinf[1:]
+                        
+                        print self.usersinfo
+                        
                         return response
 
-        raise ModuleException("system.users",  "User enumeration failed")
+        raise ModuleException("system.users",  "Users enumeration failed")
         
 
 
