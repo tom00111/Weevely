@@ -93,7 +93,7 @@ function swp($d, $type, $mod, $qty){
                 for vector in self.vectors[interpreter]:
                     
                     payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
-                    print "[find.find] Finding using method '%s'" % (vector)  
+                    print "[find.find] Finding file in %s using method '%s'" % (path, vector)  
                     
                     if interpreter == 'shell.sh':       
                         response = self.modhandler.load(interpreter).run(payload, False)

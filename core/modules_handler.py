@@ -24,7 +24,7 @@ class ModHandler(dict):
         
         if not module_name in self.modules:
             if module_name not in self.module_info.keys():
-                raise ModuleException("moduledict",  "Module not found in path %s." % (self.path_modules) )
+                raise ModuleException("!",  "Module not found in path %s." % (self.path_modules) )
             
             mod = __import__('modules.' + module_name, fromlist = ["*"])
             modclass = getattr(mod, mod.classname)

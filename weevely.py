@@ -35,7 +35,7 @@ if __name__ == "__main__":
     if  len(sys.argv) == 4 and sys.argv[1] == 'terminal':
         
         print '''[+] Starting telnet-like session. Show available modules with :help
-[+] and run modules using :module <module name> <argument1> <arg2> ...
+[+] and run modules using :<module name> <argument1> <arg2> ...
 '''
         url = sys.argv[2]
         password = sys.argv[3]
