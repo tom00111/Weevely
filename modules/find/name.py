@@ -10,7 +10,7 @@ classname = 'Name'
     
 class Name(Module):
     '''Find files if name is equal, case insensitive equal, contains, match given regular expression
-    find.name e|ei|c|ci <string> <path> 
+    :find.name e|ei|c|ci <string> <path> 
     '''
     
     php_method = '''

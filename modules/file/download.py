@@ -11,10 +11,10 @@ classname = 'Download'
     
 class Download(Module):
     '''Download remote binary/text file using different tecniques
-    file.download <remote path> <locale path>
+    :file.download <remote path> <locale path>
     '''
     
-    vectors_order = { 'shell.php' : [  "symlink()", "file()", "fread()", "file_get_contents()", "copy()"], 
+    vectors_order = { 'shell.php' : [  "file()", "fread()", "file_get_contents()", "copy()", "symlink()"], 
                       'shell.sh'  : [ "base64" ]
                      }
     
@@ -60,9 +60,7 @@ class Download(Module):
             
             
     def __slack_probe(self, remote_path, local_path):
-        
-
-        
+                
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
                 if interpreter in self.modhandler.loaded_shells:

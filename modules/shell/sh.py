@@ -11,7 +11,7 @@ classname = 'Sh'
     
 class Sh(Module):
     '''Execute system commands
-    shell.sh "<command>" 
+    :shell.sh "<command>" 
     '''
     
     visible = False

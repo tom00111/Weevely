@@ -10,7 +10,7 @@ classname = 'Suidsgid'
     
 class Suidsgid(Module):
     '''Find suid|sgid|all file 
-    find.suidsgid suid|sgid|all <path> 
+    :find.suidsgid suid|sgid|all <path> 
     '''
     
     vectors = {

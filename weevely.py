@@ -64,9 +64,9 @@ if __name__ == "__main__":
 Start telnet-like session
   ./weevely.py terminal <url> <password> 
 
-Execute single shell command, run :module or show :module help
+Execute single shell command, run :module or show module :help
   ./weevely.py cmd <url> <password> <command> 
-  ./weevely.py cmd <url> <password> :module <module name> <argument1> <arg2> ..
+  ./weevely.py cmd <url> <password> :<module name> <argument1> <arg2> ..
 
 Generate php backdoor
   ./weevely.py generate <password> <output path> 
@@ -79,7 +79,7 @@ Execute :help with 'cmd' or 'terminal' to show module documentation. Modules:'''
                 i = 0
                 print ''
             else: i+=1
-            print '[' +  mod + ']',
+            print '[ :' +  mod + ' ]',
             
         print '' 
     

@@ -9,10 +9,10 @@ classname = 'Read'
     
 class Read(Module):
     '''Read file outside the web root using different tecniques
-    file.read <path>
+    :file.read <path>
     '''
     
-    vectors_order = { 'shell.php' : [ "symlink()", "readfile()", "file_get_contents()", "fread()",  "copy()", "file()"], 
+    vectors_order = { 'shell.php' : [ "readfile()", "file_get_contents()", "fread()", "file()",  "copy()", "symlink()"], 
                       'shell.sh'  : [ "cat" ]
                      }
     

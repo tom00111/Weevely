@@ -16,7 +16,7 @@ class Terminal():
         self.url = modhandler.url
         self.password = modhandler.password
         self.interpreter = None
-        self.module_string = ':module'
+        self.module_char = ':'
         self.help_string = ':help'
         self.one_shot = one_shot
         self.completions = {}
@@ -88,25 +88,34 @@ class Terminal():
             return
             
         output = ''
-        if cmd_split[0] == self.module_string:
-            if len(cmd_split)==2:
-                output = self.run_module(cmd_split[1], [])
-            elif len(cmd_split)==3:
-                output =  self.run_module(cmd_split[1], [ cmd_split[2] ])
-            elif len(cmd_split)>3:
-                output =  self.run_module(cmd_split[1], cmd_split[2:])
-            else:
-                print '[!] Error specify module name'
+        
+        ## Module call
+        if cmd_split[0][0] == self.module_char:
+            
+            ## Help call
+            if cmd_split[0] == self.help_string:
+            
+                print ''
+                for mod_name in self.modhandler.module_info:
+                    if self.modhandler.module_info[mod_name][0]:
+                        print "%s: %s" % (mod_name, self.modhandler.module_info[mod_name][1])
                 
-        elif cmd_split[0] == self.help_string:
+            else:
             
-            print ''
-            for mod_name in self.modhandler.module_info:
-                if self.modhandler.module_info[mod_name][0]:
-                    print "%s: %s" % (mod_name, self.modhandler.module_info[mod_name][1])
-            
-            
-        elif cmd_split[0] != self.module_string:
+                
+                cmd_split[0] = cmd_split[0][1:]
+                
+                if len(cmd_split)==1:
+                    output = self.run_module(cmd_split[0], [])
+                elif len(cmd_split)==2:
+                    output =  self.run_module(cmd_split[0], [ cmd_split[1] ])
+                elif len(cmd_split)>2:
+                    output =  self.run_module(cmd_split[0], cmd_split[1:])
+                else:
+                    print '[!] Error specify module name'
+                    
+        # Default shell.sh call
+        elif cmd_split[0][0] != self.module_char:
         
             cmd = ' '.join(cmd_split)
         

@@ -10,7 +10,7 @@ classname = 'Perms'
     
 class Perms(Module):
     '''Find files by permission to write, read, execute
-    find.find first|all file|dir|all w|r|x|all <path> 
+    :find.perms first|all file|dir|all w|r|x|all <path> 
     '''
     
     php_method = '''
