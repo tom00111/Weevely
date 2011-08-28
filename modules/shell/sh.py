@@ -79,7 +79,7 @@ class Sh(Module):
             args    = "','".join( cmd.split(' ')[1:] )
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
-
+        
         return self.modhandler.load('shell.php').run(payload)
 
 
