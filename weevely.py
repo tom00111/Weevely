@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
         url = sys.argv[2]
         password = sys.argv[3]        
-        command = sys.argv[4:]
+        command = ' '.join(sys.argv[4:])
         
         try:
             Terminal (ModHandler(url, password), True).run_single(command)

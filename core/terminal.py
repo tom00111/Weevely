@@ -88,17 +88,19 @@ class Terminal():
             cmd       = cmd.strip()
             
             if cmd:
-                self.run_single(shlex.split(cmd))
+                self.run_single(cmd)
             
-    def run_single(self, cmd_split):
+    def run_single(self, cmd):
     
         if not self.interpreter:
             return
-            
+             
         output = ''
-        
+    
         ## Module call
-        if cmd_split[0][0] == self.module_char:
+        if cmd[0] == self.module_char:
+            
+            cmd_split = shlex.split(cmd)
             
             ## Help call
             if cmd_split[0] == self.help_string:
@@ -119,9 +121,7 @@ class Terminal():
                     print '[!] Error specify module name'
                     
         # Default interpreter call
-        elif cmd_split[0][0] != self.module_char:
-        
-            cmd = ' '.join(cmd_split)
+        elif cmd[0] != self.module_char:
         
             if not self.one_shot:
                 if self.__handleDirectoryChange(cmd,self.cwd_interpreter) == False:

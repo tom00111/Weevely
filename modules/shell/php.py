@@ -34,9 +34,10 @@ class Php(Module):
 
         if self.cwd_vector:
             cmd = self.cwd_vector % (cmd)
-
+        
         request = CmdRequest( self.url, self.password )
         request.setPayload(cmd)
+        
         
         try:
             resp = request.execute()
