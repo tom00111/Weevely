@@ -53,28 +53,40 @@ class ModHandler(dict):
 
     def print_module_infos(self):
         
+        module_dict={}
+        
         print ''
-        oldpart=''
         for mod in self.module_info:
             parts = mod.split('.')
+            if parts[0] not in module_dict:
+                module_dict[parts[0]] = {}
+            module_dict[parts[0]][parts[1]] = self.module_info[mod][1]
             
-            if parts[0] != oldpart:
-                output = '\n[%s] [%s]' % ( parts[0],  mod )
-                oldpart = parts[0]
-            else:
-                output = '\n%s[%s]' % ( ' '*(len(parts[0])+2), mod )
+        
+        for pkg in module_dict:
             
-            print output,
-            if len(self.module_info[mod][1])>1:
-                lines = self.module_info[mod][1].split('\n')
-                usageline = lines[-1].strip()
-                titleline = lines[0].strip()
+            oldpkg=''
+            
+            for mod in module_dict[pkg]:
                 
-                print titleline
-                for line in lines[1:-1]:
-                    print ' '*(len(parts[0])+2), line.strip()
-                print usageline
+                if pkg != oldpkg:
+                    output = '\n[%s] [%s]' % ( pkg,  mod )
+                    oldpkg = pkg
+                else:
+                    output = '\n%s[%s]' % ( ' '*(len(pkg)+3), mod )
+                
+                print output,
+                
+                if len(module_dict[pkg][mod])>1:
+                    lines = module_dict[pkg][mod].split('\n')
+                    usageline = lines[-1].strip()
+                    titleline = lines[0].strip()
                     
+                    print titleline
+                    for line in lines[1:-1]:
+                        print ' '*(len(pkg)+2), line.strip()
+                    print usageline,
+                        
                 
                 
                 

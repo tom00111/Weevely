@@ -16,6 +16,7 @@ class Terminal():
         self.url = modhandler.url
         self.password = modhandler.password
         self.interpreter = None
+        self.cwd_interpreter = None
         self.module_char = ':'
         self.help_string = ':help'
         self.one_shot = one_shot
@@ -61,14 +62,20 @@ class Terminal():
                 self.interpreter = 'shell.php'
                 print '[+] Fallback to PHP interpreter \'%s\', end commands with semi-colon.' % self.interpreter
                 if not self.one_shot:
-                    print '[+] Substitute of \'cd\' and \'ls\' are available'
-                self.prompt        = "[shell.php] %s@%s:%s> "
+                    print '[+] Substitute of \'cd [path]\' and \'ls [path]\' are available'
+                self.prompt        = "%s@%s:%s php> "
+                
+                if self.modhandler.load('shell.php').cwd_handler('.'):
+                    self.cwd_interpreter = 'shell.php'
             
         else:
             self.interpreter = 'shell.sh'
-            self.prompt = "[shell.sh] %s@%s:%s$ "
+            self.prompt = "%s@%s:%s$ "
             print '[+] Using system shell interpreter \'%s\'' % self.interpreter
             
+            if self.modhandler.load('shell.sh').cwd_handler('.'):
+                self.cwd_interpreter = 'shell.sh'
+
 
     def loop(self):
         
@@ -100,7 +107,6 @@ class Terminal():
                 
             else:
             
-                
                 cmd_split[0] = cmd_split[0][1:]
                 
                 if len(cmd_split)==1:
@@ -112,28 +118,23 @@ class Terminal():
                 else:
                     print '[!] Error specify module name'
                     
-        # Default shell.sh call
+        # Default interpreter call
         elif cmd_split[0][0] != self.module_char:
         
             cmd = ' '.join(cmd_split)
         
             if not self.one_shot:
-                if self.interpreter == 'shell.sh': 
-                    if self.__handleDirectoryChange(cmd,'shell.sh') == False:
-                        readline.add_history(cmd)
-                        cmd = "cd %s && %s" % ( self.cwd, cmd )  
-                    else:
-                        cmd = "cd %s" % ( self.cwd )     
+                if self.__handleDirectoryChange(cmd,self.cwd_interpreter) == False:
+                    if self.interpreter == 'shell.php' and cmd.startswith('ls'):
+                        print self.modhandler.load('shell.php').ls_handler(cmd)
+               
+                    output = self.run_module(self.interpreter, [ cmd ])  
+                    
+                else:
+                    pass
                 
-                elif self.interpreter == 'shell.php': 
-                    if self.__handleDirectoryChange(cmd,'shell.php') == False:
-                        readline.add_history(cmd)
-                        if cmd == 'ls':
-                            cmd = "$dir=@opendir('%s'); while(($f = readdir($dir))) { print($f.'\n'); }" % (self.cwd)
-                        else: 
-                            cmd = "chdir('%s') && %s" % ( self.cwd, cmd )  
-           
-            output = self.run_module(self.interpreter, [ cmd ])  
+            else:
+                output = self.run_module(self.interpreter, [ cmd ])  
             
         if output:
             print output
@@ -161,12 +162,7 @@ class Terminal():
             else:
                 path = (path + "/" + cwd).replace( '//', '/' ) 
             
-            if interpreter == 'shell.sh':
-                exists = self.run_module('shell.sh', [ "( [ -d '%s' ] && echo 1 ) || echo 0" % path ])
-            elif interpreter == 'shell.php':
-                exists = self.run_module('shell.php', [ "file_exists('%s') && print(1);" % path]);
-                
-            if exists == "1":
+            if self.modhandler.load(self.cwd_interpreter).cwd_handler(path,True):
                 self.cwd = path
                     
             else:

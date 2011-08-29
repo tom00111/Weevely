@@ -17,16 +17,17 @@ class Name(Module):
     php_method = '''
 @swp('%s','%s','%s');
 function ckdir($df, $f) { return ($f!='.')&&($f!='..')&&@is_dir($df); }
-function match($df, $f, $s, $m) { return (($m=='e')&&$f==$s)||(($m=='c')&&preg_match("/".$s."/",$f))||(($m=='ei')&&strcasecmp($s,$f))||(($m=='ci')&&preg_match("/".$s."/i",$f)); }
+function match($df, $f, $s, $m) { return (($m=='e')&&$f==$s)||(($m=='c')&&preg_match("/".$s."/",$f))||(($m=='ei')&&strcasecmp($s,$f)==0)||(($m=='ci')&&preg_match("/".$s."/i",$f)); }
 function swp($d, $m, $s){
             $h = @opendir($d);
             while ($f = @readdir($h)) {
                     $df=$d.'/'.$f;
-                    if(($f!='.')&&($f!='..')&&@match($df,$f,$s,$m)) print($df."\n");
-                    if(@ckdir($df,$f)) @swp($df, $mod, $s);
+                    if(($f!='.')&&($f!='..')&&@match($df,$f,$s,$m)) print($df."\\n");
+                    if(@ckdir($df,$f)) @swp($df, $m, $s);
             }
             @closedir($h);
 }
+
 ?>
 '''
     
@@ -67,11 +68,7 @@ function swp($d, $m, $s){
                 
             if mod == 'c' or mod == 'ci':
                 str_string = '\'*' + string + '*\''
-             
-             
-        elif interpreter == 'shell.php':
-            
-            str_string = '\'string\''
+
             
         return (path, str_mod, str_string)
 
@@ -92,9 +89,7 @@ function swp($d, $m, $s){
                     if response:
                         return response
                 
-                
-                
-        raise ModuleException("find.name",  "Find failed.")
+        raise ModuleException("find.name",  "No file found.")
             
 
         

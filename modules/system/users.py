@@ -10,7 +10,7 @@ classname = 'Users'
     
 class Users(Module):
     """Enumerate system users informations using different techniques
-    :system.users all 
+    :system.users
     """
     
     vectors = { 
@@ -52,8 +52,6 @@ class Users(Module):
                         for line in response.split('\n'):
                             userinf = line.split(':')
                             self.usersinfo[userinf[0]]=userinf[1:]
-                        
-                        print self.usersinfo
                         
                         return response
 
