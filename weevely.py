@@ -73,13 +73,7 @@ Generate php backdoor
 
 Execute :help as command to show module documentation. Modules:'''  
         
-        i = 0
-        for mod in ModHandler().module_info:
-            if i == 5: 
-                i = 0
-                print ''
-            else: i+=1
-            print '[ :' +  mod + ' ]',
+        ModHandler().print_module_summary()
             
         print ''
     

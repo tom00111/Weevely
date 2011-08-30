@@ -60,7 +60,7 @@ function swp($d, $type, $mod, $qty){
             elif qty == 'all':
                 qty = ''
             else:
-                raise ModuleException("find.find",  "Find failed. Use first|all as first parameter.")
+                raise ModuleException(self.name,  "Find failed. Use first|all as first parameter.")
                 
             if type == 'all':
                 type = ''
@@ -69,7 +69,7 @@ function swp($d, $type, $mod, $qty){
             elif type == 'dir':
                 type = '-type d'
             else:
-                raise ModuleException("find.find",  "Find failed. Use file|dir|all as second parameter.")
+                raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
              
             if mod == 'all':
                 mod = ''
@@ -80,31 +80,40 @@ function swp($d, $type, $mod, $qty){
             elif mod == 'x':
                 mod = '-readable'
             else:
-                raise ModuleException("find.find",  "Find failed. Use file|dir|all as second parameter.")
-             
-        
+                raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
         
         return (path, type, mod, qty)
 
     def run(self, qty, type, mod, path):
+        
+            
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, qty, type, mod, path)
             
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
-                    
-                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
-                    print "[find.find] Finding file in %s using method '%s'" % (path, vector)  
-                    
-                    if interpreter == 'shell.sh':       
-                        response = self.modhandler.load(interpreter).run(payload, False)
-                    elif interpreter == 'shell.php':
-                        response = self.modhandler.load(interpreter).run(payload)
-                        
-                    if response:
-                        return response
+                    return self.__execute_payload(interpreter, vector, qty, type, mod, path)
                 
                 
-        raise ModuleException("find.perms",  "No file found.")
+        raise ModuleException(self.name,  "No file found.")
+                    
+                    
+    def __execute_payload(self,interpreter,vector, qty, type, mod, path):
+        
+        payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
+        print "[find.perms] Finding file in %s using method '%s'" % (path, vector)  
+        
+        if interpreter == 'shell.sh':       
+            response = self.modhandler.load(interpreter).run(payload, False)
+        elif interpreter == 'shell.php':
+            response = self.modhandler.load(interpreter).run(payload)
+            
+        if response:
+            return response
+        
+                
             
 
         

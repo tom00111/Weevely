@@ -63,10 +63,22 @@ class Download(Module):
             
     def __slack_probe(self, remote_path, local_path):
                 
+                
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, remote_path, local_path)
+                
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
                 if interpreter in self.modhandler.loaded_shells:
+                    return self.__execute_payload(interpreter, vector, remote_path, local_path)
                     
+                    
+        raise ModuleException(self.name,  "File download probing failed")     
+    
+                    
+    def __execute_payload(self, interpreter, vector, remote_path, local_path):
+        
                     payload = self.vectors[interpreter][vector]
                     
                     if payload.count( '%s' ) == 1:
@@ -90,8 +102,7 @@ class Download(Module):
                         self.vector = vector
                         
                         return self.__process_response(response, remote_path, local_path )
-
-        raise ModuleException("file.download",  "File download probing failed")       
+  
      
      
     def __process_response(self,response, remote_path, local_path):
@@ -143,7 +154,7 @@ class Download(Module):
             if response:
                 return self.__process_response(response,remote_path, local_path)
                 
-            raise ModuleException("file.download",  "File read failed")
+            raise ModuleException(self.name,  "File read failed")
         
         
             

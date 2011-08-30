@@ -54,7 +54,7 @@ function swp($d, $m, $s){
         
         
         if not mod in ('e', 'ei', 'c', 'ci'):
-            raise ModuleException("find.name",  "Find name failed. Use e|ei|c|ci as parameter.")
+            raise ModuleException(self.name,  "Find name failed. Use e|ei|c|ci as parameter.")
         
         str_mod = mod
         str_string = string
@@ -72,24 +72,32 @@ function swp($d, $m, $s){
             
         return (path, str_mod, str_string)
 
+
+    def __execute_payload(self, interpreter, vector, mod, string, path):
+        
+        payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, mod, string, path)
+        print "[find.name] Finding by name using method '%s'" % (vector)  
+                  
+        if interpreter == 'shell.sh':
+            response = self.modhandler.load(interpreter).run(payload, False)
+        elif interpreter == 'shell.php':
+            response = self.modhandler.load(interpreter).run(payload)
+            
+        if response:
+            return response
+
     def run(self, mod, string, path):
+        
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, mod, string, path)
         
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
+                    return self.__execute_payload(interpreter, vector, mod, string, path)
                     
-                    payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, mod, string, path)
-                    print "[find.name] Finding by name using method '%s'" % (vector)  
-                              
-                    if interpreter == 'shell.sh':
-                        response = self.modhandler.load(interpreter).run(payload, False)
-                    elif interpreter == 'shell.php':
-                        response = self.modhandler.load(interpreter).run(payload)
-                        
-                    if response:
-                        return response
-                
-        raise ModuleException("find.name",  "No file found.")
+        raise ModuleException(self.name,  "No file found.")
             
 
         

@@ -43,36 +43,45 @@ class Read(Module):
         
     def __slack_probe(self, remote_path):
         
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, remote_path)
+                
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
                 if interpreter in self.modhandler.loaded_shells:
+                    return self.__execute_payload(interpreter, vector, remote_path)
+                
+        raise ModuleException(self.name,  "File read probing failed")      
                     
-                    payload = self.vectors[interpreter][vector]
                     
-                    if payload.count( '%s' ) == 1:
-                        payload = payload % remote_path
-                        
-                    if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
-                        
-                        if not (self.transfer_dir and self.transfer_url_dir):
-                            
-                            self.transfer_url_dir = self.modhandler.load('find.webdir').url
-                            self.transfer_dir = self.modhandler.load('find.webdir').dir
-                        
-                        payload = payload % (remote_path, self.transfer_dir, self.transfer_dir)
                     
-                    response = self.modhandler.load(interpreter).run(payload)
-                    
-                    if response:
-                        
-                        self.payload = payload
-                        self.interpreter = interpreter
-                        self.vector = vector
-                        
-                        return self.__process_response(response)
-
-        raise ModuleException("file.read",  "File read probing failed")       
-     
+    def __execute_payload(self, interpreter, vector, remote_path):
+        
+        payload = self.vectors[interpreter][vector]
+        
+        if payload.count( '%s' ) == 1:
+            payload = payload % remote_path
+            
+        if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
+            
+            if not (self.transfer_dir and self.transfer_url_dir):
+                
+                self.transfer_url_dir = self.modhandler.load('find.webdir').url
+                self.transfer_dir = self.modhandler.load('find.webdir').dir
+            
+            payload = payload % (remote_path, self.transfer_dir, self.transfer_dir)
+        
+        response = self.modhandler.load(interpreter).run(payload)
+        
+        if response:
+            
+            self.payload = payload
+            self.interpreter = interpreter
+            self.vector = vector
+            
+            return self.__process_response(response)
+ 
   
     def __process_response(self,response):
       
@@ -80,7 +89,7 @@ class Read(Module):
             url = self.transfer_url_dir + '/file.txt'
             file_path = self.transfer_dir + '/file.txt'
             
-            print "[file.read] Reading file via \'%s\' and removing" % url
+            print "[file.read] Reading file via \'%s\' and removing it" % url
             
             response = Request(url).read()
             
@@ -104,7 +113,7 @@ class Read(Module):
                 
                 return self.__process_response(response)
 
-            raise ModuleException("file.read",  "File read failed")
+            raise ModuleException(self.name,  "File read failed")
         
         
             

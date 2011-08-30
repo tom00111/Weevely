@@ -1,5 +1,6 @@
 import os
 from module import ModuleException
+from config import Config
 
 class ModHandler(dict):
     
@@ -18,6 +19,8 @@ class ModHandler(dict):
         self.modules = {}
         
         self.load_module_infos(path_modules)
+        
+        self.conf = Config(self.module_info.keys())
         
         
     def load(self, module_name):
@@ -50,6 +53,16 @@ class ModHandler(dict):
                 modclass = getattr(mod, mod.classname)
                 self.module_info[f] = [ modclass.visible, modclass.__doc__ ]
                     
+
+    def print_module_summary(self):
+        
+        i = 0
+        for mod in self.module_info:
+            if i == 5: 
+                i = 0
+                print ''
+            else: i+=1
+            print '[ :' +  mod + ' ]',
 
     def print_module_infos(self):
         

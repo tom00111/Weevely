@@ -36,24 +36,36 @@ class Suidsgid(Module):
         elif mod == 'sgid':
             mod = '-perm -02000'
         else:
-            raise ModuleException("find.suidsgid",  "Find suid/sgid failed. Use suid|sgid|all as parameter.")
+            raise ModuleException(self.name,  "Find suid/sgid failed. Use suid|sgid|all as parameter.")
          
+         
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, mod, path)
+        
+        
         
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
+                    return self.__execute_payload(interpreter, vector, mod, path)
                     
-                    payload = self.vectors[interpreter][vector] % (path, mod)
-                    print "[find.suidsgid] Finding using method '%s'" % (vector)  
-                              
-                    if interpreter == 'shell.sh':       
-                        response = self.modhandler.load(interpreter).run(payload, False)
-    
-                    if response:
-                        return response
+
+        raise ModuleException(self.name,  "No file found")
+
+                    
+    def __execute_payload(self, interpreter, vector, mod, path):
+        
+        payload = self.vectors[interpreter][vector] % (path, mod)
+        print "[find.suidsgid] Finding using method '%s'" % (vector)  
+                  
+        if interpreter == 'shell.sh':       
+            response = self.modhandler.load(interpreter).run(payload, False)
+
+        if response:
+            return response
+            
                 
-                
-        raise ModuleException("find.suidsgid",  "No file found")
             
 
         
