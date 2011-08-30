@@ -38,7 +38,6 @@ class Php(Module):
         request = CmdRequest( self.url, self.password )
         request.setPayload(cmd)
         
-        
         try:
             resp = request.execute()
         except NoDataException, e:
