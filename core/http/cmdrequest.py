@@ -23,8 +23,9 @@ class CmdRequest(Request):
 			   'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14', \
 			   'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)' )
 
-	def __init__( self, url, password ):
-		Request.__init__( self, url )
+	def __init__( self, url, password, proxy = None ):
+		Request.__init__( self, url, proxy)
+			
 		self.password  = password
 		self.extractor = re.compile( "<%s>(.*)</%s>" % ( self.password[2:], self.password[2:] ), re.DOTALL )
 		self.parsed	   = urlparse.urlparse(self.url)

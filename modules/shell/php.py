@@ -6,7 +6,7 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 from core.http.cmdrequest import CmdRequest, NoDataException
-import random
+import random, os
 
 classname = 'Php'
     
@@ -18,9 +18,16 @@ class Php(Module):
     def __init__(self, modhandler, url, password):
         
         self.cwd_vector = None
+        self.proxy = None
+        
         Module.__init__(self, modhandler, url, password)
         
-        
+        proxy = self.modhandler.conf.get_option('global', 'http_proxy')
+        if proxy:
+            print '[+] Setting http proxy \'%s\'' % (proxy)
+            self.proxy = { 'http' : proxy }
+            
+            
 
     def _probe(self):
         
@@ -35,7 +42,7 @@ class Php(Module):
         if self.cwd_vector:
             cmd = self.cwd_vector % (cmd)
         
-        request = CmdRequest( self.url, self.password )
+        request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd)
         
         try:

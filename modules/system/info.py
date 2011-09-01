@@ -22,13 +22,13 @@ class Info(Module):
                 },
                
                'shell.php' : { 
-                              "document_root" : "print($_SERVER['DOCUMENT_ROOT']);",
-                              "whoami" : "print(get_current_user());",
-                              "hostname" : "print(gethostname());",
-                              "basedir" : "print(getcwd());",
-                              "uname" : "print(php_uname());",
-                              "os" : "print(PHP_OS);",
-                              "script" : "print($_SERVER['SCRIPT_NAME']);"
+                              "document_root" : "@print($_SERVER['DOCUMENT_ROOT']);",
+                              "whoami" : "@print(get_current_user());",
+                              "hostname" : "@print(gethostname());",
+                              "basedir" : "@print(getcwd());",
+                              "uname" : "@print(php_uname());",
+                              "os" : "@print(PHP_OS);",
+                              "script" : "@print($_SERVER['SCRIPT_NAME']);"
                               }
     
     }

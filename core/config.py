@@ -16,6 +16,7 @@ class Config:
         
         if os.path.exists(conf_path):
             self.conf.read(self.conf_path)
+            
         else:
             print '[!] Config file \'%s\' not found, creating new' % (conf_path)
             self.__write_conf(module_names)

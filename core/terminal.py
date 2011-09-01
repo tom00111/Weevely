@@ -25,16 +25,17 @@ class Terminal():
         self.__load_interpreters()
     
         self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-        
-        self.username = self.modhandler.load('system.info').run("whoami")
-        self.hostname = self.modhandler.load('system.info').run("hostname")
-        self.cwd = self.modhandler.load('system.info').run("basedir")
+
+        self.username = self.run_module('system.info', [ "whoami" ])
+        self.hostname = self.run_module('system.info', [ "hostname" ])
+        self.cwd = self.run_module('system.info', [ "basedir" ])
     
         if not one_shot:
             
             self.history      = os.path.expanduser( '~/.weevely_history' )
 
             try:
+                
                 readline.parse_and_bind( 'tab: menu-complete' )
                 readline.set_completer( self.__complete )
                 readline.read_history_file( self.history )
