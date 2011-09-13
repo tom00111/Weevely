@@ -29,7 +29,7 @@ class Php(Module):
             self.proxy = { 'http' : proxy }
             
         if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
-            print '[!] Error setting current directory parameters, this function will no work.'
+            print '[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.'
         else:
             self.cwd_vector = "chdir('%s') && %s" 
         

@@ -28,6 +28,7 @@ class Info(Module):
                               "basedir" : "@print(getcwd());",
                               "uname" : "@print(php_uname());",
                               "os" : "@print(PHP_OS);",
+                              "safe_mode"     : "(ini_get('safe_mode') && print(1)) || print(0);",
                               "script" : "@print($_SERVER['SCRIPT_NAME']);"
                               }
     

