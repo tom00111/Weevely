@@ -45,6 +45,8 @@ class Info(Module):
     def run( self, info):
         
         
+        if info in self.infos:
+            return self.infos[info]
         if info == 'all':
             
             for interpreter in self.vectors:
@@ -57,7 +59,6 @@ class Info(Module):
                 tabs = '\t'*(3-((len(info)+1)/8))
                 output += '%s:%s%s\n' % (info, tabs, self.infos[info])
             return output
-        
         else:
             
             for interpreter in self.vectors:

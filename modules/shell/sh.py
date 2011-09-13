@@ -98,24 +98,8 @@ class Sh(Module):
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
         
-        if self.cwd_vector:
-            cmd = self.cwd_vector % (cmd)
-        
         return self.modhandler.load('shell.php').run(payload)
 
-
-    def cwd_handler (self, path, set_new_cwd=False):
-        
-        response = self.run("( [ -d '%s' ] && echo 1 ) || echo 0" % path)
-        
-        if response == '1':
-            if set_new_cwd:
-                self.cwd_vector = "cd %s && %s" % ( path, '%s' )
-                
-            return True
-        
-        return False
-        
 
 
     

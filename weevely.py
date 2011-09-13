@@ -52,10 +52,16 @@ if __name__ == "__main__":
 
         url = sys.argv[2]
         password = sys.argv[3]        
-        command = ' '.join(sys.argv[4:])
         
         try:
-            Terminal (ModHandler(url, password), True).run_single(command)
+            
+            terminal = Terminal (ModHandler(url, password), True)
+            if sys.argv[4][0] == terminal.module_char:
+                terminal.run_module_cmd(sys.argv[4:])
+            else:
+                terminal.run_line_cmd(' '.join(sys.argv[4:]))
+            
+            
         except KeyboardInterrupt:
             print '\n[!] Exiting. Bye ^^'
     else:

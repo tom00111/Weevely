@@ -38,7 +38,7 @@ class Reversetcp(Module):
     def run(self, host, port):
                 
         print "[backdoor.reverse_tcp] Weevely should now block during reverse backdoor usage. If not, assure"
-        print "[backdoor.reverse_tcp] \'shell.sh\' is loaded and port is correctly bounded (use \'nc -v -l -p %s\')" % (port)
+        print "[backdoor.reverse_tcp] \'shell.sh\' is loaded and port is opened (use \'nc -v -l -p %s\')" % (port)
         
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:

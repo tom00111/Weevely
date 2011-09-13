@@ -16,7 +16,6 @@ class Terminal():
         self.url = modhandler.url
         self.password = modhandler.password
         self.interpreter = None
-        self.cwd_interpreter = None
         self.module_char = ':'
         self.help_string = ':help'
         self.one_shot = one_shot
@@ -26,9 +25,10 @@ class Terminal():
     
         self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 
-        self.username = self.run_module('system.info', [ "whoami" ])
-        self.hostname = self.run_module('system.info', [ "hostname" ])
-        self.cwd = self.run_module('system.info', [ "basedir" ])
+        self.username = self.run('system.info', [ "whoami" ])
+        self.hostname = self.run('system.info', [ "hostname" ])
+        self.cwd = self.run('system.info', [ "basedir" ])
+                    
     
         if not one_shot:
             
@@ -65,17 +65,12 @@ class Terminal():
                 if not self.one_shot:
                     print '[+] Substitute of \'cd [path]\' and \'ls [path]\' are available'
                 self.prompt        = "%s@%s:%s php> "
-                
-                if self.modhandler.load('shell.php').cwd_handler('.'):
-                    self.cwd_interpreter = 'shell.php'
             
         else:
             self.interpreter = 'shell.sh'
             self.prompt = "%s@%s:%s$ "
             print '[+] Using system shell interpreter \'%s\'' % self.interpreter
-            
-            if self.modhandler.load('shell.sh').cwd_handler('.'):
-                self.cwd_interpreter = 'shell.sh'
+
 
 
     def loop(self):
@@ -89,60 +84,68 @@ class Terminal():
             cmd       = cmd.strip()
             
             if cmd:
-                self.run_single(cmd)
+                if cmd[0] == self.module_char:
+                    self.run_module_cmd(shlex.split(cmd))
+                else:
+                    self.run_line_cmd(cmd)
             
-    def run_single(self, cmd):
-    
+            
+    def run_module_cmd(self, cmd_splitted):
+        
         if not self.interpreter:
             return
              
         output = ''
     
-        ## Module call
-        if cmd[0] == self.module_char:
-            
-            cmd_split = shlex.split(cmd)
-            
-            ## Help call
-            if cmd_split[0] == self.help_string:
-            
-                self.modhandler.print_module_infos()
-                
-            else:
-            
-                cmd_split[0] = cmd_split[0][1:]
-                
-                if len(cmd_split)==1:
-                    output = self.run_module(cmd_split[0], [])
-                elif len(cmd_split)==2:
-                    output =  self.run_module(cmd_split[0], [ cmd_split[1] ])
-                elif len(cmd_split)>2:
-                    output =  self.run_module(cmd_split[0], cmd_split[1:])
-                else:
-                    print '[!] Error specify module name'
-                    
-        # Default interpreter call
-        elif cmd[0] != self.module_char:
+        ## Help call
+        if cmd_splitted[0] == self.help_string:
         
-            if not self.one_shot:
-                if self.__handleDirectoryChange(cmd,self.cwd_interpreter) == False:
-                    if self.interpreter == 'shell.php' and cmd.startswith('ls'):
-                        print self.modhandler.load('shell.php').ls_handler(cmd)
-               
-                    output = self.run_module(self.interpreter, [ cmd ])  
-                    
-                else:
-                    pass
+            self.modhandler.print_module_infos()
+            
+        else:
+        
+            cmd_splitted[0] = cmd_splitted[0][1:]
+            
+            if len(cmd_splitted)==1:
+                output = self.run(cmd_splitted[0], [])
+            elif len(cmd_splitted)==2:
+                output =  self.run(cmd_splitted[0], [ cmd_splitted[1] ])
+            elif len(cmd_splitted)>2:
+                output =  self.run(cmd_splitted[0], cmd_splitted[1:])
+            else:
+                print '[!] Module name error'
+   
+        if output:
+            print output       
+            
+    def run_line_cmd(self, cmd_line):
+                
+        if not self.interpreter:
+            return
+             
+        output = ''
+        
+        if not self.one_shot:
+
+            if self.__handleDirectoryChange(cmd_line) == False:
+                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
+                    print self.modhandler.load('shell.php').ls_handler(cmd_line)
+           
+                output = self.run(self.interpreter, [ cmd_line ])  
                 
             else:
-                output = self.run_module(self.interpreter, [ cmd ])  
+                pass
+            
+        else:
+            output = self.run(self.interpreter, [ cmd_line ])  
             
         if output:
             print output
     
 
 
-    def __handleDirectoryChange( self, cmd, interpreter ):
+    def __handleDirectoryChange( self, cmd):
+        
         cd  = self.cwd_extract.findall(cmd)
         
         if cd != None and len(cd) > 0:    
@@ -163,11 +166,10 @@ class Terminal():
             else:
                 path = (path + "/" + cwd).replace( '//', '/' ) 
             
-            if self.modhandler.load(self.cwd_interpreter).cwd_handler(path,True):
+            if self.modhandler.load('shell.php').cwd_handler(path):
                 self.cwd = path
-                    
             else:
-                print "[!] Directory '%s' does not exist or is not accessible." % path
+                print "[!] '%s' is not a directory or is not accessible." % path
 
             return True
 
@@ -193,7 +195,7 @@ class Terminal():
             return None
 
 
-    def run_module(self, module_name, module_arguments):
+    def run(self, module_name, module_arguments):
         
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
