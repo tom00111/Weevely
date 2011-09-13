@@ -28,6 +28,7 @@ class Php(Module):
             print '[shell.php] Setting http proxy \'%s\'' % (proxy)
             self.proxy = { 'http' : proxy }
             
+            
         if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
             print '[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.'
         else:
@@ -78,6 +79,7 @@ class Php(Module):
             path = cmd_splitted[1]
         else:
             path = self.path
+            
             
         return self.run( ls_vector % (path), False)
     
