@@ -50,7 +50,7 @@ class Sh(Module):
             raise ModuleException("system.exec",  "Shell interpreter initialization failed")
         
         
-    def __execute_paylaod(self, interpreter, vector):
+    def __execute_payload(self, interpreter, vector):
         
         try:
             rand     = random.randint( 11111, 99999 )
@@ -75,7 +75,7 @@ class Sh(Module):
         for interpreter in self.vectors:
             for vector in self.vectors_order[interpreter]:
                 if interpreter in self.modhandler.loaded_shells:
-                    return self.__execute_paylaod(interpreter, vector)
+                    return self.__execute_payload(interpreter, vector)
                     
 
                 
