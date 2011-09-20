@@ -6,7 +6,6 @@ Created on 20/set/2011
 
 
 from core.module import Module, ModuleException
-from core.http.request import Request
 
 classname = 'Check'
     
@@ -34,18 +33,11 @@ class Check(Module):
         
         Module.__init__(self, modhandler, url, password)    
     
-    def run(self, remote_path, mode):
+    def __execute_payload(self, interpreter, vector, remote_path, mode):
         
-        payload = None
         
-        for i in self.vectors:
-            if mode in self.vectors[i]:
-                self.interpreter = i
-                self.vector = mode
-                payload = self.vectors[i][mode] % (remote_path)
-                break
-                
-                
+        payload = self.vectors[interpreter][vector] % (remote_path)
+        
         if payload:
             
             response = self.modhandler.load(self.interpreter).run(payload)
@@ -55,9 +47,28 @@ class Check(Module):
             elif (mode == 'md5' and response):
                 return response
             else:
-                print 'False, or file not found.'
+                
+                if mode != 'exists':
+                    if not self.run(remote_path, 'exists'):
+                        print 'File not exists.'
+                        return False
+                        
+                print 'False'
                 return False
         
+    
+    def run(self, remote_path, mode):
+        
+        interpreter, vector = self._get_default_vector()
+        if interpreter and vector:
+            return self.__execute_payload(interpreter, vector, remote_path, mode)
+        else:
+            for i in self.vectors:
+                if mode in self.vectors[i]:
+                    self.interpreter = i
+                    self.vector = mode
+                    return self.__execute_payload(i, mode, remote_path, mode)
+
         raise ModuleException(self.name,  "File check failed, use exists|file|dir|md5|r|w|x as option.")
             
             
