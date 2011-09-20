@@ -14,8 +14,8 @@ class Binaries(Module):
     :find.binaries all | <name> 
     '''
 
-    paths = [ "/usr/local/bin",
-             "/usr/bin",
+    paths = [ "/usr/bin",
+             "/usr/local/bin",
              "/bin",
              "/usr/local/sbin",
              "/usr/sbin",
@@ -40,70 +40,57 @@ class Binaries(Module):
 
     def __init__(self, modhandler, url, password):
         
-        self.vector = "(is_file('%s') && print(1)) || (is_executable('%s') && print(2));"
-        
         Module.__init__(self, modhandler, url, password)
         
         
+    def __checkfile(self, bin, completepath):
+        
+        output = None
+             
+        if self.modhandler.load('file.check').run(completepath, 'x' , True):
+            output = 'Executable'
+            self.bins[bin] = completepath  
+        elif self.modhandler.load('file.check').run(completepath, 'exists', True ):
+            output = 'Not Executable'
+            self.bins[bin] = completepath  
+
+        return output
+
+        
     def run( self, binary_name):
         
-        
-
+        found = False
         if binary_name == 'all':
-            
-            
-            output=''
             
             for bin in self.bins:
                 
-                tabs = '\t'*(3-((len(bin)+1)/8))    
-                output += '%s:' % bin
+                output = bin + ':' + '\t'*(3-((len(bin)+1)/8))
+                print output,
                 
                 for path in self.paths:
-                         
+                    
                     completepath = path + '/' + bin
-                         
-                    filemode = self.modhandler.load('shell.php').run(self.vector % ( completepath, completepath ))
-                    filemode_str = ''
-                        
-                    if filemode == '1' or filemode == '2':
-                        
-                        if filemode == '1':
-                            filemode_str = 'Executable'
-                        else:
-                            filemode_str = 'Not Executable'
-                            
-                        self.bins[bin] = completepath
-                        output += '%s%s%s%s' % (tabs, completepath, tabs, filemode_str)
+                    
+                    response = self.__checkfile(bin, completepath)
+                    if response:
+                        print completepath, response,
+                        found = True
                         break
                     
-                output += '\n'
+                print ''
                     
-                         
-                        
-
-                    
-                    
-            return output
-        
-        elif binary_name in self.bins and self.bins['binary_name']:
+        elif binary_name in self.bins and self.bins[binary_name]:
             return self.bins[path]
-        
         else:
             for path in self.paths:
-                completepath = path + '/' + binary_name
-                filemode = self.modhandler.load('shell.php').run(self.vector % ( completepath, completepath ))
                     
-                filemode_str = '' 
-                if filemode == '1':
-                    filemode_str = 'Executable'
-                    self.bins[binary_name] = completepath
-                elif filemode == '2':
-                    filemode_str = 'Not Executable'
-                    self.bins[binary_name] = completepath
-                                        
-                return '%s:\t%s\t%s\n' % (bin, self.bins[binary_name], filemode_str)
-         
-        raise ModuleException(self.name,  "Executable binary '%s' not found." % (binary_name))
+                completepath = path + '/' + binary_name
+                
+                response = self.__checkfile(binary_name, completepath)
+                if response:
+                    return completepath
+            
+        if not found:        
+            raise ModuleException(self.name,  "Binary '%s' not found." % (binary_name))
 
         

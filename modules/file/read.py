@@ -21,8 +21,8 @@ class Read(Module):
                                "file()"             : "print(implode('', file('%s')));",
                                "fread()"            : "$f='%s'; print(fread(fopen($f,'r'),filesize($f)));",
                                 "file_get_contents()"     : "print(file_get_contents('%s'));",
-                                "copy()"       : "@copy('compress.zlib://%s','%s/file.txt') && file_exists('%s/file.txt') && print(1);",
-                                "symlink()"     : "@symlink('%s','%s/file.txt'); file_exists('%s/file.txt') && print(1);"
+                                "copy()"       : "@copy('compress.zlib://%s','%s/file.txt');",
+                                "symlink()"     : "@symlink('%s','%s/file.txt');"
                                 },
                 'shell.sh' : {
                                 "cat" : "cat %s"
@@ -63,7 +63,7 @@ class Read(Module):
         if payload.count( '%s' ) == 1:
             payload = payload % remote_path
             
-        if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 3:
+        if (vector.startswith('copy') or vector.startswith('symlink')) and payload.count( '%s' ) == 2:
             
             if not (self.transfer_dir and self.transfer_url_dir):
                 

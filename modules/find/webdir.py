@@ -59,33 +59,36 @@ class Webdir(Module):
         if self.url and self.dir:
             return
             
-        document_root = self.modhandler.load('system.info').run('document_root')
-        if not document_root[-1]=='/': document_root += '/'
+        root_find_dir = self.modhandler.load('system.info').run('basedir')
         
-        http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
-        
-#        print '[find.webdir] Implying that %s URL points to %s, searching for writable web directory' % (http_root, document_root)
-        
-        writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', document_root).split('\n')
-        
-        for dir_path in writable_dirs:
-        
-            if not dir_path[-1]=='/': dir_path += '/'
-            file_path = dir_path + self.probe_filename
-
-            file_url = http_root + file_path.replace(document_root,'')
-            dir_url = http_root + dir_path.replace(document_root,'')
-        
-        
-            interpreter, vector = self._get_default_vector()
-            if interpreter and vector:
-                return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-        
-                
-            for interpreter in self.vectors:
-                for vector in self.vectors[interpreter]:
-                    if interpreter in self.modhandler.loaded_shells:
-                        return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+        if root_find_dir:
+            
+            if not root_find_dir[-1]=='/': root_find_dir += '/'
+            
+            http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
+            
+    #        print '[find.webdir] Implying that %s URL points to %s, searching for writable web directory' % (http_root, root_find_dir)
+            
+            writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
+            
+            for dir_path in writable_dirs:
+            
+                if not dir_path[-1]=='/': dir_path += '/'
+                file_path = dir_path + self.probe_filename
+    
+                file_url = http_root + file_path.replace(root_find_dir,'')
+                dir_url = http_root + dir_path.replace(root_find_dir,'')
+            
+            
+                interpreter, vector = self._get_default_vector()
+                if interpreter and vector:
+                    return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+            
+                    
+                for interpreter in self.vectors:
+                    for vector in self.vectors[interpreter]:
+                        if interpreter in self.modhandler.loaded_shells:
+                            return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
                         
         
                  

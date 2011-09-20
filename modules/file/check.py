@@ -27,47 +27,44 @@ class Check(Module):
            }
     
     def __init__(self, modhandler, url, password):
-        
-        self.vector = None
-        self.interpreter = None
+
         
         Module.__init__(self, modhandler, url, password)    
     
-    def __execute_payload(self, interpreter, vector, remote_path, mode):
+    def __execute_payload(self, interpreter, vector, remote_path, mode, quiet):
         
         
         payload = self.vectors[interpreter][vector] % (remote_path)
-        
-        if payload:
+        response = self.modhandler.load(interpreter).run(payload)
             
-            response = self.modhandler.load(self.interpreter).run(payload)
-                
-            if response == '1':
-                return True
-            elif (mode == 'md5' and response):
-                return response
-            else:
-                
-                if mode != 'exists':
-                    if not self.run(remote_path, 'exists'):
+        if response == '1':
+            return True
+        elif (mode == 'md5' and response):
+            return response
+        else:
+            
+            if mode != 'exists':
+                if not self.run(remote_path, 'exists', quiet):
+                    if not quiet:
                         print 'File not exists.'
-                        return False
-                        
+                    return False
+                 
+            if not quiet:
                 print 'False'
-                return False
+                
+            return False
         
     
-    def run(self, remote_path, mode):
+    def run(self, remote_path, mode, quiet = False):
+        
         
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:
-            return self.__execute_payload(interpreter, vector, remote_path, mode)
+            return self.__execute_payload(interpreter, vector, remote_path, mode, quiet)
         else:
             for i in self.vectors:
                 if mode in self.vectors[i]:
-                    self.interpreter = i
-                    self.vector = mode
-                    return self.__execute_payload(i, mode, remote_path, mode)
+                    return self.__execute_payload(i, mode, remote_path, mode, quiet)
 
         raise ModuleException(self.name,  "File check failed, use exists|file|dir|md5|r|w|x as option.")
             
