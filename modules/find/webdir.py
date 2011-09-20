@@ -13,7 +13,7 @@ from urlparse import urlparse
 classname = 'Webdir'
     
 class Webdir(Module):
-    '''Find writable directory in web root with corresponding URL (help file downloads)
+    '''Find writable directory and corresponding URL
     :find.webdir
     '''
     
@@ -40,10 +40,9 @@ class Webdir(Module):
         payload = self.vectors[interpreter][vector] % file_path
         self.modhandler.load(interpreter).run(payload)
 
-        if self.modhandler.load('shell.php').run("file_exists('%s') && print('1');" % file_path) == '1':
+        if self.modhandler.load('file.check').run(file_path, 'exists'):
                 
             if(Request(file_url).read() == '1'):
-                print "[find.webdir] Writable web dir: %s -> %s" % (dir_path, dir_url)
                 self.dir = dir_path
                 self.url = dir_url
                 return
@@ -52,7 +51,10 @@ class Webdir(Module):
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                         
 
-
+    def run(self):
+        if self.url and self.dir:
+            print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
+            
     
     def _probe(self):
         
