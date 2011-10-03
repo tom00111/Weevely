@@ -9,7 +9,7 @@ from core.module import Module, ModuleException
 classname = 'Info'
     
 class Info(Module):
-    """Collect system shell informations
+    """Collect system informations
     :system.info all|whoami|hostname|basedir|document_root
     """
     

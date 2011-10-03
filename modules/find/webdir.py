@@ -13,7 +13,7 @@ from urlparse import urlparse
 classname = 'Webdir'
     
 class Webdir(Module):
-    '''Find writable directory and corresponding URL
+    '''Find writable directory and get corresponding URL
     :find.webdir
     '''
     
@@ -73,8 +73,6 @@ class Webdir(Module):
             
             http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
             
-    #        print '[find.webdir] Implying that %s URL points to %s, searching for writable web directory' % (http_root, root_find_dir)
-            
             writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
             
             for dir_path in writable_dirs:
@@ -97,7 +95,6 @@ class Webdir(Module):
                             response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
                             if response:
                                 return response
-        turn
                  
         if not (self.url and self.dir):
-            raise ModuleException(self.name,  "Writable web directory corresponding not found")
+            raise ModuleException(self.name,  "Writable web directory not found")

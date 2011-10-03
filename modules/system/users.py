@@ -9,7 +9,7 @@ from core.module import Module, ModuleException
 classname = 'Users'
     
 class Users(Module):
-    """Enumerate system users informations using different techniques
+    """Enumerate system users using different techniques
     :system.users
     """
     

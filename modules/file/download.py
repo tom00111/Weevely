@@ -11,7 +11,7 @@ from hashlib import md5
 classname = 'Download'
     
 class Download(Module):
-    '''Download remote binary/ascii file using different techniques
+    '''Download remote binary/ascii files
     :file.download <remote path> <locale path>
     '''
     

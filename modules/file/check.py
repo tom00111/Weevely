@@ -10,7 +10,7 @@ from core.module import Module, ModuleException
 classname = 'Check'
     
 class Check(Module):
-    '''Check remote files using different techniques
+    '''Check remote files presence, type, md5 and permissions
     :file.check <remote path> exists|file|dir|md5|r|w|x
     '''
     

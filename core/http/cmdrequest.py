@@ -17,7 +17,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import random, urllib2, urlparse, re, base64
 from request import Request
-from urllib import urlencode
 
 class CmdRequest(Request):
 	agents = ( 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6', \
@@ -53,7 +52,7 @@ class CmdRequest(Request):
 		self['Referer']	= referer
 
 	def setPostData(self, data_dict):
-		self.data = urlencode(data_dict)
+		self.data = data_dict
 
 	def execute( self ):
 		response = self.read()

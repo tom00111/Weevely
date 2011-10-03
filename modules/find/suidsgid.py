@@ -9,7 +9,7 @@ from core.module import Module, ModuleException
 classname = 'Suidsgid'
     
 class Suidsgid(Module):
-    '''Find suid|sgid|all file 
+    '''Find suid, sgid, or every file with superuser flag 
     :find.suidsgid suid|sgid|all <path> 
     '''
     
