@@ -48,9 +48,11 @@ class Read(Module):
             return self.__execute_payload(interpreter, vector, remote_path)
                 
         for interpreter in self.vectors:
-            for vector in self.vectors_order[interpreter]:
-                if interpreter in self.modhandler.loaded_shells:
-                    return self.__execute_payload(interpreter, vector, remote_path)
+            if interpreter in self.modhandler.loaded_shells:
+                for vector in self.vectors_order[interpreter]:
+                    response = self.__execute_payload(interpreter, vector, remote_path)
+                    if response:
+                        return response
                 
         raise ModuleException(self.name,  "File read probing failed")      
                     

@@ -13,7 +13,7 @@ class Request:
 		self.opener.addheader(key, value)
 
 	def read(self, bytes= -1):
-		handle = self.opener.open(self.url)
+		handle = self.opener.open(self.url, data=self.data)
 		if bytes > 0: 
 			return handle.read(bytes)
 		else:

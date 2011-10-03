@@ -57,16 +57,20 @@ class Check(Module):
     
     def run(self, remote_path, mode, quiet = False):
         
-        
+        mode_found = False
+                
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:
             return self.__execute_payload(interpreter, vector, remote_path, mode, quiet)
         else:
             for i in self.vectors:
                 if mode in self.vectors[i]:
-                    return self.__execute_payload(i, mode, remote_path, mode, quiet)
-
-        raise ModuleException(self.name,  "File check failed, use exists|file|dir|md5|r|w|x as option.")
-            
+                    mode_found = True
+                    response = self.__execute_payload(i, mode, remote_path, mode, quiet)
+                    if response:
+                        return response
+                    
+        if not mode_found:
+            raise ModuleException(self.name,  "File check failed, use exists|file|dir|md5|r|w|x as option.")
             
                 

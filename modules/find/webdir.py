@@ -45,10 +45,14 @@ class Webdir(Module):
             if(Request(file_url).read() == '1'):
                 self.dir = dir_path
                 self.url = dir_url
-                return
             
             if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
+                
+            return True
+            
+        return False    
+                
                         
 
     def run(self):
@@ -88,11 +92,12 @@ class Webdir(Module):
             
                     
                 for interpreter in self.vectors:
-                    for vector in self.vectors[interpreter]:
-                        if interpreter in self.modhandler.loaded_shells:
-                            return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-                        
-        
+                    if interpreter in self.modhandler.loaded_shells:
+                        for vector in self.vectors[interpreter]:
+                            response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+                            if response:
+                                return response
+        turn
                  
         if not (self.url and self.dir):
             raise ModuleException(self.name,  "Writable web directory corresponding not found")

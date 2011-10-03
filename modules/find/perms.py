@@ -94,7 +94,9 @@ function swp($d, $type, $mod, $qty){
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
-                    return self.__execute_payload(interpreter, vector, qty, type, mod, path)
+                    response = self.__execute_payload(interpreter, vector, qty, type, mod, path)
+                    if response:
+                        return response
                 
                 
         raise ModuleException(self.name,  "No file found.")
@@ -102,6 +104,7 @@ function swp($d, $type, $mod, $qty){
                     
     def __execute_payload(self,interpreter,vector, qty, type, mod, path):
         
+        response = None
         payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
         print "[find.perms] Finding file in %s using method '%s'" % (path, vector)  
         
@@ -110,8 +113,7 @@ function swp($d, $type, $mod, $qty){
         elif interpreter == 'shell.php':
             response = self.modhandler.load(interpreter).run(payload)
             
-        if response:
-            return response
+        return response
         
                 
             

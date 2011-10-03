@@ -11,7 +11,7 @@ from hashlib import md5
 classname = 'Download'
     
 class Download(Module):
-    '''Download remote binary/ascii file using different tecniques
+    '''Download remote binary/ascii file using different techniques
     :file.download <remote path> <locale path>
     '''
     
@@ -54,24 +54,20 @@ class Download(Module):
             self.encoder_callable = True
         else:
             print '[file.download] PHP \'base64_encode\' transfer methods not available.'
-            
-        if self.modhandler.load('shell.php').run("is_callable('md5_file') && print('1');") == '1':
-            self.md5_callable = True
-        else:
-            print '[file.download] PHP \'md5_file\' file correctness check not available.'
-            
+
             
     def __slack_probe(self, remote_path, local_path):
-                
                 
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:
             return self.__execute_payload(interpreter, vector, remote_path, local_path)
                 
         for interpreter in self.vectors:
-            for vector in self.vectors_order[interpreter]:
-                if interpreter in self.modhandler.loaded_shells:
-                    return self.__execute_payload(interpreter, vector, remote_path, local_path)
+            if interpreter in self.modhandler.loaded_shells:
+                for vector in self.vectors_order[interpreter]:
+                    response = self.__execute_payload(interpreter, vector, remote_path, local_path)
+                    if response:
+                        return response
                     
                     
         raise ModuleException(self.name,  "File download probing failed")     
@@ -144,12 +140,9 @@ class Download(Module):
             print '[file.download] File downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
         
 
-        if self.md5_callable:
-            response_md5 = md5(response).hexdigest()
-            if self.modhandler.load('file.check').run(remote_path, 'md5') == response_md5:
-                print '[file.download] MD5 hash of \'%s\' match.' % local_path
-            else:
-                print '[!] [file.download] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path
+        response_md5 = md5(response).hexdigest()
+        if not self.modhandler.load('file.check').run(remote_path, 'md5') == response_md5:
+            print '[!] [file.download] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path
 
 
      

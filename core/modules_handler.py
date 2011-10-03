@@ -83,14 +83,14 @@ class ModHandler(dict):
             for mod in module_dict[pkg]:
                 
                 if pkg != oldpkg:
-                    output = '\n[%s] [%s]' % ( pkg,  mod )
+                    output = '[%s] [%s]' % ( pkg,  mod )
                     oldpkg = pkg
                 else:
-                    output = '\n%s[%s]' % ( ' '*(len(pkg)+3), mod )
+                    output = '%s[%s]' % ( ' '*(len(pkg)+3), mod )
                 
                 print output,
                 
-                if len(module_dict[pkg][mod])>1:
+                if module_dict[pkg][mod] and len(module_dict[pkg][mod])>1:
                     lines = module_dict[pkg][mod].split('\n')
                     usageline = lines[-1].strip()
                     titleline = lines[0].strip()
@@ -99,6 +99,10 @@ class ModHandler(dict):
                     for line in lines[1:-1]:
                         print ' '*(len(pkg)+2), line.strip()
                     print usageline,
+                else:
+                    print ''
+                    
+                print ''
                         
                 
                 

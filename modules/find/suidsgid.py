@@ -48,7 +48,9 @@ class Suidsgid(Module):
         for interpreter in self.vectors:
             if interpreter in self.modhandler.loaded_shells:
                 for vector in self.vectors[interpreter]:
-                    return self.__execute_payload(interpreter, vector, mod, path)
+                    response = self.__execute_payload(interpreter, vector, mod, path)
+                    if response:
+                        return response
                     
 
         raise ModuleException(self.name,  "No file found")
