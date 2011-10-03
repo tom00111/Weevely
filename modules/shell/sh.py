@@ -17,8 +17,8 @@ class Sh(Module):
     visible = False
     
     
-    vectors_order = { 'shell.php' : [  "perl->system()", "system()", "passthru()", "shell_exec()", "popen()", 
-                                     "exec()", "pcntl_exec()", "python_eval()", "proc_open()"] }
+    vectors_order = { 'shell.php' : [  "system()", "passthru()", "shell_exec()", "popen()", 
+                                     "exec()", "pcntl_exec()", "perl->system()", "python_eval()", "proc_open()"] }
     
     
     vectors = { 'shell.php' : { "system()"       : "@system('%s 2>&1');",
