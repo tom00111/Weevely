@@ -215,7 +215,10 @@ class Terminal():
                 
                 else:
                     try:
-                        return self.modhandler.load(module_name).run(*module_arguments)
+                        response = self.modhandler.load(module_name).run(*module_arguments)
+                        if response != None:
+                            return response
+                        
                     except ModuleException, e:
                         print '[!] [%s] Error: %s' % (e.module, e) 
         

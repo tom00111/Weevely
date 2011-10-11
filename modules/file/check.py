@@ -42,17 +42,14 @@ class Check(Module):
         elif (mode == 'md5' and response):
             return response
         else:
-            
             if mode != 'exists':
                 if not self.run(remote_path, 'exists', quiet):
                     if not quiet:
                         print 'File not exists.'
-                    return False
-                 
             if not quiet:
                 print 'False'
                 
-            return False
+        return False
         
     
     def run(self, remote_path, mode, quiet = False):
@@ -67,10 +64,9 @@ class Check(Module):
                 if mode in self.vectors[i]:
                     mode_found = True
                     response = self.__execute_payload(i, mode, remote_path, mode, quiet)
-                    if response:
-                        return response
+                    return response
                     
         if not mode_found:
-            raise ModuleException(self.name,  "File check failed, use exists|file|dir|md5|r|w|x as option.")
+            raise ModuleException(self.name,  "Error, use exists|file|dir|md5|r|w|x as option.")
             
                 

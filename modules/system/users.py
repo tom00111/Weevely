@@ -23,7 +23,6 @@ class Users(Module):
                'file.read' : {
                               "file.read" : "%s"
                               }
-    
     }
     
 
@@ -56,7 +55,7 @@ class Users(Module):
                         
                         return response
 
-        raise ModuleException("system.users",  "Users enumeration failed")
+        raise ModuleException(self.name,  "Users enumeration failed")
         
 
 
