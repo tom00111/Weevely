@@ -51,7 +51,6 @@ class Php(Module):
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd)
         
-        print cmd
         
         try:
             resp = request.execute()
