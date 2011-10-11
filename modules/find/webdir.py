@@ -13,7 +13,7 @@ from urlparse import urlparse
 classname = 'Webdir'
     
 class Webdir(Module):
-    '''Find writable directory and get corresponding URL
+    '''Find writable first directory and get corresponding URL
     :find.webdir
     '''
     

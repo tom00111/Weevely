@@ -23,20 +23,17 @@ class Terminal():
     
         self.__load_interpreters()
         
-        if self.interpreter:
-    
-            self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-    
-            self.username = self.run('system.info', [ "whoami" ])
-            self.hostname = self.run('system.info', [ "hostname" ])
-            self.cwd = self.run('system.info', [ "basedir" ])
-            
-            self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
-            if self.safe_mode:
-                print '[!] Safe mode is enabled'
+        if self.interpreter and not one_shot:
+
+                self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
                 
-        
-            if not one_shot:
+                self.username = self.run('system.info', [ "whoami" ])
+                self.hostname = self.run('system.info', [ "hostname" ])
+                self.cwd = self.run('system.info', [ "basedir" ])
+                
+                self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
+                if self.safe_mode:
+                    print '[!] Safe mode is enabled'
                 
                 self.history      = os.path.expanduser( '~/.weevely_history' )
     
