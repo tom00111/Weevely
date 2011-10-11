@@ -10,7 +10,7 @@ classname = 'Users'
     
 class Users(Module):
     """Enumerate system users using different techniques
-    :system.users
+    :system.users 
     """
     
     vectors = { 
@@ -36,6 +36,7 @@ class Users(Module):
         
                 
     def run(self):
+        
         
         for interpreter in self.vectors:
             for vector in self.vectors[interpreter]:
