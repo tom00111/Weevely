@@ -33,6 +33,11 @@ class Upload(Module):
     def __execute_payload(self, interpreter, vector, file_encoded_content, remote_path, file_local_md5):
         
         
+        
+        file_exists = self.modhandler.load('file.check').run(remote_path, 'exists' , True)
+        if file_exists:
+            raise ModuleException(self.name,  'File \'%s\' exists, change remote path' % remote_path)
+            
         output = ''
         
         payload = self.vectors[interpreter][vector] % (remote_path, self.rand_post_name)
