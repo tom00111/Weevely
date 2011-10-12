@@ -14,7 +14,11 @@ class CommonUserFiles(Module):
                     
                     "home" : [ ".bashrc", 
                               ".bash_history", 
-                              ".profile"],
+                              ".profile",
+                              ".ssh",
+                              ".ssh/authorized_keys",
+                              ".ssh/known_hosts"
+                              ],
                     "web" : [ "public_html/", 
                              "public_html/wp-config.php", 
                              "public_html/config.php", 
@@ -51,7 +55,7 @@ class CommonUserFiles(Module):
                         
                         if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
                             
-                            output = 'File \'' + path + '\' '
+                            output = 'Found \'' + path + '\' '
                             
                             if self.modhandler.load('file.check').run(path, 'r', quiet=True):
                                 output += 'readable '
