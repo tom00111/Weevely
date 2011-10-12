@@ -19,9 +19,6 @@ import random, urllib2, urlparse, re, base64
 from request import Request
 
 class CmdRequest(Request):
-	agents = ( 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6', \
-			   'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14', \
-			   'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB5; InfoPath.1)' )
 
 	def __init__( self, url, password, proxy = None ):
 		Request.__init__( self, url, proxy)
@@ -36,7 +33,8 @@ class CmdRequest(Request):
 		else:
 			self.query = ''.join( self.parsed.path.split('.')[:-1] ).replace( '/', ' ' )
 
-		self.opener.addheader( 'User-Agent', self.agents[ random.randint( 0, len(self.agents) - 1 ) ] )
+#		self.opener.addheader( 'User-Agent', self.agents[ random.randint( 0, len(self.agents) - 1 ) ] )
+#		self.opener.setVersion(self.agents[ random.randint( 0, len(self.agents) - 1 ) ])
 
 	def setPayload( self, payload ):
 		payload = base64.b64encode( payload.strip() )
