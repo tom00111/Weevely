@@ -6,7 +6,7 @@ classname = 'CommonUserFiles'
 
 class CommonUserFiles(Module):
     """Enumerate common user file in home or public_html folders
-    :assessment.common_user_files all | home | web
+    :assess.common_user_files all | home | web
     """
     
     
@@ -15,11 +15,11 @@ class CommonUserFiles(Module):
                     "home" : [ ".bashrc", 
                               ".bash_history", 
                               ".profile"],
-                    "web" : [ "/public_html/", 
-                             "/public_html/wp-config.php", 
-                             "/public_html/config.php", 
-                             "/public_html/uploads",
-                             "/public_html/.htaccess" ] 
+                    "web" : [ "public_html/", 
+                             "public_html/wp-config.php", 
+                             "public_html/config.php", 
+                             "public_html/uploads",
+                             "public_html/.htaccess" ] 
                     
                     }
 
@@ -37,31 +37,31 @@ class CommonUserFiles(Module):
             
         self.modhandler.load('system.users').run()
         
-        for user in self.modhandler.load('system.users').usersinfo.keys():
+        for user in self.modhandler.load('system.users').usersinfo:
             
-            if user:
-                print 'User:', user
+            print 'Checking user \'%s\' home \'%s\'' % (user.name, user.home)
+            
+            for current_mode in self.common_files:
                 
-                for current_mode in self.common_files:
-                    if current_mode == 'all' or current_mode == mode:
+                if mode == 'all' or current_mode == mode:
+                    
+                    for f in self.common_files[current_mode]:
                         
-                        for file in self.common_files[current_mode]:
+                        path = user.home + '/' + f
+                        
+                        if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
                             
-                            path = '/home/' + user + file
+                            output = 'File \'' + path + '\' '
                             
-                            if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
-                                
-                                output = 'File \'' + path + '\' '
-                                
-                                if self.modhandler.load('file.check').run(path, 'r', quiet=True):
-                                    output += 'readable '
-                                if self.modhandler.load('file.check').run(path, 'w', quiet=True):
-                                    output += 'writable '
-                                
-                                print output
-                                
-                        
-                        
-            
-            
+                            if self.modhandler.load('file.check').run(path, 'r', quiet=True):
+                                output += 'readable '
+                            if self.modhandler.load('file.check').run(path, 'w', quiet=True):
+                                output += 'writable '
+                            
+                            print output
+                            
+                    
+                    
+        
+        
             

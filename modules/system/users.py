@@ -8,8 +8,24 @@ from core.module import Module, ModuleException
 
 classname = 'Users'
     
+    
+class User:
+    
+    def __init__(self,line):
+           
+        linesplit = line.split(':')
+        
+        self.line = line
+        self.name = linesplit[0]
+        
+        if len(linesplit) > 5 and linesplit[5]:
+            self.home = linesplit[5]
+        else:
+            self.home = '/home/' + self.name
+            
+    
 class Users(Module):
-    """Enumerate system users using different techniques
+    """Enumerate system users using different techniuserinf[1:]ques
     :system.users 
     """
     
@@ -50,8 +66,9 @@ class Users(Module):
                         print "[system.users] Users enumerated using method '%s'" % vector
                         
                         for line in response.split('\n'):
-                            userinf = line.split(':')
-                            self.usersinfo[userinf[0]]=userinf[1:]
+                            
+                            user = User(line)
+                            self.usersinfo[user]=user
                         
                         return response
 
