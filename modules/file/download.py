@@ -71,6 +71,7 @@ class Download(Module):
                         return response
                     
                     
+                    
         raise ModuleException(self.name,  "File download probing failed")     
     
                     
@@ -143,11 +144,14 @@ class Download(Module):
         
 
         response_md5 = md5(response).hexdigest()
-        if not self.modhandler.load('file.check').run(remote_path, 'md5') == response_md5:
-            print '[!] [' + self.name + '] MD5 hash of \'%s\' file mismatch, file corrupted.' % local_path
+        remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5', True)
+        if not remote_md5:
+            print '[!] [' + self.name + '] MD5 hash method is not callable with \'%s\', check disabled' % remote_path
+            return response
+        elif not  remote_md5 == response_md5:
+            print '[' + self.name + '] MD5 hash of \'%s\' file mismatch, file corrupted' % local_path
         else:
             return response
-
 
      
     def run(self, remote_path, local_path, returnFileData = False):

@@ -33,7 +33,6 @@ class Check(Module):
     
     def __execute_payload(self, interpreter, vector, remote_path, mode, quiet):
         
-        
         payload = self.vectors[interpreter][vector] % (remote_path)
         response = self.modhandler.load(interpreter).run(payload)
             
