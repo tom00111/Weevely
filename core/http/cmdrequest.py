@@ -33,9 +33,6 @@ class CmdRequest(Request):
 		else:
 			self.query = ''.join( self.parsed.path.split('.')[:-1] ).replace( '/', ' ' )
 
-#		self.opener.addheader( 'User-Agent', self.agents[ random.randint( 0, len(self.agents) - 1 ) ] )
-#		self.opener.setVersion(self.agents[ random.randint( 0, len(self.agents) - 1 ) ])
-
 	def setPayload( self, payload ):
 		payload = base64.b64encode( payload.strip() )
 		length  = len(payload)
