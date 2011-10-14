@@ -6,7 +6,7 @@ classname = 'CommonUserFiles'
 
 class CommonUserFiles(Module):
     """Enumerate common user file in home or public_html folders
-    :assess.common_user_files all | home | web
+    :assess.common_user_files all | home | web | <file1> | <file1,...,fileN>
     """
     
     
@@ -37,7 +37,13 @@ class CommonUserFiles(Module):
     def run(self, mode):
         
         if mode != 'all' and mode not in self.common_files.keys():
-            raise ModuleException(self.name,  "Error, use all|home|web as option ")
+            
+            custom_files = mode.split(',')
+            if custom_files:
+                self.common_files['custom'] = custom_files
+                mode = 'custom'
+            else:
+                raise ModuleException(self.name,  "Error, use all | home | web | <file1> | <file1,...,fileN> as option ")
             
         self.modhandler.load('system.users').run()
         
