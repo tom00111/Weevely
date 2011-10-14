@@ -30,7 +30,8 @@ class Terminal():
                 self.username = self.run('system.info', [ "whoami" ])
                 self.hostname = self.run('system.info', [ "hostname" ])
                 self.cwd = self.run('system.info', [ "basedir" ])
-                
+    
+                    
                 self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
                 if self.safe_mode:
                     print '[!] Safe mode is enabled'
