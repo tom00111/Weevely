@@ -54,30 +54,23 @@ class UserFiles(Module):
             
         self.modhandler.load('system.users').run()
         
-        for user in self.modhandler.load('system.users').usersinfo:
+        
+        path_list = []
+        user_list = self.modhandler.load('system.users').usersinfo
             
-            print 'Checking user \'%s\' home \'%s\'' % (user.name, user.home)
-            
+        print 'Enumerating %i users' % (len(user_list))
+        
+        for user in user_list:
             for current_mode in self.common_files:
-                
                 if mode == 'auto' or current_mode == mode:
-                    
                     for f in self.common_files[current_mode]:
-                        
-                        path = user.home + '/' + f
-                        
-                        if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
-                            
-                            output = 'Found \'' + path + '\' '
-                            
-                            if self.modhandler.load('file.check').run(path, 'r', quiet=True):
-                                output += 'readable '
-                            if self.modhandler.load('file.check').run(path, 'w', quiet=True):
-                                output += 'writable '
-                            if self.modhandler.load('file.check').run(path, 'x', quiet=True):
-                                output += 'executable '
-                                                            
-                            print output
+                        path_list.append(user.home + '/' + f)
+                     
+        
+        if path_list:
+            self.modhandler.load('file.enumerate').run('', path_list)
+                    
+                       
                             
                     
                     

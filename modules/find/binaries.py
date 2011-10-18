@@ -14,7 +14,7 @@ class Binaries(Module):
     :find.binaries auto | <name> 
     '''
 
-    paths = [ "/usr/bin",
+    bins_path = [ "/usr/bin",
              "/usr/local/bin",
              "/bin",
              "/usr/local/sbin",
@@ -42,55 +42,19 @@ class Binaries(Module):
         
         Module.__init__(self, modhandler, url, password)
         
-        
-    def __checkfile(self, bin, completepath):
-        
-        output = None
-             
-        if self.modhandler.load('file.check').run(completepath, 'x' , True):
-            output = 'Executable'
-            self.bins[bin] = completepath  
-        elif self.modhandler.load('file.check').run(completepath, 'exists', True ):
-            output = 'Not Executable'
-            self.bins[bin] = completepath  
-
-        return output
-
-        
     def run( self, binary_name):
         
-        found = False
+        path_list =  []
+        
         if binary_name == 'auto':
-            
             for bin in self.bins:
-                
-                output = bin + ':' + '\t'*(3-((len(bin)+1)/8))
-                print output,
-                
-                for path in self.paths:
+                for path in self.bins_path:
+                    path_list.append(path + '/' + bin)
                     
-                    completepath = path + '/' + bin
-                    
-                    response = self.__checkfile(bin, completepath)
-                    if response:
-                        print completepath, response,
-                        found = True
-                        break
-                    
-                print ''
-                    
-        elif binary_name in self.bins and self.bins[binary_name]:
-            return self.bins[path]
         else:
-            for path in self.paths:
-                    
-                completepath = path + '/' + binary_name
-                
-                response = self.__checkfile(binary_name, completepath)
-                if response:
-                    return completepath
+            path_list = [ binary_name ]
             
-        if not found:        
-            raise ModuleException(self.name,  "Binary '%s' not found." % (binary_name))
+        self.modhandler.load('file.enumerate').run('', path_list)
 
+            
         
