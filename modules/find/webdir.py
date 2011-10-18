@@ -30,7 +30,7 @@ class Webdir(Module):
         self.dir = None
         self.url = None
         
-        self.probe_filename = ''.join(choice(letters) for i in xrange(4)) + '.txt'
+        self.probe_filename = ''.join(choice(letters) for i in xrange(4)) + '.html'
 
         Module.__init__(self, modhandler, url, password)
         
@@ -42,14 +42,18 @@ class Webdir(Module):
 
         if self.modhandler.load('file.check').run(file_path, 'exists'):
                 
-            if(Request(file_url).read() == '1'):
+            file_content = Request(file_url).read()
+            if( file_content == '1'):
                 self.dir = dir_path
                 self.url = dir_url
+                
             
             if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                 
-            return True
+            if self.dir and self.url:
+                return True
+                
             
         return False    
                 
@@ -58,11 +62,7 @@ class Webdir(Module):
     def run(self):
         if self.url and self.dir:
             print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
-            
-    
-    def _probe(self):
         
-        if self.url and self.dir:
             return
             
         root_find_dir = self.modhandler.load('system.info').run('basedir')
@@ -77,17 +77,18 @@ class Webdir(Module):
             
             for dir_path in writable_dirs:
             
+            
                 if not dir_path[-1]=='/': dir_path += '/'
                 file_path = dir_path + self.probe_filename
     
                 file_url = http_root + file_path.replace(root_find_dir,'')
                 dir_url = http_root + dir_path.replace(root_find_dir,'')
             
-            
                 interpreter, vector = self._get_default_vector()
                 if interpreter and vector:
-                    return self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-            
+                    response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+                    if response:
+                        return response
                     
                 for interpreter in self.vectors:
                     if interpreter in self.modhandler.loaded_shells:

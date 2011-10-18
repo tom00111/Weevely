@@ -72,7 +72,7 @@ class Download(Module):
                     
                     
                     
-        raise ModuleException(self.name,  "File download probing failed")     
+        raise ModuleException(self.name,  "File download failed")     
     
                     
     def __execute_payload(self, interpreter, vector, remote_path, local_path):
@@ -85,6 +85,8 @@ class Download(Module):
                     if (vector == 'copy' or vector == 'symlink') and payload.count( '%s' ) == 2:
                         
                         if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
+                            
+                            self.modhandler.load('find.webdir').run()
                             
                             self.transfer_url_dir = self.modhandler.load('find.webdir').url
                             self.transfer_dir = self.modhandler.load('find.webdir').dir
@@ -104,8 +106,7 @@ class Download(Module):
                         self.interpreter = interpreter
                         self.vector = vector
                         
-                        proc_response = self.__process_response(response, remote_path, local_path )
-                        return proc_response
+                        return response
   
      
      
@@ -130,50 +131,48 @@ class Download(Module):
             
         else:
             if self.encoder_callable:
-                response = b64decode(response)
-            
-        try:
-            f = open(local_path,'wb')
-            f.write(response)
-            f.close()
-        except Exception, e:
-            print '[!] [' + self.name + '] Some error occurred writing local file \'%s\'.' % local_path
-            raise ModuleException(self.name, e)
-        else:
-            print '[' + self.name + '] File downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
-        
+                try:
+                    response = b64decode(response)
+                except TypeError:
+                    print "[!] [" + self.name + "] Error, unexpected file content"
+                    
+                    
+        if response:
 
-        response_md5 = md5(response).hexdigest()
-        remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5', True)
-        if not remote_md5:
-            print '[!] [' + self.name + '] MD5 hash method is not callable with \'%s\', check disabled' % remote_path
-            return response
-        elif not  remote_md5 == response_md5:
-            print '[' + self.name + '] MD5 hash of \'%s\' file mismatch, file corrupted' % local_path
-        else:
-            return response
+            try:
+                f = open(local_path,'wb')
+                f.write(response)
+                f.close()
+            except Exception, e:
+                print '[!] [' + self.name + '] Some error occurred writing local file \'%s\'.' % local_path
+                raise ModuleException(self.name, e)
+            
+    
+            response_md5 = md5(response).hexdigest()
+            remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5', True)
+            if not remote_md5:
+                print '[!] [' + self.name + '] MD5 hash method is not callable with \'%s\', check disabled' % remote_path
+                return response
+            elif not  remote_md5 == response_md5:
+                print '[' + self.name + '] MD5 hash of \'%s\' file mismatch, file corrupted' % local_path
+            else:
+                print '[' + self.name + '] File correctly downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
+                return response
 
      
     def run(self, remote_path, local_path, returnFileData = False):
         
-        if not self.payload or not self.interpreter:
-            file_response = self.__slack_probe(remote_path, local_path)
+        self.__slack_probe(remote_path, local_path)
+        response = self.modhandler.load(self.interpreter).run(self.payload)
+        
+        if response:
+            file_response = self.__process_response(response,remote_path, local_path)
             if returnFileData:
                 return file_response
             else:
                 return
             
-        else:
-            response = self.modhandler.load(self.interpreter).run(self.payload)
-            
-            if response:
-                file_response = self.__process_response(response,remote_path, local_path)
-                if returnFileData:
-                    return file_response
-                else:
-                    return
-                
-            raise ModuleException(self.name,  "File read failed")
+        raise ModuleException(self.name,  "File read failed")
         
         
             
