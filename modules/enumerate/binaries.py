@@ -54,7 +54,7 @@ class Binaries(Module):
         else:
             path_list = [ binary_name ]
             
-        self.modhandler.load('file.enumerate').run('', path_list)
+        self.modhandler.load('enumerate.paths').run('', path_list)
 
             
         

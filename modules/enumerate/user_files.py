@@ -68,7 +68,7 @@ class UserFiles(Module):
                      
         
         if path_list:
-            self.modhandler.load('file.enumerate').run('', path_list)
+            self.modhandler.load('enumerate.user_files').run('', path_list)
                     
                        
                             
