@@ -5,8 +5,8 @@ from core.module import Module, ModuleException
 classname = 'CommonUserFiles'
 
 class CommonUserFiles(Module):
-    """Enumerate common user file in home or public_html folders
-    :assess.common_user_files all | home | web | <file1> | <file1,...,fileN>
+    """Enumerate user files. Search common ones in home, public_html, specify file path or load a file list
+    :assess.common_user_files all | home | web | <file> | load:<file_list.txt>
     """
     
     
@@ -38,12 +38,19 @@ class CommonUserFiles(Module):
         
         if mode != 'all' and mode not in self.common_files.keys():
             
-            custom_files = mode.split(',')
+            if mode.startswith('load:'):
+                try:
+                    custom_files=open(mode[5:],'r').read().splitlines()
+                except:
+                    raise ModuleException(self.name,  "Error opening path list \'%s\'" % mode[5:])
+            else:
+                custom_files = mode.split(',')
+                
             if custom_files:
                 self.common_files['custom'] = custom_files
                 mode = 'custom'
             else:
-                raise ModuleException(self.name,  "Error, use all | home | web | <file1> | <file1,...,fileN> as option ")
+                raise ModuleException(self.name,  "Error, use all | home | web | <file> | load:<file_list.txt> as option ")
             
         self.modhandler.load('system.users').run()
         
