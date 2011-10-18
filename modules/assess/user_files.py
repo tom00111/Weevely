@@ -2,11 +2,11 @@
 
 from core.module import Module, ModuleException
 
-classname = 'CommonUserFiles'
+classname = 'UserFiles'
 
-class CommonUserFiles(Module):
+class UserFiles(Module):
     """Enumerate user files. Search common ones in home, public_html, specify file path or load a file list
-    :assess.common_user_files all | home | web | <file> | load:<file_list.txt>
+    :assess.user_files all | home | web | <file> | load:<file_list.txt>
     """
     
     
