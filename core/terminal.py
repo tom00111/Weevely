@@ -65,7 +65,7 @@ class Terminal():
                 
             else:
                 self.interpreter = 'shell.php'
-                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon.' % self.interpreter
+                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon.'
                 if not self.one_shot:
                     print '[shell.php] Substitute of \'cd [path]\' and \'ls [path]\' are available'
                 self.prompt        = "%s@%s:%s php> "
