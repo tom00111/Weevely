@@ -2,26 +2,22 @@
 
 from core.module import Module, ModuleException
 
-classname = 'Enumerate'
+classname = 'Paths'
 
-class Enumerate(Module):
-    """Enumerate files. Load list list from file or specify path list
-    :file.enumerate  load:<path_list.txt> | <path1>,...,<pathN> 
+class Paths(Module):
+    """Enumerate file paths. Load list list from file 
+    :enumerate.paths <path_list.txt> 
     """
      
     def run(self, list_path, list = []):
         
         if not list and list_path:
-            if list_path.startswith('load:'):
-                try:
-                    list=open(list_path[5:],'r').read().splitlines()
-                except:
-                    raise ModuleException(self.name,  "Error opening path list \'%s\'" % list_path[5:])
-            else:
-                list = list_path.split(',')
-            
+            try:
+                list=open(list_path,'r').read().splitlines()
+            except:
+                raise ModuleException(self.name,  "Error opening path list \'%s\'" % list_path)
+
         for path in list:
-            
             
             output = path + '' + '\t'*(3-((len(path)+1)/8))
             
