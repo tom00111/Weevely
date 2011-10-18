@@ -55,25 +55,25 @@ class Terminal():
         try:
             self.modhandler.load('shell.sh')
         except ModuleException, e:
-            print '[!] [shell.sh] Error loading module: %s' % (e)
+            print '[!] [shell.sh] Error loading system shell interpreter.' 
             
             try:
                 self.modhandler.load('shell.php')
             except ModuleException, e:
-                print '[!] [shell.sh] Error loading module: %s' % (e)
-                print '[!] No backdoor found. Check url and password'
+                print '[!] [shell.php] Error loading PHP interpreter.' 
+                print '[!] [shell.php] No backdoor found. Check url and password.'
                 
             else:
                 self.interpreter = 'shell.php'
-                print '[+] Fallback to PHP interpreter \'%s\', end commands with semi-colon.' % self.interpreter
+                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon.' % self.interpreter
                 if not self.one_shot:
-                    print '[+] Substitute of \'cd [path]\' and \'ls [path]\' are available'
+                    print '[shell.php] Substitute of \'cd [path]\' and \'ls [path]\' are available'
                 self.prompt        = "%s@%s:%s php> "
             
         else:
             self.interpreter = 'shell.sh'
             self.prompt = "%s@%s:%s$ "
-            print '[+] Using system shell interpreter \'%s\'' % self.interpreter
+            print '[shell.sh] Using system shell interpreter'
 
 
 

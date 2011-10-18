@@ -58,7 +58,7 @@ class ModHandler(dict):
         
         i = 0
         for mod in self.module_info:
-            if i == 5: 
+            if i == 4: 
                 i = 0
                 print ''
             else: i+=1
