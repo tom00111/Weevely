@@ -14,7 +14,7 @@ classname = 'Webdir'
     
 class Webdir(Module):
     '''Find writable first directory and get corresponding URL
-    :find.webdir
+    :find.webdir auto | <start dir>
     '''
     
     vectors = { 'shell.php' : { "fwrite()"       : "fwrite(fopen('%s','w'),'1');",
@@ -52,6 +52,7 @@ class Webdir(Module):
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                 
             if self.dir and self.url:
+                print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
                 return True
                 
             
@@ -59,13 +60,20 @@ class Webdir(Module):
                 
                         
 
-    def run(self):
+    def run(self, start_dir):
         if self.url and self.dir:
             print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
-        
             return
             
-        root_find_dir = self.modhandler.load('system.info').run('basedir')
+        if start_dir == 'auto':
+            try:
+                root_find_dir = self.modhandler.load('system.info').run('basedir')
+            except e:
+                print '[!] [find.webdir] ' + e
+                root_find_dir = None
+                
+        else:
+            root_find_dir = start_dir
         
         if root_find_dir:
             
@@ -73,8 +81,13 @@ class Webdir(Module):
             
             http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
             
-            writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
-            
+            try:
+                writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
+            except Exception as e:
+                print '[!] [find.webdir] ' + str(e)
+                writable_dirs = []
+                
+               
             for dir_path in writable_dirs:
             
             

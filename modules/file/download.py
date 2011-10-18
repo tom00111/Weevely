@@ -86,7 +86,7 @@ class Download(Module):
                         
                         if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
                             
-                            self.modhandler.load('find.webdir').run()
+                            self.modhandler.load('find.webdir').run('auto')
                             
                             self.transfer_url_dir = self.modhandler.load('find.webdir').url
                             self.transfer_dir = self.modhandler.load('find.webdir').dir
