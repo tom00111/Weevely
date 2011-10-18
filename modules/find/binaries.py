@@ -11,7 +11,7 @@ classname = 'Binaries'
     
 class Binaries(Module):
     '''Find executables in common PATH folders
-    :find.binaries all | <name> 
+    :find.binaries auto | <name> 
     '''
 
     paths = [ "/usr/bin",
@@ -60,7 +60,7 @@ class Binaries(Module):
     def run( self, binary_name):
         
         found = False
-        if binary_name == 'all':
+        if binary_name == 'auto':
             
             for bin in self.bins:
                 

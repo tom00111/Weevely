@@ -6,7 +6,7 @@ classname = 'UserFiles'
 
 class UserFiles(Module):
     """Enumerate user files. Search common ones in home, public_html, specify file path or load a file list
-    :assess.user_files all | home | web | <file> | load:<file_list.txt>
+    :assess.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
     
@@ -36,7 +36,7 @@ class UserFiles(Module):
         
     def run(self, mode):
         
-        if mode != 'all' and mode not in self.common_files.keys():
+        if mode != 'auto' and mode not in self.common_files.keys():
             
             if mode.startswith('load:'):
                 try:
@@ -50,7 +50,7 @@ class UserFiles(Module):
                 self.common_files['custom'] = custom_files
                 mode = 'custom'
             else:
-                raise ModuleException(self.name,  "Error, use all | home | web | <file> | load:<file_list.txt> as option ")
+                raise ModuleException(self.name,  "Error, use auto | home | web | <file path> | load:<path_list.txt> as option ")
             
         self.modhandler.load('system.users').run()
         
@@ -60,7 +60,7 @@ class UserFiles(Module):
             
             for current_mode in self.common_files:
                 
-                if mode == 'all' or current_mode == mode:
+                if mode == 'auto' or current_mode == mode:
                     
                     for f in self.common_files[current_mode]:
                         
@@ -74,7 +74,9 @@ class UserFiles(Module):
                                 output += 'readable '
                             if self.modhandler.load('file.check').run(path, 'w', quiet=True):
                                 output += 'writable '
-                            
+                            if self.modhandler.load('file.check').run(path, 'x', quiet=True):
+                                output += 'executable '
+                                                            
                             print output
                             
                     

@@ -10,7 +10,7 @@ classname = 'Info'
     
 class Info(Module):
     """Collect system informations
-    :system.info all|whoami|hostname|basedir|document_root
+    :system.info auto | whoami | hostname |basedir |document_root
     """
     
     vectors = { 
@@ -48,7 +48,7 @@ class Info(Module):
         
         if info in self.infos:
             return self.infos[info]
-        if info == 'all':
+        if info == 'auto':
             
             for interpreter in self.vectors:
                 for vector in self.vectors[interpreter]:

@@ -9,8 +9,8 @@ from core.module import Module, ModuleException
 classname = 'Suidsgid'
     
 class Suidsgid(Module):
-    '''Find suid, sgid, or every file with superuser flag 
-    :find.suidsgid suid|sgid|all <path> 
+    '''Find superuser files
+    :find.suidsgid suid | sgid | any <path> 
     '''
     
     vectors = {
@@ -29,14 +29,14 @@ class Suidsgid(Module):
 
     def run(self, mod, path):
         
-        if mod == 'all':
+        if mod == 'any':
             mod = '-perm -04000 -o -perm -02000'
         elif mod == 'suid':
             mod = '-perm -04000'
         elif mod == 'sgid':
             mod = '-perm -02000'
         else:
-            raise ModuleException(self.name,  "Find suid/sgid failed. Use suid|sgid|all as parameter.")
+            raise ModuleException(self.name,  "Find suid/sgid failed. Use suid|sgid|any as parameter.")
          
          
         interpreter, vector = self._get_default_vector()
