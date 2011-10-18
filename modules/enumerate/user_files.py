@@ -6,7 +6,7 @@ classname = 'UserFiles'
 
 class UserFiles(Module):
     """Enumerate user files. Search common ones in home, public_html, specify file path or load a file list
-    :assess.user_files auto | home | web | <file path> | load:<path_list.txt>
+    :enumerate.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
     

@@ -10,8 +10,8 @@ from core.module import Module, ModuleException
 classname = 'Binaries'
     
 class Binaries(Module):
-    '''Find executables in common PATH folders
-    :find.binaries auto | <name> 
+    '''Enumerate available executables in common PATH folders
+    :enumerate.binaries auto | <name> 
     '''
 
     bins_path = [ "/usr/bin",

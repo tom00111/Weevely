@@ -26,7 +26,7 @@ class User:
     
 class Users(Module):
     """Enumerate system users using different techniques
-    :system.users 
+    :enumerate.users 
     """
     
     vectors = { 
