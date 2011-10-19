@@ -99,7 +99,7 @@ function swp($d, $type, $mod, $qty){
                         return response
                 
                 
-        raise ModuleException(self.name,  "No file found.")
+        raise ModuleException(self.name,  "No file found")
                     
                     
     def __execute_payload(self,interpreter,vector, qty, type, mod, path):

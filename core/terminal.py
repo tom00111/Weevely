@@ -207,7 +207,7 @@ class Terminal():
             try:
                 module_arguments_requested = self.modhandler.load(module_name).len_arguments
             except ModuleException, e:
-                print '[!] [%s] Error while loading: %s' % (e.module, e)   
+                print '[!] [%s] Error while loading: %s' % (e.module, e.error)   
             
             else: 
                 if module_arguments_requested != len(module_arguments): 
@@ -221,7 +221,7 @@ class Terminal():
                             return response
                         
                     except ModuleException, e:
-                        print '[!] [%s] Error: %s' % (e.module, e) 
+                        print '[!] [%s] Error: %s' % (e.module, e.error) 
         
       
     

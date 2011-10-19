@@ -89,7 +89,8 @@ class Download(Module):
                             try:
                                 self.modhandler.load('find.webdir').run('auto')
                             except ModuleException, e:
-                                return 
+                                print '[!] [' + e.module + '] ' + e.error
+                                return
                             
                             self.transfer_url_dir = self.modhandler.load('find.webdir').url
                             self.transfer_dir = self.modhandler.load('find.webdir').dir
