@@ -5,7 +5,7 @@ from core.module import Module, ModuleException
 classname = 'UserFiles'
 
 class UserFiles(Module):
-    """Enumerate user files. Search common ones in home, public_html, specify file path or load a file list
+    """Enumerate paths in users homes. Choose home paths, web paths, single path or path list
     :enum.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
