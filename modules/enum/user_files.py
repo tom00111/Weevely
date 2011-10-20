@@ -52,11 +52,11 @@ class UserFiles(Module):
             else:
                 raise ModuleException(self.name,  "Error, use auto | home | web | <file path> | load:<path_list.txt> as option ")
             
-        self.modhandler.load('system.users').run()
+        self.modhandler.load('enum.users').run()
         
         
         path_list = []
-        user_list = self.modhandler.load('system.users').usersinfo
+        user_list = self.modhandler.load('enum.users').usersinfo
             
         print 'Enumerating %i users' % (len(user_list))
         
