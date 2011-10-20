@@ -31,14 +31,14 @@ Weevely 0.4 - Generate and manage stealth PHP backdoors
 '''
    
 help_string = '''Start telnet-like session
-  ./weevely.py <url> <password> 
+  weevely <url> <password> 
   
 Run single command or module
-  ./weevely.py <url> <password> <command> 
-  ./weevely.py <url> <password> :<module name> <argument1> <arg2> ..
+  weevely <url> <password> <command> 
+  weevely <url> <password> :<module name> <argument1> <arg2> ..
 
 Generate PHP backdoor script
-  ./weevely.py generate <password> <output path> 
+  weevely generate <password> <output path> 
 
 Show help with command :help and run modules with :<module name>. Available modules:'''  
     
