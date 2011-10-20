@@ -39,16 +39,13 @@ class Module:
         
     def _get_default_vector(self):
         
-        default_interpreter = None
-        default_vector = None
+        conf_vector = self.modhandler.conf.get_vector(self.name)
         
-        conf_interpreter, conf_vector = self.modhandler.conf.get_vector(self.name)
-        if conf_interpreter in self.vectors:
-            default_interpreter = conf_interpreter
+        for conf_interpreter in self.vectors:
             if conf_vector in self.vectors[conf_interpreter]:
-                default_vector = conf_vector
-        
-        return default_interpreter, default_vector
+                return conf_interpreter, conf_vector
+    
+        return None, None
     
 class ModuleException(Exception):
     def __init__(self, module, value):

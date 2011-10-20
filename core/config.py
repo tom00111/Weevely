@@ -26,7 +26,7 @@ class Config:
             
         for name in module_names:
             self.conf.add_section(name)
-            self.conf.set(name, 'default_interpreter','')
+#            self.conf.set(name, 'default_interpreter','')
             self.conf.set(name, 'default_vector', '')
             
         self.conf.add_section('global')
@@ -40,7 +40,7 @@ class Config:
         return self.conf.get(section,option)
         
     def get_vector(self, section):
-        return self.conf.get(section,'default_interpreter'), self.conf.get(section,'default_vector')
+        return self.conf.get(section,'default_vector')
         
         
             
