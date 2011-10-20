@@ -103,8 +103,7 @@ class Terminal():
     
         ## Help call
         if cmd_splitted[0] == self.help_string:
-        
-            self.modhandler.print_module_infos()
+            self.modhandler.modinfo.print_module_infos()
             
         else:
         

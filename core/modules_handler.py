@@ -1,6 +1,7 @@
 import os
 from module import ModuleException
 from config import Config
+from modules_info import ModInfos
 
 class ModHandler(dict):
     
@@ -14,19 +15,19 @@ class ModHandler(dict):
         
         self.path_modules = path_modules
 
-        self.loaded_shells = []        
-        self.module_info = {}
+        self.loaded_shells = []    
         self.modules = {}
         
-        self.load_module_infos(path_modules)
+        self.modinfo = ModInfos()
+        self.module_info = self.modinfo.module_info
         
-        self.conf = Config(self.module_info.keys())
+        self.conf = Config(self.modinfo.module_info.keys())
         
         
     def load(self, module_name):
         
         if not module_name in self.modules:
-            if module_name not in self.module_info.keys():
+            if module_name not in self.modinfo.module_info.keys():
                 raise ModuleException("!",  "Module not found in path %s." % (self.path_modules) )
             
             mod = __import__('modules.' + module_name, fromlist = ["*"])
@@ -37,72 +38,8 @@ class ModHandler(dict):
                 self.loaded_shells.append(module_name)
             
         return self.modules[module_name]
-    
 
-    def load_module_infos(self, dir):
-        
-        for f in os.listdir(dir):
-            
-            f = dir + os.sep + f
-            
-            if os.path.isdir(f):
-                self.load_module_infos(f)
-            if os.path.isfile(f) and f.endswith('.py') and not f.endswith('__init__.py'):
-                f = f[8:-3].replace('/','.')
-                mod = __import__('modules.' + f, fromlist = ["*"])
-                modclass = getattr(mod, mod.classname)
-                self.module_info[f] = [ modclass.visible, modclass.__doc__ ]
-                    
 
-    def print_module_summary(self):
-        
-        i = 0
-        for mod in self.module_info:
-            if i == 4: 
-                i = 0
-                print ''
-            else: i+=1
-            print '[ :' +  mod + ' ]',
-
-    def print_module_infos(self):
-        
-        module_dict={}
-        
-        print ''
-        for mod in self.module_info:
-            parts = mod.split('.')
-            if parts[0] not in module_dict:
-                module_dict[parts[0]] = {}
-            module_dict[parts[0]][parts[1]] = self.module_info[mod][1]
-            
-        
-        for pkg in module_dict:
-            
-            oldpkg=''
-            
-            for mod in module_dict[pkg]:
-                
-                if pkg != oldpkg:
-                    output = '[%s] [%s]' % ( pkg,  mod )
-                    oldpkg = pkg
-                else:
-                    output = '%s[%s]' % ( ' '*(len(pkg)+3), mod )
-                
-                print output,
-                
-                if module_dict[pkg][mod] and len(module_dict[pkg][mod])>1:
-                    lines = module_dict[pkg][mod].split('\n')
-                    usageline = lines[-1].strip()
-                    titleline = lines[0].strip()
-                    
-                    print titleline
-                    for line in lines[1:-1]:
-                        print ' '*(len(pkg)+2), line.strip()
-                    print usageline,
-                else:
-                    print ''
-                    
-                print ''
                         
                 
                 
