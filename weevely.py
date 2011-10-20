@@ -47,9 +47,8 @@ if __name__ == "__main__":
     
     if  len(sys.argv) == 3 and sys.argv[1].startswith('http'):
         
-        print '''[+] Starting terminal. Show modules help with :help 
-[+] Run modules with :<module name> <argument1> <arg2> ...
-'''
+        print "[+] Starting terminal. Shell probing may take a while..."
+        
         url = sys.argv[1]
         password = sys.argv[2]
           

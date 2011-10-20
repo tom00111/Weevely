@@ -25,6 +25,10 @@ class Terminal():
         
         if self.interpreter and not one_shot:
 
+                print '[' + self.interpreter + '] Show help with :help command'
+                print '[' + self.interpreter + '] Run modules with :<module> <arg 1> ... <arg N>'
+                print ''
+
                 self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
                 
                 self.username = self.run('system.info', [ "whoami" ])

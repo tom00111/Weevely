@@ -55,7 +55,7 @@ class Php(Module):
         try:
             resp = request.execute()
         except NoDataException, e:
-            print '[-] No data returned'
+            pass
         except Exception, e:
             print '[!] Error requesting data: check URL or your internet connection.'
         else:
