@@ -9,7 +9,7 @@ from ConfigParser import RawConfigParser
 
 class Config:
     
-    def __init__(self, module_names, conf_path='weevely.ini'):
+    def __init__(self, module_names, conf_path='~/.weevely.ini'):
         
         self.conf = RawConfigParser()
         self.conf_path = conf_path
