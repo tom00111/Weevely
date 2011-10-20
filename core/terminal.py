@@ -25,6 +25,7 @@ class Terminal():
         
         if self.interpreter and not one_shot:
 
+                print ''
                 print '[' + self.interpreter + '] Show help with :help command'
                 print '[' + self.interpreter + '] Run modules with :<module> <arg 1> ... <arg N>'
                 print ''
@@ -59,17 +60,17 @@ class Terminal():
         try:
             self.modhandler.load('shell.sh')
         except ModuleException, e:
-            print '[!] [shell.sh] Error loading system shell interpreter.' 
+            print '[!] [shell.sh] Error loading system shell interpreter' 
             
             try:
                 self.modhandler.load('shell.php')
             except ModuleException, e:
                 print '[!] [shell.php] Error loading PHP interpreter.' 
-                print '[!] [shell.php] No backdoor found. Check url and password.'
+                print '[!] [shell.php] No backdoor found. Check url and password'
                 
             else:
                 self.interpreter = 'shell.php'
-                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon.'
+                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon'
                 if not self.one_shot:
                     print '[shell.php] Substitute of \'cd [path]\' and \'ls [path]\' are available'
                 self.prompt        = "%s@%s:%s php> "
@@ -77,7 +78,7 @@ class Terminal():
         else:
             self.interpreter = 'shell.sh'
             self.prompt = "%s@%s:%s$ "
-            print '[shell.sh] Using system shell interpreter'
+            print '[shell.sh] Loaded system shell'
 
 
 
@@ -222,7 +223,8 @@ class Terminal():
                         response = self.modhandler.load(module_name).run(*module_arguments)
                         if response != None:
                             return response
-                        
+                    except KeyboardInterrupt:
+                        print '[!] Stopped %s execution' % module_name
                     except ModuleException, e:
                         print '[!] [%s] Error: %s' % (e.module, e.error) 
         

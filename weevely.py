@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
     if  len(sys.argv) == 3 and sys.argv[1].startswith('http'):
         
-        print "[+] Starting terminal. Shell probing may take a while..."
+        print "[+] Starting terminal. Shell probe may take a while..."
         
         url = sys.argv[1]
         password = sys.argv[2]
