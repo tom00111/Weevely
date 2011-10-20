@@ -22,7 +22,7 @@ class Paths(Module):
             output = path + '' + '\t'*(3-((len(path)+1)/8))
             
             if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
-                output += 'exists'
+                output += '\texists'
                 
                 if self.modhandler.load('file.check').run(path, 'r', quiet=True):
                     output += ', +readable '
