@@ -9,16 +9,17 @@ from ConfigParser import RawConfigParser
 
 class Config:
     
-    def __init__(self, module_names, conf_path='weevely.ini'):
+    def __init__(self, module_names):
+        
         
         self.conf = RawConfigParser()
-        self.conf_path = conf_path
+        self.conf_path = os.path.expanduser( '~/.weevely.ini' )
         
-        if os.path.exists(conf_path):
+        if os.path.exists(self.conf_path):
             self.conf.read(self.conf_path)
             
         else:
-            print '[!] Config file \'%s\' not found, creating new' % (conf_path)
+            print '[!] Config file \'%s\' not found, creating' % (self.conf_path)
             self.__write_conf(module_names)
             
             
@@ -26,7 +27,6 @@ class Config:
             
         for name in module_names:
             self.conf.add_section(name)
-#            self.conf.set(name, 'default_interpreter','')
             self.conf.set(name, 'default_vector', '')
             
         self.conf.add_section('global')
