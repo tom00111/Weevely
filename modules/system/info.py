@@ -29,7 +29,8 @@ class Info(Module):
                               "uname" : "@print(php_uname());",
                               "os" : "@print(PHP_OS);",
                               "safe_mode"     : "(ini_get('safe_mode') && print(1)) || print(0);",
-                              "script" : "@print($_SERVER['SCRIPT_NAME']);"
+                              "script" : "@print($_SERVER['SCRIPT_NAME']);",
+                              "client_ip" : "print($_SERVER['REMOTE_ADDR']);"
                               }
     
     }
