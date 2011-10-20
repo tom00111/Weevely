@@ -17,6 +17,9 @@ class Paths(Module):
             except:
                 raise ModuleException(self.name,  "Error opening path list \'%s\'" % list_path)
 
+
+        print 'Enumerating %i paths' % (len(list))
+        
         for path in list:
             
             output = path + '' + '\t'*(3-((len(path)+1)/8))
@@ -31,7 +34,7 @@ class Paths(Module):
                 if self.modhandler.load('file.check').run(path, 'x', quiet=True):
                     output += ', +excutable '
                                      
-            print output
+                print output
                         
                     
                     
