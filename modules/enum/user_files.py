@@ -58,7 +58,7 @@ class UserFiles(Module):
         path_list = []
         user_list = self.modhandler.load('enum.users').usersinfo
             
-        print 'Enumerating %i users' % (len(user_list))
+        print '[%s] Enumerating %i users' % (self.name, len(user_list))
         
         for user in user_list:
             for current_mode in self.common_files:
