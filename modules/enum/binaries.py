@@ -10,7 +10,7 @@ from core.module import Module, ModuleException
 classname = 'Binaries'
     
 class Binaries(Module):
-    '''Enumerate available executables in common PATH folders
+    '''Enumerate binaries in common PATH folders
     :enum.binaries auto | <name> 
     '''
 

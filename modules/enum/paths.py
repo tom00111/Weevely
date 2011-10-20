@@ -5,7 +5,7 @@ from core.module import Module, ModuleException
 classname = 'Paths'
 
 class Paths(Module):
-    """Enumerate file paths. Load list list from file 
+    """Enumerate paths on remote filesystem
     :enum.paths <path_list.txt> 
     """
      

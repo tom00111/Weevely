@@ -12,7 +12,7 @@ from random import randint
 classname = 'Download'
     
 class Download(Module):
-    '''Download remote binary/ascii files
+    '''Download binary/ascii files from target filesystem
     :file.download <remote path> <locale path>
     '''
     

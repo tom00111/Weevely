@@ -25,7 +25,7 @@ class User:
             
     
 class Users(Module):
-    """Enumerate system users using different techniques
+    """Enumerate users and /etc/passwd content
     :enum.users 
     """
     

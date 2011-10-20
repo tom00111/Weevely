@@ -10,7 +10,7 @@ from os import remove
 classname = 'Read'
     
 class Read(Module):
-    '''Read remote file
+    '''Read file from remote filesystem
     :file.read <remote path> 
     '''
         

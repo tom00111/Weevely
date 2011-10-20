@@ -11,7 +11,7 @@ import random, os
 classname = 'Php'
     
 class Php(Module):
-    '''Execute single PHP commands
+    '''Shell to execute PHP commands
     :shell.php "<command>;"
     '''
     

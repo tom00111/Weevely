@@ -10,7 +10,7 @@ classname = 'Info'
     
 class Info(Module):
     """Collect system informations
-    :system.info auto | whoami | hostname |basedir |document_root
+    :system.info auto | whoami | hostname |basedir | document_root | client_ip
     """
     
     vectors = { 

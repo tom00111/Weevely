@@ -15,7 +15,7 @@ from core.module import Module
 classname = 'Reversetcp'
     
 class Reversetcp(Module):
-    """Send reverse shell using TCP socket
+    """Send reverse TCP shell  
     :backdoor.reverse_tcp ip port 
     """
     

@@ -10,7 +10,7 @@ import random
 classname = 'Sh'
     
 class Sh(Module):
-    '''Execute system commands
+    '''Shell to execute system commands
     :shell.sh "<command>" 
     '''
     
