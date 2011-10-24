@@ -26,7 +26,7 @@ class User:
     
 class Users(Module):
     """Enumerate users and /etc/passwd content
-    :enum.users 
+    :audit.users 
     """
     
     vectors = { 

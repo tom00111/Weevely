@@ -6,7 +6,7 @@ classname = 'UserFiles'
 
 class UserFiles(Module):
     """Enumerate common files in home and public_html folders
-    :enum.user_files auto | home | web | <file path> | load:<path_list.txt>
+    :audit.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
     
@@ -56,7 +56,7 @@ class UserFiles(Module):
         
         
         path_list = []
-        user_list = self.modhandler.load('enum.users').usersinfo
+        user_list = self.modhandler.load('audit.users').usersinfo
             
         print '[%s] Enumerating %i users' % (self.name, len(user_list))
         
@@ -68,7 +68,7 @@ class UserFiles(Module):
                      
         
         if path_list:
-            self.modhandler.load('enum.paths').run('', path_list)
+            self.modhandler.load('audit.users').run('', path_list)
                     
                        
                             

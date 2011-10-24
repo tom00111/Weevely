@@ -8,14 +8,14 @@ class ModInfos:
         self.module_info = {}
         self.load_module_infos()
 
-    def load_module_infos(self, path_modules = 'modules'):
+    def load_module_infos(self, path_modules = 'modules', recursion = True):
         
         for f in os.listdir(path_modules):
             
             f = path_modules + os.sep + f
             
-            if os.path.isdir(f):
-                self.load_module_infos(f)
+            if os.path.isdir(f) and recursion:
+                self.load_module_infos(f, False)
             if os.path.isfile(f) and f.endswith('.py') and not f.endswith('__init__.py'):
                 f = f[8:-3].replace('/','.')
                 mod = __import__('modules.' + f, fromlist = ["*"])
