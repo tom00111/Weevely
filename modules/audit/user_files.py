@@ -6,7 +6,7 @@ classname = 'UserFiles'
 
 class UserFiles(Module):
     """Enumerate common files in home and public_html folders
-    :audit.user_files auto | home | web | <file path> | load:<path_list.txt>
+    :enum.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
     
@@ -52,7 +52,7 @@ class UserFiles(Module):
             else:
                 raise ModuleException(self.name,  "Error, use auto | home | web | <file path> | load:<path_list.txt> as option ")
             
-        self.modhandler.load('enum.users').run()
+        self.modhandler.load('audit.users').run()
         
         
         path_list = []
@@ -68,7 +68,7 @@ class UserFiles(Module):
                      
         
         if path_list:
-            self.modhandler.load('audit.users').run('', path_list)
+            self.modhandler.load('enum.paths').run('', path_list)
                     
                        
                             
