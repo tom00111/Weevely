@@ -58,7 +58,10 @@ if __name__ == "__main__":
             print '\n[!] Exiting. Bye ^^'
         
     elif len(sys.argv) == 4 and sys.argv[1] == 'generate':
-        Backdoor( sys.argv[2] ).save( sys.argv[3] )
+        try:
+         Backdoor( sys.argv[2] ).save( sys.argv[3] )
+        except Exception, e:
+            print '\n[!] Creation error: %s.' % str(e)
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
 
