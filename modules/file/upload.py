@@ -41,9 +41,10 @@ class Upload(Module):
         payload = self.vectors[interpreter][vector] % (remote_path, self.rand_post_name)
         
         proxy = self.modhandler.load('shell.php').proxy
+        current_mode = self.modhandler.load('shell.php').current_mode
         
         request = CmdRequest( self.url, self.password, proxy)
-        request.setPayload(payload)
+        request.setPayload(payload, current_mode)
         request.setPostData({self.rand_post_name : file_encoded_content})
         
         try:

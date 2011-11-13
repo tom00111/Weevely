@@ -65,7 +65,6 @@ class Terminal():
             try:
                 self.modhandler.load('shell.php')
             except ModuleException, e:
-                print '[!] [shell.php] Error loading PHP interpreter.' 
                 print '[!] [shell.php] No backdoor found. Check url and password'
                 
             else:

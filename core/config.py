@@ -31,6 +31,7 @@ class Config:
             
         self.conf.add_section('global')
         self.conf.set('global','http_proxy','')
+        self.conf.set('global','request_mode','')
             
         with open(self.conf_path, 'wb') as configfile:
             self.conf.write(configfile)

