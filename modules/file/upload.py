@@ -32,7 +32,7 @@ class Upload(Module):
         
     def __execute_payload(self, interpreter, vector, file_encoded_content, remote_path, file_local_md5):
         
-#        file_exists = self.modhandler.load('file.check').run(remote_path, 'exists' , True)
+#        file_exists = self.modhandler.load('file.check').run(remote_path, 'exists')
 #        if file_exists:
 #            raise ModuleException(self.name,  'File \'%s\' exists, change remote path' % remote_path)
 #            
@@ -50,20 +50,22 @@ class Upload(Module):
         try:
             response = request.execute()
         except NoDataException, e:
-            print '[-] No data returned'
+            self.mprint('[-] [%s] No data returned' % self.name)
         except Exception, e:
-            print '[!] Error requesting data: check URL or your internet connection.'
+            self.mprint('[!] [%s] Error requesting data: check URL or your internet connection.' % self.name)
         else:
-            file_remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5' , True)
+            
+            
+            file_remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5')
             if file_remote_md5 == file_local_md5:
-                output = '[!] [file.upload] File \'%s\' uploaded.' % remote_path
+                output = '[%s] File \'%s\' uploaded.' % (self.name, remote_path)
             else:
-                file_exists = self.modhandler.load('file.check').run(remote_path, 'exists' , True)
+                file_exists = self.modhandler.load('file.check').run(remote_path, 'exists')
                 if file_exists:
-                    print '[!] [file.upload] MD5 hash of \'%s\' file mismatch, file corrupted.' % remote_path
+                    self.mprint('[!] [%s] MD5 hash of \'%s\' file mismatch, file corrupted.' % (self.name, remote_path))
                 else:
-                    print '[!] [file.upload] File \'%s\' creation failed.' % remote_path
-                
+                    self.mprint ('[!] [%s] File \'%s\' creation failed.' % ( self.name, remote_path))
+        
         
         return output
         

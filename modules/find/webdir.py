@@ -62,14 +62,14 @@ class Webdir(Module):
 
     def run(self, start_dir):
         if self.url and self.dir:
-            print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
+            self.mprint("[%s] Writable web dir: %s -> %s" % (self.name, self.dir, self.url))
             return
             
         if start_dir == 'auto':
             try:
                 root_find_dir = self.modhandler.load('system.info').run('basedir')
             except ModuleException, e:
-                print '[!] [' + e.module + '] ' + e.error
+                self.mprint('[!] [' + e.module + '] ' + e.error)
                 root_find_dir = None
                 
         else:
@@ -84,7 +84,7 @@ class Webdir(Module):
             try:
                 writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
             except Exception as e:
-                print '[!] [' + e.module + '] ' + e.error
+                self.mprint('[!] [' + e.module + '] ' + e.error)
                 writable_dirs = []
                 
                

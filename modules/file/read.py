@@ -26,7 +26,7 @@ class Read(Module):
         file.close()
         
         response = self.modhandler.load('file.download').run(remote_path, file.name, True)
-            
+        
         if response:
             remove(file.name)
             return response

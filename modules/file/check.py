@@ -31,7 +31,7 @@ class Check(Module):
         
         Module.__init__(self, modhandler, url, password)    
     
-    def __execute_payload(self, interpreter, vector, remote_path, mode, quiet):
+    def __execute_payload(self, interpreter, vector, remote_path, mode):
         
         payload = self.vectors[interpreter][vector] % (remote_path)
         response = self.modhandler.load(interpreter).run(payload)
@@ -42,27 +42,24 @@ class Check(Module):
             return response
         else:
             if mode != 'exists':
-                if not self.run(remote_path, 'exists', quiet):
-                    if not quiet:
-                        print 'File not exists.'
-            if not quiet:
-                print 'False'
+                if not self.run(remote_path, 'exists'):
+                    self.mprint('File not exists.', 4)
                 
         return False
         
     
-    def run(self, remote_path, mode, quiet = False):
+    def run(self, remote_path, mode):
         
         mode_found = False
                 
         interpreter, vector = self._get_default_vector()
         if interpreter and vector:
-            return self.__execute_payload(interpreter, vector, remote_path, mode, quiet)
+            return self.__execute_payload(interpreter, vector, remote_path, mode)
         else:
             for i in self.vectors:
                 if mode in self.vectors[i]:
                     mode_found = True
-                    response = self.__execute_payload(i, mode, remote_path, mode, quiet)
+                    response = self.__execute_payload(i, mode, remote_path, mode)
                     return response
                     
         if not mode_found:

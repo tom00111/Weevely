@@ -60,16 +60,17 @@ class Users(Module):
                     
                     if self.vectors[interpreter][vector].count('%s') == 1:
                         payload = payload % ('/etc/passwd')
-                    
+                
                     try:    
                         response = self.modhandler.load(interpreter).run(payload)
                     except ModuleException:
                         response = None
+                        
                             
     
                     if response and ':0:0:' in response:
                         
-                        print "[system.users] Users enumerated using method '%s'" % vector
+                        self.mprint("[%s] Enumerating user using method '%s'" % (self.name, vector))
                         
                         for line in response.split('\n'):
                             

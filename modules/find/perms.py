@@ -106,7 +106,7 @@ function swp($d, $type, $mod, $qty){
         
         response = None
         payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
-        print "[find.perms] Searching in %s using method '%s'" % (path, vector)  
+        self.mprint("[%s] Searching in %s using method '%s'" % (self.name, path, vector)  )
         
         if interpreter == 'shell.sh':       
             response = self.modhandler.load(interpreter).run(payload, False)

@@ -43,7 +43,7 @@ class UserWebFiles(Module):
 
         if home[-1] != '/': home = home + '/'
 
-        print '[%s] Crawling paths in %s (depth %i)' % (self.name, url, depth_limit)
+        self.mprint('[%s] Crawling paths in %s (depth %i)' % (self.name, url, depth_limit))
         
         try:
             crawler = Crawler(url, depth_limit, confine_prefix, exclude)
@@ -53,7 +53,7 @@ class UserWebFiles(Module):
         
         path_list = [ home + p[len(url):] for p in crawler.urls_remembered ]
             
-        print '[%s] Enumerating %i paths in %s' % (self.name, len(path_list), home)
+        self.mprint('[%s] Enumerating %i paths in %s' % (self.name, len(path_list), home))
 
         if path_list:
             self.modhandler.load('enum.paths').run('', path_list)

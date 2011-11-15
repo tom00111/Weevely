@@ -77,7 +77,6 @@ class Terminal():
         else:
             self.interpreter = 'shell.sh'
             self.prompt = "%s@%s:%s$ "
-            print '[shell.sh] Loaded system shell'
 
 
 
@@ -122,7 +121,7 @@ class Terminal():
             else:
                 print '[!] Module name error'
    
-        if output:
+        if output != None:
             print output       
             
     def run_line_cmd(self, cmd_line):
@@ -146,7 +145,7 @@ class Terminal():
         else:
             output = self.run(self.interpreter, [ cmd_line ])  
             
-        if output:
+        if output != None:
             print output
     
 

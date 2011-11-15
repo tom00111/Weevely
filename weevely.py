@@ -22,6 +22,7 @@ from core.terminal import Terminal
 from core.backdoor import Backdoor
 from core.modules_handler import ModHandler
 from core.modules_info import ModInfos
+from core.test import Test
 
 import sys
     
@@ -62,6 +63,14 @@ if __name__ == "__main__":
          Backdoor( sys.argv[2] ).save( sys.argv[3] )
         except Exception, e:
             print '\n[!] Creation error: %s.' % str(e)
+            
+            
+    elif len(sys.argv) == 4 and sys.argv[1] == 'test':
+        try:
+         Test().run( sys.argv[2], sys.argv[3] )
+        except Exception, e:
+            print '\n[!] Test error: %s.' % str(e)
+            raise
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
 

@@ -54,7 +54,7 @@ class Download(Module):
         if self.modhandler.load('shell.php').run("is_callable('base64_encode') && print('1');") == '1':
             self.encoder_callable = True
         else:
-            print '[' + self.name + '] PHP \'base64_encode\' transfer methods not available.'
+            self.mprint('[%s] PHP \'base64_encode\' transfer methods not available.' % self.name)
 
             
     def __slack_probe(self, remote_path, local_path):
@@ -89,7 +89,7 @@ class Download(Module):
                             try:
                                 self.modhandler.load('find.webdir').run('auto')
                             except ModuleException, e:
-                                print '[!] [' + e.module + '] ' + e.error
+                                self.mprint('[!] [' + e.module + '] ' + e.error)
                                 return
                             
                             self.transfer_url_dir = self.modhandler.load('find.webdir').url
@@ -121,16 +121,16 @@ class Download(Module):
             
             if self.modhandler.load('file.check').run(self.file_path, 'exists'):
                 
-                print "[" + self.name + "] Reading file via \'%s\' and removing" % self.url
+                self.mprint("[%s] Reading file via \'%s\' and removing" % (self.name, self.url))
                 
                 response = Request(self.url).read()
                 
                 if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % self.file_path) != '1':
-                    print "[!] [" + self.name + "] Error cleaning support file %s" % (self.file_path)
+                    self.mprint("[!] [%s] Error cleaning support file %s" % (self.name, self.file_path))
                     
                     
             else:
-                    print "[!] [" + self.name + "] Error checking existance of %s" % (self.file_path)
+                    self.mprint("[!] [%s] Error checking existance of %s" % (self.name, self.file_path))
                 
             
         else:
@@ -138,7 +138,7 @@ class Download(Module):
                 try:
                     response = b64decode(response)
                 except TypeError:
-                    print "[!] [" + self.name + "] Error, unexpected file content"
+                    self.mprint("[!] [%s] Error, unexpected file content")
                     
                     
         if response:
@@ -148,19 +148,20 @@ class Download(Module):
                 f.write(response)
                 f.close()
             except Exception, e:
-                print '[!] [' + self.name + '] Some error occurred writing local file \'%s\'.' % local_path
+                self.mprint('[!] [%s] Some error occurred writing local file \'%s\'.' % (self.name, local_path))
                 raise ModuleException(self.name, e)
             
     
             response_md5 = md5(response).hexdigest()
-            remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5', True)
+            remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5')
+            
             if not remote_md5:
-                print '[!] [' + self.name + '] MD5 hash method is not callable with \'%s\', check disabled' % remote_path
+                self.mprint('[!] [%s] MD5 hash method is not callable with \'%s\', check disabled' % (self.name, remote_path))
                 return response
             elif not  remote_md5 == response_md5:
-                print '[' + self.name + '] MD5 hash of \'%s\' file mismatch, file corrupted' % local_path
+                self.mprint('[%s] MD5 hash of \'%s\' file mismatch, file corrupted' % (self.name, local_path))
             else:
-                print '[' + self.name + '] File correctly downloaded to \'%s\' using method \'%s\'' % (local_path, self.vector)
+                self.mprint('[%s] File correctly downloaded to \'%s\' using method \'%s\'' % (self.name, local_path, self.vector))
                 return response
 
      

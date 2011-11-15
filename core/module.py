@@ -24,6 +24,13 @@ class Module:
         self._probe()
         self.__get_arguments_num()
     
+
+    
+    def mprint(self, str, importance = 3):
+        if importance <= self.modhandler.verbosity:
+            print str
+        
+    
     def _probe(self):
         pass
     

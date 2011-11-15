@@ -23,6 +23,7 @@ class ModHandler(dict):
         
         self.conf = Config(self.modinfo.module_info.keys())
         
+        self.verbosity=3
         
     def load(self, module_name):
         
@@ -40,7 +41,9 @@ class ModHandler(dict):
         return self.modules[module_name]
 
 
-                        
+                    
+    def set_verbosity(self, v = 3):
+        self.verbosity = v        
                 
                 
                 

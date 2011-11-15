@@ -52,13 +52,15 @@ class UserFiles(Module):
             else:
                 raise ModuleException(self.name,  "Error, use auto | home | web | <file path> | load:<path_list.txt> as option ")
             
+        self.modhandler.set_verbosity(1)
         self.modhandler.load('audit.users').run()
+        self.modhandler.set_verbosity()
         
         
         path_list = []
         user_list = self.modhandler.load('audit.users').usersinfo
             
-        print '[%s] Enumerating %i users' % (self.name, len(user_list))
+        self.mprint('[%s] Enumerating %i users' % (self.name, len(user_list)))
         
         for user in user_list:
             for current_mode in self.common_files:

@@ -77,7 +77,7 @@ function swp($d, $m, $s){
         
         response = None
         payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, mod, string, path)
-        print "[find.name] Finding by name using method '%s'" % (vector)  
+        self.mprint("[%s] Finding by name using method '%s'" % (self.name,vector)  )
                   
         if interpreter == 'shell.sh':
             response = self.modhandler.load(interpreter).run(payload, False)

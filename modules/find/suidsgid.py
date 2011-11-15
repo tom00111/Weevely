@@ -59,7 +59,7 @@ class Suidsgid(Module):
     def __execute_payload(self, interpreter, vector, mod, path):
         
         payload = self.vectors[interpreter][vector] % (path, mod)
-        print "[find.suidsgid] Finding using method '%s'" % (vector)  
+        self.mprint("[%s] Finding using method '%s'" % (self.name,vector)  )
                   
         if interpreter == 'shell.sh':       
             response = self.modhandler.load(interpreter).run(payload, False)

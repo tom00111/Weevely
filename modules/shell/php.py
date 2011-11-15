@@ -30,12 +30,14 @@ class Php(Module):
         
         proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            print '[shell.php] Setting http proxy \'%s\'' % (proxy)
+            self.mprint('[shell.php] Setting http proxy \'%s\'' % (proxy))
             self.proxy = { 'http' : proxy }
             
         mode = modhandler.conf.get_option('global', 'request_mode')
         if mode in self.modes:
             self.modes = [ mode ]
+            
+        self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
         
 
     def _probe(self):
@@ -50,12 +52,11 @@ class Php(Module):
                 found = True
                 break
         
-        
         if not found:
             raise ModuleException("shell.php",  "PHP interpreter initialization failed")
         else:
             if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
-                print  '[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.'
+                self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
     
@@ -66,7 +67,8 @@ class Php(Module):
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
-        #print cmd, self.current_mode
+        
+        self.mprint( "%s" % (cmd), 5)
          
         
         try:
@@ -74,7 +76,7 @@ class Php(Module):
         except NoDataException, e:
             pass
         except Exception, e:
-            print '[!] Error requesting data: check URL or your internet connection.'
+            self.mprint('[!] Error requesting data: check URL or your internet connection.')
         else:
             return resp
         

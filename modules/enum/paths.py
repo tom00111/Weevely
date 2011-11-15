@@ -17,24 +17,25 @@ class Paths(Module):
             except:
                 raise ModuleException(self.name,  "Error opening path list \'%s\'" % list_path)
 
-
-        print '[%s] Enumerating %i paths' % (self.name, len(list))
+        self.mprint('[%s] Enumerating %i paths' % (self.name, len(list)))
         
         for path in list:
             
             output = path + '' + '\t'*(3-((len(path)+1)/8))
             
-            if self.modhandler.load('file.check').run(path, 'exists', quiet=True):
+            if self.modhandler.load('file.check').run(path, 'exists'):
                 output += '\texists'
                 
-                if self.modhandler.load('file.check').run(path, 'r', quiet=True):
+                if self.modhandler.load('file.check').run(path, 'r'):
                     output += ', +readable'
-                if self.modhandler.load('file.check').run(path, 'w', quiet=True):
+                if self.modhandler.load('file.check').run(path, 'w'):
                     output += ', +writable'
-                if self.modhandler.load('file.check').run(path, 'x', quiet=True):
+                if self.modhandler.load('file.check').run(path, 'x'):
                     output += ', +excutable'
-                                     
-                print output
+                                         
+                self.mprint(output)
+                
+            
                         
                     
                     

