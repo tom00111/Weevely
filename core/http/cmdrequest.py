@@ -17,6 +17,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import random, urllib2, urlparse, re, base64
 from request import Request
+from random import random, choice, shuffle
+from string import letters, digits
 
 class CmdRequest(Request):
 
@@ -50,8 +52,24 @@ class CmdRequest(Request):
 		
 		else: # mode == 'Cookie' or unset
 		
+			prefixes = [ "ID", "SID", "APISID", "USRID", "SESSID", "__utma", "__utmc", "__utmb" ]
+			shuffle(prefixes)
+			
+			
+			rand_cookie = ''
+			rand_cookie += prefixes.pop() + '=' + self.password[:2] + '; '
+			while len(prefixes)>3:
+				if random()>0.5:
+					break
+				rand_cookie += prefixes.pop() + '=' + ''.join([choice(letters + digits) for i in xrange(16)]) + '; '
+				
+				
+			rand_cookie += prefixes.pop() + '=' + payload[:third] + '; '
+			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '
+			rand_cookie += prefixes.pop() + '=' + payload[thirds:] + ' '
+		
 			cookies = "USR=%s; ASD1=%s; ASD3=%s; ASD4=%s" % (self.password[:2], payload[:third], payload[third:thirds], payload[thirds:])
-			self['Cookie'] = cookies
+			self['Cookie'] = rand_cookie
 		
 		
 	def setPostData(self, data_dict):

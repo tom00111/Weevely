@@ -15,7 +15,7 @@ class Php(Module):
     :shell.php "<command>;"
     '''
     
-    modes = ['Cookie', 'Referer' ]
+    available_modes = [ 'Cookie', 'Referer' ]
     
     def __init__(self, modhandler, url, password):
         
@@ -25,6 +25,12 @@ class Php(Module):
         
         self.current_mode = None
         
+                    
+        mode = modhandler.conf.get_option('global', 'request_mode')
+        if mode in self.available_modes:
+            self.modes = [ mode ]
+        else:
+            self.modes = self.available_modes
         
         Module.__init__(self, modhandler, url, password)
         
@@ -32,10 +38,7 @@ class Php(Module):
         if proxy:
             self.mprint('[shell.php] Setting http proxy \'%s\'' % (proxy))
             self.proxy = { 'http' : proxy }
-            
-        mode = modhandler.conf.get_option('global', 'request_mode')
-        if mode in self.modes:
-            self.modes = [ mode ]
+
             
         self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
         

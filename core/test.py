@@ -6,15 +6,15 @@ class Test:
     
     commands = [
                 
-#                ":audit.user_files auto",
-#                ":file.upload /etc/passwd asd/test",
-#                ":file.check asd/test exists",
-#                "rm asd/test",
-#                ":file.check asd/test r",
+                ":audit.user_files .profile",
+                ":file.upload /etc/passwd asd/test",
+                ":file.check asd/test exists",
+                "rm asd/test",
+                ":file.check asd/test r",
 #                ":audit.user_web_files /var/www http://localhost/",
-#                ":audit.users",
-#                ":enum.binaries telnet",
-                ":enum.paths /home/norby/prov",
+                ":audit.users",
+                ":enum.binaries telnet",
+#                ":enum.paths /home/norby/prov",
                  ":system.info auto"
                 
                 ]
