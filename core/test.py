@@ -16,8 +16,7 @@ class Test:
                 ":enum.binaries telnet",
 #                ":enum.paths /home/norby/prov",
                  ":system.info auto",
-                 ":sql.query mysql localhost emilio ** 'SHOW DATABASES;'"
-                
+                 
                 ]
     
     def run(self, url, password):

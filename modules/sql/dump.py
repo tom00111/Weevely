@@ -23,7 +23,6 @@ function dmp ($table)
 {
     $result .= "-- -------- TABLE '$table' ----------\n";
     $query = mysql_query("SELECT * FROM ".$table);
-    
     $numrow = mysql_num_rows($query);
     $numfields = mysql_num_fields($query);
     print $numrow . " " . $numfields;
@@ -35,9 +34,7 @@ function dmp ($table)
         {
             $result .= "`".mysql_field_name($query, $k)."`";
             if ($k < ($numfields-1))
-            {
                 $result .= ", ";
-            }
         }
         $result .= ") VALUES ";
         while ($row = mysql_fetch_row($query))
@@ -57,35 +54,23 @@ function dmp ($table)
                     $result .= "'$row[$j]'";
                 }
                 else if (is_null($row[$j]))
-                {
                     $result .= "NULL";
-                }
                 else
-                {
                     $result .= $row[$j];
-                }
                 if ( $j<($numfields-1))
-                {
                     $result .= ", ";
-                }
             }
             $result .= ")";
             $i++;
             if ($i < $numrow)
-            {
                 $result .= ",";
-            }
             else
-            {
                 $result .= ";";
-            }
             $result .= "\n";
         }
     }
     else
-    {
         $result .= "-- table is empty";
-    }
     return $result . "\n\n";
 }
 mysql_connect("%s","%s","%s");

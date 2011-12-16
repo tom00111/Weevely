@@ -62,14 +62,14 @@ if __name__ == "__main__":
         try:
          Backdoor( sys.argv[2] ).save( sys.argv[3] )
         except Exception, e:
-            print '\n[!] Creation error: %s.' % str(e)
-            
+            print '\n[!] Creation error: %s ' % str(e)
+            raise
             
     elif len(sys.argv) == 4 and sys.argv[1] == 'test':
         try:
          Test().run( sys.argv[2], sys.argv[3] )
         except Exception, e:
-            print '\n[!] Test error: %s.' % str(e)
+            print '\n[!] Test error: %s ' % str(e)
             raise
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
