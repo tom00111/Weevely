@@ -36,10 +36,13 @@ class Terminal():
                 self.hostname = self.run('system.info', [ "hostname" ])
                 self.cwd = self.run('system.info', [ "basedir" ])
     
-                    
-                self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
-                if self.safe_mode:
-                    print '[!] Safe mode is enabled'
+                try:
+                    self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
+                except:
+                    self.safe_mode = None
+                else:
+                    if self.safe_mode:
+                        print '[!] Safe mode is enabled'
                 
                 self.history      = os.path.expanduser( '~/.weevely_history' )
     
@@ -60,7 +63,7 @@ class Terminal():
         try:
             self.modhandler.load('shell.sh')
         except ModuleException, e:
-            print '[!] [shell.sh] Error loading system shell interpreter' 
+            print '[!] [shell.sh] Error loading system shell interpreter'
             
             try:
                 self.modhandler.load('shell.php')

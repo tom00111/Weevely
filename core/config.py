@@ -4,7 +4,7 @@ Created on 30/ago/2011
 @author: norby
 '''
 import os
-from ConfigParser import RawConfigParser
+from ConfigParser import RawConfigParser, NoSectionError
 
 
 class Config:
@@ -38,11 +38,18 @@ class Config:
             
     
     def get_option(self, section, option):
-        return self.conf.get(section,option)
+        try:
+            return self.conf.get(section,option)
+        except NoSectionError:
+            pass
+            #print '[!] No section \'%s\' in config file.' % section
         
     def get_vector(self, section):
-        return self.conf.get(section,'default_vector')
-        
+        try:
+            return self.conf.get(section,'default_vector')
+        except NoSectionError:
+            pass
+            #print '[!] No section \'%s\' in config file' % section
         
             
 

