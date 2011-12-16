@@ -39,21 +39,21 @@ class Query(Module):
 
         vector = self._get_default_vector2()
         if vector:
-            payload = self.__prepare_payload(vector, [host, user, pwd, query]) 
-            response = self.__execute_payload(payload)
+            response = self.__execute_payload(vector, [host, user, pwd, query])
             if response != None:
                 return response
             
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
-            payload = self.__prepare_payload(vector, [host, user, pwd, query]) 
-            response = self.__execute_payload(vector.interpreter, payload)
+            response = self.__execute_payload(vector, [host, user, pwd, query])
             if response != None:
                 return response
         
-    def __execute_payload(self, interpreter, payload):
+    def __execute_payload(self, vector, parameters):
         
-        response = self.modhandler.load(interpreter).run(payload)
+        payload = self.__prepare_payload(vector, parameters) 
+        
+        response = self.modhandler.load(vector.interpreter).run(payload)
         if response:
             return response
         return None

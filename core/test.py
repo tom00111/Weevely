@@ -16,7 +16,7 @@ class Test:
                 ":enum.binaries telnet",
 #                ":enum.paths /home/norby/prov",
                  ":system.info auto",
-                 ":sql.query mysql localhost emilio 1101995 'SHOW TABLES FROM emilio;'"
+                 ":sql.query mysql localhost emilio ** 'SHOW DATABASES;'"
                 
                 ]
     
