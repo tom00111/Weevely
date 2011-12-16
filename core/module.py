@@ -54,6 +54,11 @@ class Module:
     
         return None, None
     
+    def _get_default_vector2(self):
+        
+        conf_vector = self.modhandler.conf.get_vector(self.name)
+        return self.vectors.get_vector_by_name(conf_vector)
+    
 class ModuleException(Exception):
     def __init__(self, module, value):
         self.module = module

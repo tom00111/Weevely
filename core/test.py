@@ -15,7 +15,8 @@ class Test:
                 ":audit.users",
                 ":enum.binaries telnet",
 #                ":enum.paths /home/norby/prov",
-                 ":system.info auto"
+                 ":system.info auto",
+                 ":sql.query mysql localhost emilio 1101995 'SHOW TABLES FROM emilio;'"
                 
                 ]
     
