@@ -13,8 +13,8 @@ classname = 'Summary'
 
     
 class Summary(Module):
-    '''Get SQL structure summary
-    :sql.query mysql|postgres <host> <user> <pass> listdb | <db name>  
+    '''Get SQL database summary
+    :sql.query mysql|postgres <host> <user> <pass> <db name>  
     '''
     
     vectors = VectorList( [
@@ -32,6 +32,10 @@ class Summary(Module):
         
 
     def run( self, mode, host, user, pwd , db ):
+
+        if mode != 'mysql':
+            raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
+        
 
         vector = self._get_default_vector2()
         if vector:
@@ -53,40 +57,29 @@ class Summary(Module):
         pwd = parameters[3]
         db = parameters[4]
         
-        if db == 'listdb':    
-            # database
-            payload = self.__prepare_payload(vector, [], 0) 
-            response = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
-            if response:
-                for db in response.split('\n'):
-                    self.structure[db]={}
-                
-                                
+        self.modhandler.set_verbosity(1)
         
-        else:      
-            
-            db = parameters[-1]
-            self.structure[db] = {}
-              
-            # tables
-            payload = self.__prepare_payload(vector, [db], 1) 
-     
-            response = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
-            
-            if response:
-                for table in response.split('\n'):
-                    
-                    
-                    self.structure[db][table]={}
-                    
-                    # columns
-                    cpayload = self.__prepare_payload(vector, [db, table], 2) 
-                    cresponse = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
-                    if cresponse:
-                        for column in response.split('\n'):   
-                            self.structure[db][table][column]=[]
+        self.structure[db] = {}
+          
+        # tables
+        payload = self.__prepare_payload(vector, [db], 1) 
+ 
+        response = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
+        
+        if response:
+            for table in response.split('\n'):
+                
+                
+                self.structure[db][table]={}
+                
+                # columns
+                cpayload = self.__prepare_payload(vector, [db, table], 2) 
+                cresponse = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
+                if cresponse:
+                    for column in response.split('\n'):   
+                        self.structure[db][table][column]=[]
                                             
-                    
+        self.modhandler.set_verbosity()
         self.__print_db()
 
     def __prepare_payload( self, vector, parameters , parameter_num):
