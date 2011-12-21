@@ -139,7 +139,8 @@ class Terminal():
             if self.__handleDirectoryChange(cmd_line) == False:
                 if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
                     print self.modhandler.load('shell.php').ls_handler(cmd_line)
-           
+                    return
+                
                 output = self.run(self.interpreter, [ cmd_line ])  
                 
             else:

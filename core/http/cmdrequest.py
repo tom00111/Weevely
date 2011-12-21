@@ -38,6 +38,7 @@ class CmdRequest(Request):
 
 	
 	def setPayload( self, payload, mode):
+		
 		payload = base64.b64encode( payload.strip() )
 		length  = len(payload)
 		third	= length / 3

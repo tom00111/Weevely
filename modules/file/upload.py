@@ -7,7 +7,7 @@ Created on 23/set/2011
 from core.module import Module, ModuleException
 from core.http.cmdrequest import CmdRequest, NoDataException
 from base64 import b64encode
-from os import urandom
+from random import choice
 from hashlib import md5
 
 classname = 'Upload'
@@ -27,7 +27,7 @@ class Upload(Module):
     def __init__(self, modhandler, url, password):
         Module.__init__(self, modhandler, url, password)    
         
-        self.rand_post_name = urandom(4)
+        self.rand_post_name = ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(4)])
         
         
     def __execute_payload(self, interpreter, vector, file_encoded_content, remote_path, file_local_md5):

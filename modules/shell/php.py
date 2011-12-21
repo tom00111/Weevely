@@ -109,6 +109,11 @@ class Php(Module):
             path = '.'
             
             
-        return self.run( ls_vector % (path), False)
+        response = self.run( ls_vector % (path), False)
+        if not response:
+            self.mprint('[!] Error listing files in \'%s\', incorrect permission or safe mode enabled' % path)
+            
+        return response
+            
     
     
