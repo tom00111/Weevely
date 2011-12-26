@@ -19,6 +19,7 @@ import random, urllib2, urlparse, re, base64
 from request import Request
 from random import random, choice, shuffle, randint
 from string import letters, digits
+from core.pollution import pollute_string
 
 class CmdRequest(Request):
 
@@ -66,6 +67,8 @@ class CmdRequest(Request):
 					break
 				rand_cookie += prefixes.pop() + '=' + ''.join([choice(letters + digits) for i in xrange(16)]) + '; '
 				
+			
+			p, payload = pollute_string(payload,'!"#$%&()*-,./:<>?@[\]^_`{|}~',0.3)
 				
 			rand_cookie += prefixes.pop() + '=' + payload[:third] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '

