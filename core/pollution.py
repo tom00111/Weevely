@@ -25,8 +25,22 @@ def random_string(charset = 'abcdefghijklmnopqrstuvwxyz', len=4, fixed=False):
 	if not fixed:
 		len = randrange(2,len)
 	return ''.join([choice(charset) for i in xrange(len)])
+
+def pollute_with_random_str(str, charset = '!"#$%&()*-,./:<>?@[\]^_`{|}~', frequency=0.3):
+
+	str_encoded = ''
+	for char in str:
+		if random() < frequency:
+			str_encoded += random_string(charset, 1, True) + char
+		else:
+			str_encoded += char
+			
+	return str_encoded
 	
-def pollute_string(str, charset = 'abcdefghijklmnopqrstuvwxyz', frequency=0.1):
+	
+
+	
+def pollute_with_static_str(str, charset = 'abcdefghijklmnopqrstuvwxyz', frequency=0.1):
 
 	while True:
 		pollution_chars = random_string(charset, 16, True)
