@@ -13,7 +13,7 @@ classname = 'Dump'
     
 class Dump(Module):
     '''Get SQL database dump
-    :sql.query mysql|postgres <host> <user> <pass> <db name> <table name>|any
+    :sql.dump mysql|postgres <host> <user> <pass> <db name> <table name>|any
     '''
     
     vectors = VectorList( [

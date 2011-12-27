@@ -8,13 +8,13 @@ from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 import random
 
-classname = 'Console'
+classname = 'Summary'
  
 
     
-class Console(Module):
-    '''Start SQL console
-    :sql.console mysql|postgres <host> <user> <pass> <db name>  
+class Summary(Module):
+    '''Get SQL database summary
+    :sql.summary mysql|postgres <host> <user> <pass> <db name>  
     '''
     
     vectors = VectorList( [
