@@ -5,8 +5,8 @@ from core.module import Module, ModuleException
 classname = 'UserFiles'
 
 class UserFiles(Module):
-    """Enumerate common files in home and public_html folders
-    :enum.user_files auto | home | web | <file path> | load:<path_list.txt>
+    """Enumerate common restricted files in home and public_html folders
+    :audit.user_files auto | home | web | <file path> | load:<path_list.txt>
     """
     
     
