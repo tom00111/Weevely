@@ -37,7 +37,10 @@ class ModInfos:
                 module_dict[parts[0]] = []
             module_dict[parts[0]].append(':' + mod)
             
-        for mod in module_dict:
+        ordered_module_dict = module_dict.keys()
+        ordered_module_dict.sort()
+            
+        for mod in ordered_module_dict:
             print '[%s] %s' % (mod, ', '.join(module_dict[mod]))
 
 
@@ -52,8 +55,10 @@ class ModInfos:
                 module_dict[parts[0]] = {}
             module_dict[parts[0]][parts[1]] = self.module_info[mod][1]
             
+        ordered_module_dict = module_dict.keys()
+        ordered_module_dict.sort()
         
-        for pkg in module_dict:
+        for pkg in ordered_module_dict:
             
             oldpkg=''
             
