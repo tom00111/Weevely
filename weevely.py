@@ -27,8 +27,8 @@ from core.test import Test
 import sys
     
 print '''
-Weevely 0.4 - Generate and manage stealth PHP backdoors
-              Emilio Pinna, Simone Margaritelli 2011-2012            
+Weevely 0.5 - Generate and manage stealth PHP backdoors
+              Emilio Pinna 2011-2012            
 '''
    
 help_string = '''Start telnet-like session

@@ -7,16 +7,18 @@ class Test:
     commands = [
                 
                 ":audit.user_files .profile",
+                "mkdir prova",
+                "chmod 777 prova",
                 ":file.upload /etc/passwd ./prova/test",
                 ":file.check prova/test exists",
                 "rm prova/test",
                 ":file.check prova/test r",
-#                ":audit.user_web_files /var/www http://localhost/",
+                ":audit.user_web_files /var/www http://site.org/",
                 ":audit.users",
                 ":enum.binaries telnet",
-#                ":enum.paths /home/norby/prov",
-                 ":system.info auto",
-                 
+                ":enum.paths /home/asd/",
+                 ":sql.query mysql localhost asd asdasd 'SHOW databases;'",
+                 ":sql.summary mysql localhost asd asdasd asd"
                 ]
     
     def run(self, url, password):
