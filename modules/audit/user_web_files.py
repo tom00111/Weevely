@@ -11,22 +11,6 @@ class UserWebFiles(Module):
     """
     
     
-    common_files = { 
-                    
-                    "home" : [ ".bashrc", 
-                              ".bash_history", 
-                              ".profile",
-                              ".ssh",
-                              ".ssh/authorized_keys",
-                              ".ssh/known_hosts"
-                              ],
-                    "web" : [ "public_html/", 
-                             "public_html/wp-config.php", 
-                             "public_html/config.php", 
-                             "public_html/uploads",
-                             "public_html/.htaccess" ] 
-                    
-                    }
 
     def __init__( self, modhandler , url, password):
 

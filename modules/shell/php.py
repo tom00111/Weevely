@@ -36,7 +36,7 @@ class Php(Module):
         
         proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            self.mprint('[shell.php] Setting http proxy \'%s\'. Caching corrupt weevely requests, better use proxychains.' % (proxy))
+            self.mprint('[shell.php] Proxy \'%s\' cache can broke weevely requests, use proxychains instead.' % (proxy))
             self.proxy = { 'http' : proxy }
 
             
