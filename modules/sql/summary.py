@@ -80,7 +80,11 @@ class Summary(Module):
                         self.structure[db][table][column]=[]
                                             
         self.modhandler.set_verbosity()
-        self.__print_db()
+        
+        if self.structure[db]:
+            self.__print_db()
+        else:
+            self.mprint('[%s] Error getting database structure, no response' % (self.name))
 
     def __prepare_payload( self, vector, parameters , parameter_num):
 
@@ -93,6 +97,7 @@ class Summary(Module):
     def __print_db(self):
         
         for db in self.structure:
+            
             print 'DB \'%s\'' % db
             
             for table in self.structure[db]:

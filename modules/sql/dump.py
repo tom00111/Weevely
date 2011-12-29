@@ -132,8 +132,12 @@ while ($i < mysql_num_rows ($tableQ))
         payload = self.__prepare_payload(vector, [host, user, pwd, db, table]) 
         response = self.modhandler.load(vector.interpreter).run(payload)
         
+        self.modhandler.set_verbosity()
+        
         if response:
             return response
+        else:
+            self.mprint('[%s] Error dumping database, no response' % self.name)
             
     def __prepare_payload( self, vector, parameters):
 

@@ -40,7 +40,10 @@ class Console(Module):
                 
                 if cmd:
                     response = self.modhandler.load('sql.query').run(mode, host, user, pwd, cmd)
-                    print response
+                    if response:
+                        print response
+                    else:
+                        self.mprint('[%s] No data returned' % self.name, 2)
         
         except KeyboardInterrupt:
             self.modhandler.set_verbosity()
