@@ -47,7 +47,6 @@ class Query(Module):
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
-            self.mprint('[%s] No data returned' % self.name)
             
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
@@ -55,7 +54,6 @@ class Query(Module):
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
-            self.mprint('[%s] No data returned' % self.name)
                 
         
     def __execute_payload(self, vector, parameters):

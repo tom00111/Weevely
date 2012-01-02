@@ -21,7 +21,7 @@ from random import random, choice, shuffle, randint
 from string import letters, digits
 from core.pollution import pollute_with_random_str
 
-default_prefixes = [ "ID", "SID", "APISID", "USRID", "SESSID", "__utma", "__utmc", "__utmb" ]
+default_prefixes = [ "ID", "SID", "APISID", "USRID", "SESSID", "SESS", "SSID", "USR", "PREF" ]
 shuffle(default_prefixes)
 			
 			

@@ -32,6 +32,7 @@ class Terminal():
 
                 self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
                 
+                self.modhandler.set_verbosity(2)
                 self.username = self.run('system.info', [ "whoami" ])
                 self.hostname = self.run('system.info', [ "hostname" ])
                 self.cwd = self.run('system.info', [ "basedir" ])
@@ -43,6 +44,8 @@ class Terminal():
                 else:
                     if self.safe_mode:
                         print '[!] Safe mode is enabled'
+                        
+                self.modhandler.set_verbosity()
                 
                 self.history      = os.path.expanduser( '~/.weevely_history' )
     
