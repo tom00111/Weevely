@@ -75,7 +75,6 @@ class CmdRequest(Request):
 			# DO NOT fuzz with %, _ (\w on regexp keep _)
 			payload = pollute_with_random_str(payload, '#&*-/?@~')
 		
-			
 				
 			rand_cookie += prefixes.pop() + '=' + payload[:third] + '; '
 			rand_cookie += prefixes.pop() + '=' + payload[third:thirds] + '; '
