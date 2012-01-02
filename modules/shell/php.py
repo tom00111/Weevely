@@ -83,8 +83,12 @@ class Php(Module):
         except Exception, e:
             self.mprint('[!] Error requesting data: check URL or your internet connection.')
         else:
-            self.mprint( "Response: %s" % resp, debug_level)
-            return resp
+                    
+            if  'error' in resp and 'eval()\'d code' in resp:
+                self.mprint('[!] Invalid response: \'%s\'' % (resp))
+            else:
+                self.mprint( "Response: %s" % resp, debug_level)
+                return resp
         
 
     def cwd_handler (self, path):

@@ -39,7 +39,6 @@ class Info(Module):
         
     def run( self, info):
         
-        
         if info in self.infos:
             return self.infos[info]
         
@@ -53,6 +52,7 @@ class Info(Module):
         
 
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        
         for vector in vectors:
             
             if vector.name not in self.infos and (info == 'auto' or info == vector.name):
@@ -75,12 +75,7 @@ class Info(Module):
 
 
     def __execute_payload(self, vector, parameters):
-        response = self.modhandler.load(vector.interpreter).run(vector.payloads[0])
-        
-        if  'syntax error' in response or 'eval()\'d' in response:
-            self.mprint('[%s] Invalid response probing \'%s\'' % (self.name, vector.name))
-        else:
-            return response
+        return self.modhandler.load(vector.interpreter).run(vector.payloads[0])
         
 
 
