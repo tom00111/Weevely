@@ -85,7 +85,7 @@ class Php(Module):
         else:
                     
             if  'error' in resp and 'eval()\'d code' in resp:
-                self.mprint('[!] Invalid response on request \'%s\'' % (cmd))
+                self.mprint('[!] Invalid response on request \'%s\'' % (cmd), debug_level)
             else:
                 self.mprint( "Response: %s" % resp, debug_level)
                 return resp
