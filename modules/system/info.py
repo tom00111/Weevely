@@ -77,8 +77,8 @@ class Info(Module):
     def __execute_payload(self, vector, parameters):
         response = self.modhandler.load(vector.interpreter).run(vector.payloads[0])
         
-        if  parameters[0] in ('whoami', 'hostname', 'safe_mode', 'client_ip', 'os') and set(response).intersection('<> '):
-            self.mprint('[%s] Invalid response: %s' % (self.name, response), 1)
+        if  'syntax error' in response or 'eval()\'d' in response:
+            self.mprint('[%s] Invalid response probing \'%s\'' % (self.name, vector.name))
         else:
             return response
         
