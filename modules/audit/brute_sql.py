@@ -9,11 +9,11 @@ from core.vector import VectorList, Vector
 import random
 from math import ceil
 
-classname = 'Sqlbrute'
+classname = 'Brute_sql'
  
-class Sqlbrute(Module):
+class Brute_sql(Module):
     '''Bruteforce sql user. 
-    :audit.sqlbrute <mysql|pg> <host> <user> <local_file_list.txt>
+    :audit.brute_sql <mysql|pg> <host> <user> <local_file_list.txt>
     '''
     
     vectors = VectorList([
@@ -71,7 +71,7 @@ if(@mysql_connect($h, $u, $pwd)){
         wl = parameters[2]
         chunks = int(ceil(len(wl)/self.chunksize))
         
-        self.mprint('[%s] Dividing wordlist of %i words in %i chunks of %i words.' % (self.name, len(wl), chunks+1, self.chunksize))
+        self.mprint('[%s] Splitting wordlist of %i words in %i chunks of %i words.' % (self.name, len(wl), chunks+1, self.chunksize))
         
         for i in range(chunks+1):
         
