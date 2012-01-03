@@ -6,7 +6,7 @@ classname = 'Paths'
 
 class Paths(Module):
     """Enumerate paths on remote filesystem
-    :enum.paths <path_list.txt> 
+    :enum.paths <local_path_list.txt> 
     """
      
     def run(self, list_path, list = []):

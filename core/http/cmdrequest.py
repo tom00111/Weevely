@@ -34,6 +34,7 @@ class CmdRequest(Request):
 			
 		self.password  = password
 		self.extractor = re.compile( "<%s>(.*)</%s>" % ( self.password[2:], self.password[2:] ), re.DOTALL )
+#		self.extractor_debug = re.compile( "<%sDEBUG>(.*)</%sDEBUG>" % ( self.password[2:], self.password[2:] ), re.DOTALL )
 		self.parsed	   = urlparse.urlparse(self.url)
 		self.data = None
 
@@ -88,6 +89,7 @@ class CmdRequest(Request):
 
 	def execute( self ):
 		response = self.read()
+#		print self.extractor_debug.findall(response)
 		data	 = self.extractor.findall(response)
 		if len(data) < 1 or not data:
 			raise NoDataException( 'No data returned.' )

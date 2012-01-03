@@ -11,7 +11,7 @@ classname = 'Info'
     
 class Info(Module):
     """Collect system informations
-    :system.info auto | whoami | hostname |basedir | document_root | client_ip
+    :system.info auto | whoami | hostname | basedir | document_root | client_ip
     """
     
     

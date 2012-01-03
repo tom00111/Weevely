@@ -6,7 +6,7 @@ classname = 'UserFiles'
 
 class UserFiles(Module):
     """Enumerate common restricted files in home and public_html folders
-    :audit.user_files auto | home | web | <file path> | load:<path_list.txt>
+    :audit.user_files auto | home | web | <remote path> | load:<local_path_list.txt>
     """
     
     

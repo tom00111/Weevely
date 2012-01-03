@@ -14,7 +14,7 @@ classname = 'Query'
     
 class Query(Module):
     '''Execute SQL query
-    :sql.query <mysql|pg> <host> <user> <pass> "<query>"
+    :sql.query mysql|postgres <host> <user> <pass> "<query>"
     '''
     
     vectors = VectorList([
