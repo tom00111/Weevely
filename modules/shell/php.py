@@ -63,13 +63,15 @@ class Php(Module):
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
        
-    def run(self, cmd, use_current_path = True):
+    def run(self, cmd, use_current_path = True, post_data = {}):
 
         if use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
+        if post_data:
+            request.setPostData(post_data)
         
         debug_level = 5
         
