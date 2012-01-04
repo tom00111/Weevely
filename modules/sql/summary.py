@@ -33,10 +33,6 @@ class Summary(Module):
 
     def run( self, mode, host, user, pwd , db ):
 
-        if mode != 'mysql':
-            raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
-        
-
         vector = self._get_default_vector2()
         if vector:
             response = self.__execute_payload(vector, [mode, host, user, pwd, db])

