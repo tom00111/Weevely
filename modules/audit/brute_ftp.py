@@ -21,11 +21,11 @@ class Brute_ftp(Module):
 foreach(split('[\n]+',$w) as $pwd) {
 $c=@ftp_connect($h, $p);
 if($c){
-    $l=@ftp_login($c,$u,$pwd);
-    if($l) {
-        print("+" . $u . ":" . $pwd . "\n");
-        break;
-    }
+$l=@ftp_login($c,$u,$pwd);
+if($l) {
+print("+" . $u . ":" . $pwd . "\n");
+break;
+}
 }
 } 
 """)

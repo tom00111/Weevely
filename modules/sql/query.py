@@ -19,14 +19,13 @@ class Query(Module):
     
     vectors = VectorList([
             Vector('shell.php', 'php_fetch', """
-            $c="%s"; $q="%s"; $f="%s";
-            if(@$c("%s","%s","%s")){
-                $result = $q("%s");
-                while (list($table) = $f($result)) {
-                        echo $table."\n";
-                }
-            }
-            """)
+$c="%s"; $q="%s"; $f="%s";
+if(@$c("%s","%s","%s")){
+$result = $q("%s");
+while (list($table) = $f($result)) {
+echo $table."\n";
+}
+}""")
             ])
 
 

