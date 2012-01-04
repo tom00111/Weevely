@@ -73,9 +73,9 @@ class Users(Module):
                         self.mprint("[%s] Enumerating user using method '%s'" % (self.name, vector))
                         
                         for line in response.split('\n'):
-                            
-                            user = User(line)
-                            self.usersinfo[user]=user
+                            if line:
+                                user = User(line)
+                                self.usersinfo[user]=user
                         
                         return response
 
