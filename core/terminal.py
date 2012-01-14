@@ -92,6 +92,7 @@ class Terminal(Enviroinment):
             print output       
             
     def run_line_cmd(self, cmd_line):
+        
                 
         if not self.interpreter:
             return

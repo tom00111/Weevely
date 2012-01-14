@@ -7,6 +7,7 @@ class Test:
     commands = [
                 
                 ":audit.user_files .profile",
+                "mkdir asd",
                 "mkdir asd/prova",
                 "chmod 777 asd/prova",
                 ":file.upload /etc/passwd ./asd/prova/test",

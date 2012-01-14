@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from core.terminal import Terminal
+from core.terminal import Terminal, module_trigger
 from core.backdoor import Backdoor
 from core.modules_handler import ModHandler
 from core.modules_info import ModInfos
@@ -84,9 +84,8 @@ if __name__ == "__main__":
             password = sys.argv[2]        
             
             try:
-                
-                terminal = Terminal (ModHandler(url, password, load_env=False))
-                if sys.argv[3][0] == terminal.module_char:
+                terminal = Terminal (ModHandler(url, password), True)
+                if sys.argv[3][0] == module_trigger:
                     terminal.run_module_cmd(sys.argv[3:])
                 else:
                     terminal.run_line_cmd(' '.join(sys.argv[3:]))

@@ -39,7 +39,6 @@ class Php(Module):
             self.mprint('[shell.php] Proxy cache can broke weevely requests, use proxychains instead.')
             self.proxy = { 'http' : proxy }
 
-            
         self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
         
 

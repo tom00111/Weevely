@@ -70,6 +70,9 @@ class Upload(Module):
         file_local_md5 = md5(file_content).hexdigest()
         file_encoded_content = b64encode(file_content)
 
+        if self.modhandler.load('file.check').run(remote_path, 'exists'):
+            raise ModuleException(self.name,  "Remote file %s exists" % (remote_path))
+            
                 
         vectors = self._get_default_vector2()
         if not vectors:
