@@ -85,7 +85,7 @@ if __name__ == "__main__":
             
             try:
                 
-                terminal = Terminal (ModHandler(url, password), True)
+                terminal = Terminal (ModHandler(url, password, load_env=False))
                 if sys.argv[3][0] == terminal.module_char:
                     terminal.run_module_cmd(sys.argv[3:])
                 else:

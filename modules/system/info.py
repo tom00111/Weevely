@@ -42,16 +42,9 @@ class Info(Module):
         if info in self.infos:
             return self.infos[info]
         
-        vector = self._get_default_vector2()
-        if vector:
-            response = self.__execute_payload(vector, [info])
-            if response:
-                self.infos[info] = response
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return response
-        
-
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
         for vector in vectors:
             

@@ -33,13 +33,9 @@ class Summary(Module):
 
     def run( self, mode, host, user, pwd , db ):
 
-        vector = self._get_default_vector2()
-        if vector:
-            response = self.__execute_payload(vector, [mode, host, user, pwd, db])
-            if response != None:
-                return response
-            
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells + [ 'sql.query' ])
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells + [ 'sql.query' ])
         for vector in vectors:
             response = self.__execute_payload(vector, [mode, host, user, pwd, db])
             if response != None:

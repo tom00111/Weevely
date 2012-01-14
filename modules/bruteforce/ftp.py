@@ -61,14 +61,9 @@ break;
 
         rand_post_name = ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(4)])
 
-        vector = self._get_default_vector2()
-        if vector:
-            response = self.__execute_payload(vector, [host, port, user, rand_post_name, start_line, wl_splitted])
-            if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return response
-            
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
             response = self.__execute_payload(vector, [host, port, user, rand_post_name, start_line, wl_splitted])
             if response != None:

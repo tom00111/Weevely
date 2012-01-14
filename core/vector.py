@@ -32,5 +32,5 @@ class Vector:
 
 
     def __repr__(self):
-        return '[%s, %s, %s]' % (self.name,self.interpreter,  self.cmnds)
+        return '[%s, %s, %s]' % (self.name,self.interpreter,  self.payloads)
 

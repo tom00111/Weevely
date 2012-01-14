@@ -49,14 +49,9 @@ echo $table."\n";
         else:
             raise ModuleException(self.name,  "Database '%s' unsupported" % (mode))
 
-        vector = self._get_default_vector2()
-        if vector:
-            response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
-            if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return response
-            
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
             response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
             if response != None:

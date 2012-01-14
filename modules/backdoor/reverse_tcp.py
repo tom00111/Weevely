@@ -42,14 +42,9 @@ class Reversetcp(Module):
         t = Timer(5.0, self.__check_module_state)
         t.start()
 
-        vector = self._get_default_vector2()
-        if vector:
-            self.last_vector = vector.name
-
-            
-            self.__execute_payload(vector, [host, port])
-            
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         for vector in vectors:
             
             self.last_vector = vector.name

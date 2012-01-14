@@ -5,9 +5,15 @@ Created on 22/ago/2011
 '''
 
 from core.module import ModuleException
+from core.enviroinment import Enviroinment
 import readline, atexit, os, re, shlex
 
-class Terminal():
+module_trigger = ':'
+help_string = ':help'
+cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+    
+            
+class Terminal(Enviroinment):
     
     def __init__( self, modhandler, one_shot = False):
 
@@ -15,75 +21,30 @@ class Terminal():
         
         self.url = modhandler.url
         self.password = modhandler.password
-        self.interpreter = None
-        self.module_char = ':'
-        self.help_string = ':help'
+        self.interpreter = modhandler.interpreter
+
         self.one_shot = one_shot
         self.completions = {}
     
-        self.__load_interpreters()
-        
-        if self.interpreter and not one_shot:
-
-                print ''
-                print '[' + self.interpreter + '] Show help with :help command'
-                print '[' + self.interpreter + '] Run modules with :<module> <arg 1> ... <arg N>'
-                print ''
-
-                self.cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-                
-                self.modhandler.set_verbosity(2)
-                self.username = self.run('system.info', [ "whoami" ])
-                self.hostname = self.run('system.info', [ "hostname" ])
-                self.cwd = self.run('system.info', [ "basedir" ])
     
-                try:
-                    self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
-                except:
-                    self.safe_mode = None
-                else:
-                    if self.safe_mode:
-                        print '[!] Safe mode is enabled'
-                        
-                self.modhandler.set_verbosity()
-                
-                self.history      = os.path.expanduser( '~/.weevely_history' )
+        if not self.interpreter:
+            print '[!] [shell.php] No remote backdoor found. Check URL and password.'
     
-                try:
-                    
-                    readline.parse_and_bind( 'tab: menu-complete' )
-                    readline.set_completer( self.__complete )
-                    readline.read_history_file( self.history )
-                    
-                except IOError:
-                    pass
+        elif not one_shot:
+            Enviroinment.__init__(self)
         
-                atexit.register( readline.write_history_file, self.history )
+            self.history      = os.path.expanduser( '~/.weevely_history' )
 
-
-    def __load_interpreters(self):
-        
-        try:
-            self.modhandler.load('shell.sh')
-        except ModuleException, e:
-            print '[!] [shell.sh] Error loading system shell interpreter'
-            
             try:
-                self.modhandler.load('shell.php')
-            except ModuleException, e:
-                print '[!] [shell.php] No backdoor found. Check url and password'
                 
-            else:
-                self.interpreter = 'shell.php'
-                print '[shell.php] Fallback to PHP interpreter. End commands with semi-colon'
-                if not self.one_shot:
-                    print '[shell.php] Substitute of \'cd [path]\' and \'ls [path]\' are available'
-                self.prompt        = "%s@%s:%s php> "
-            
-        else:
-            self.interpreter = 'shell.sh'
-            self.prompt = "%s@%s:%s$ "
-
+                readline.parse_and_bind( 'tab: menu-complete' )
+                readline.set_completer( self.__complete )
+                readline.read_history_file( self.history )
+                
+            except IOError:
+                pass
+    
+            atexit.register( readline.write_history_file, self.history )
 
 
     def loop(self):
@@ -97,7 +58,7 @@ class Terminal():
             cmd       = cmd.strip()
             
             if cmd:
-                if cmd[0] == self.module_char:
+                if cmd[0] == module_trigger:
                     self.run_module_cmd(shlex.split(cmd))
                 else:
                     self.run_line_cmd(cmd)
@@ -111,7 +72,7 @@ class Terminal():
         output = ''
     
         ## Help call
-        if cmd_splitted[0] == self.help_string:
+        if cmd_splitted[0] == help_string:
             self.modhandler.modinfo.print_module_infos()
             
         else:
@@ -139,7 +100,7 @@ class Terminal():
         
         if not self.one_shot:
 
-            if self.__handleDirectoryChange(cmd_line) == False:
+            if self._handleDirectoryChange(cmd_line) == False:
                 if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
                     print self.modhandler.load('shell.php').ls_handler(cmd_line)
                     return
@@ -157,36 +118,6 @@ class Terminal():
     
 
 
-    def __handleDirectoryChange( self, cmd):
-        
-        cd  = self.cwd_extract.findall(cmd)
-        
-        if cd != None and len(cd) > 0:    
-            cwd  = cd[0].strip()
-            path = self.cwd
-            if cwd[0] == '/':
-                path = cwd
-            elif cwd == '..':
-                dirs = path.split('/')
-                dirs.pop()
-                path = '/' + '/'.join(dirs)[1:]
-            elif cwd == '.':
-                pass
-            elif cwd[0:3] == '../':
-                path = cwd.replace( '../', path )
-            elif cwd[0:2] == './':
-                path = cwd.replace( './', path )
-            else:
-                path = (path + "/" + cwd).replace( '//', '/' ) 
-            
-            if self.modhandler.load('shell.php').cwd_handler(path):
-                self.cwd = path
-            else:
-                print "[!] '%s' is not a directory or is not accessible." % path
-
-            return True
-
-        return False
 
     def __complete( self, text, state ):
         

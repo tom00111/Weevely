@@ -17,8 +17,8 @@ class Test:
                 ":audit.users",
                 ":enum.binaries telnet",
                 ":enum.paths /home/asd/",
-                 ":sql.query mysql localhost asd asdasd 'SHOW databases;'",
-                 ":sql.summary mysql localhost asd asdasd asd"
+#                 ":sql.query mysql localhost asd asdasd 'SHOW databases;'",
+#                 ":sql.summary mysql localhost asd asdasd asd"
                 ]
     
     def run(self, url, password):
@@ -30,7 +30,7 @@ class Test:
             try:
                 
                 terminal = Terminal (ModHandler(url, password), True)
-                if cmd[0] == terminal.module_char:
+                if cmd[0] == ':':
                     terminal.run_module_cmd(cmd.split())
                 else:
                     terminal.run_line_cmd(cmd)

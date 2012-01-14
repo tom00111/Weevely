@@ -24,7 +24,6 @@ class Php(Module):
         self.proxy = None
         
         self.current_mode = None
-        
                     
         mode = modhandler.conf.get_option('global', 'request_mode')
         if mode in self.available_modes:
@@ -32,11 +31,12 @@ class Php(Module):
         else:
             self.modes = self.available_modes
         
+        
         Module.__init__(self, modhandler, url, password)
         
         proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            self.mprint('[shell.php] Proxy \'%s\' cache can broke weevely requests, use proxychains instead.' % (proxy))
+            self.mprint('[shell.php] Proxy cache can broke weevely requests, use proxychains instead.')
             self.proxy = { 'http' : proxy }
 
             
@@ -56,12 +56,13 @@ class Php(Module):
                 break
         
         if not found:
-            raise ModuleException("shell.php",  "PHP interpreter initialization failed")
+            raise ModuleException(self.name,  "PHP interpreter initialization failed")
         else:
             if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
+                
        
     def run(self, cmd, use_current_path = True, post_data = {}):
 

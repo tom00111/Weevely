@@ -1,9 +1,18 @@
 import os
 from module import ModuleException
+from vector import VectorList, Vector 
 from config import Config
 from modules_info import ModInfos
 
-class ModHandler(dict):
+
+
+class ModHandler:
+    
+    vectors = VectorList([
+        Vector('shell.sh', 'system_shell', ""),
+        Vector('shell.php', 'php_shell', "")
+        ])
+    
     
     def __init__(self, url = None, password = None, path_modules = 'modules'):
         
@@ -24,6 +33,10 @@ class ModHandler(dict):
         self.conf = Config(self.modinfo.module_info.keys())
         
         self.verbosity=3
+        
+        self.interpreter = None
+        self.__load_interpreters()
+        
         
     def load(self, module_name):
         
@@ -46,9 +59,21 @@ class ModHandler(dict):
         self.verbosity = v        
                 
                 
-                
+    def __load_interpreters(self):
+        
+        for vector in self.vectors:
+            
+            try:
+                self.load(vector.interpreter)
+            except ModuleException, e:
+                print '[!] [%s] %s' % (e.module, e.error)   
+            else:
+                self.interpreter = vector.interpreter
+                break
+   
                     
                 
+    
             
     
                 

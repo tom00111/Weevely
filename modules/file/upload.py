@@ -71,15 +71,9 @@ class Upload(Module):
         file_encoded_content = b64encode(file_content)
 
                 
-        vector = self._get_default_vector2()
-        if vector:
-            response = self.__execute_payload(vector, [file_encoded_content, file_local_md5, remote_path])
-            if response:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return 
-        
-
-        vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
         for vector in vectors:
             response = self.__execute_payload(vector, [file_encoded_content,  file_local_md5, remote_path])
