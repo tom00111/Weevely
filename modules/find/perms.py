@@ -5,6 +5,8 @@ Created on 22/ago/2011
 '''
 
 from core.module import Module, ModuleException
+from core.vector import VectorList, Vector as V
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Perms'
     
@@ -12,57 +14,99 @@ class Perms(Module):
     '''Find files with write, read, execute permissions
     :find.perms first|all file|dir|all w|r|x|all <path> 
     '''
-    
-    php_method = '''
-@swp('%s','%s','%s','%s');
-function ckmod($df, $m) { return ($m=="all")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
-function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='all'||($t=='file'&&@is_file($df))||($t=='dir'&&@is_dir($df))); }
+
+    vectors = VectorList([
+       V('shell.php', 'php_recursive', """@swp('%s','%s','%s','%s');
+function ckmod($df, $m) { return ($m=="any")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
+function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='any'||($t=='f'&&@is_file($df))||($t=='d'&&@is_dir($df))); }
 function swp($d, $type, $mod, $qty){
-            $h = @opendir($d);
-            while ($f = @readdir($h)) {
-                    $df=$d.'/'.$f;
-                    if(@cktp($df,$f,$type)&&@ckmod($df,$mod)) {
-                            print($df."\\n");
-                            if($qty=="first") return;
-                    }
-                    if(@cktp($df,$f,'dir')){
-                            @swp($df, $type, $mod, $qty);
-                    }
-            }
-            @closedir($h);
+$h = @opendir($d);
+while ($f = @readdir($h)) {
+$df=$d.'/'.$f;
+if(@cktp($df,$f,$type)&&@ckmod($df,$mod)) {
+print($df."\\n");
+if($qty=="first") return;
 }
-'''
+if(@cktp($df,$f,'d')){
+@swp($df, $type, $mod, $qty);
+}
+}
+@closedir($h);
+}"""),
+       V('shell.sh', "find" , "find %s %s %s %s 2>/dev/null")
+    ])
     
-    sh_method = "find %s %s %s %s 2>/dev/null"
+
+    params = ParametersList('Find files by permissions', vectors.get_names_list(),
+                    P(arg='qty', help='How many files display', choices=['first', 'any'], default='any'), 
+                    P(arg='type', help='Type', choices=['f','d', 'any'], default='any'), 
+                    P(arg='perm', help='Permission', choices=['w','r','x','any'], default='r'),
+                    P(arg='rpath', help='Remote starging path', default='.')
+                    )
     
-    vectors = {
-               "shell.sh" : {
-                             'find' : sh_method
-                },
-               
-               "shell.php" : {
-              "php_recursive_find" : php_method
-                              }
-          }
     
-    visible = True
+
     
+#    php_method = '''
+#@swp('%s','%s','%s','%s');
+#function ckmod($df, $m) { return ($m=="all")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
+#function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='all'||($t=='file'&&@is_file($df))||($t=='dir'&&@is_dir($df))); }
+#function swp($d, $type, $mod, $qty){
+#            $h = @opendir($d);
+#            while ($f = @readdir($h)) {
+#                    $df=$d.'/'.$f;
+#                    if(@cktp($df,$f,$type)&&@ckmod($df,$mod)) {
+#                            print($df."\\n");
+#                            if($qty=="first") return;
+#                    }
+#                    if(@cktp($df,$f,'dir')){
+#                            @swp($df, $type, $mod, $qty);
+#                    }
+#            }
+#            @closedir($h);
+#}
+#'''
+#    
+#    sh_method = "find %s %s %s %s 2>/dev/null"
+#    
+#    vectors = {
+#               "shell.sh" : {
+#                             'find' : sh_method
+#                },
+#               
+#               "shell.php" : {
+#              "php_recursive_find" : php_method
+#                              }
+#          }
+#    
+#    visible = True
+#    
     def __init__(self, modhandler, url, password):
         
         Module.__init__(self, modhandler, url, password)
         
 
-    def __prepare_vector(self,interpreter, path, type, mod, qty):
-        
-        if interpreter == 'shell.sh':
+
+
+
+
+            
+    def __prepare_payload( self, vector, parameters ):  
+
+        path = parameters[0]
+        qty = parameters[1]
+        type = parameters[2]
+        mod = parameters[3]
+            
+        if vector.interpreter == 'shell.sh':
             if qty == 'first':
                 qty = '-print -quit'
-            elif qty == 'all':
+            elif qty == 'any':
                 qty = ''
             else:
                 raise ModuleException(self.name,  "Find failed. Use first|all as first parameter.")
                 
-            if type == 'all':
+            if type == 'any':
                 type = ''
             elif type == 'file':
                 type = '-type f'
@@ -71,7 +115,7 @@ function swp($d, $type, $mod, $qty){
             else:
                 raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
              
-            if mod == 'all':
+            if mod == 'any':
                 mod = ''
             elif mod == 'w':
                 mod = '-writable'
@@ -82,42 +126,38 @@ function swp($d, $type, $mod, $qty){
             else:
                 raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
         
-        return (path, type, mod, qty)
-
-    def run(self, qty, type, mod, path):
+        return vector.payloads[0] % (path, type, mod, qty)
         
+
+    def run_module(self, qty, type, mod, path):
             
-        interpreter, vector = self._get_default_vector()
-        if interpreter and vector:
-            return self.__execute_payload(interpreter, vector, qty, type, mod, path)
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+        
+        for vector in vectors:
             
-        for interpreter in self.vectors:
-            if interpreter in self.modhandler.loaded_shells:
-                for vector in self.vectors[interpreter]:
-                    response = self.__execute_payload(interpreter, vector, qty, type, mod, path)
-                    if response:
-                        return response
-                
-                
-        raise ModuleException(self.name,  "No file found")
+            response = self.__execute_payload(vector, [path, qty, type, mod])
+            if response != None:
+                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
+                return response
+        
+        raise ModuleException(self.name,  "Files not found failed")
                     
                     
-    def __execute_payload(self,interpreter,vector, qty, type, mod, path):
+    def __execute_payload(self, vector, parameters):
         
-        response = None
-        payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, path, type, mod, qty)
-        self.mprint("[%s] Searching in %s using method '%s'" % (self.name, path, vector)  )
-        
-        if interpreter == 'shell.sh':       
-            response = self.modhandler.load(interpreter).run(payload, False)
-        elif interpreter == 'shell.php':
-            response = self.modhandler.load(interpreter).run(payload)
-            
-        return response
+        payload = self.__prepare_payload(vector, parameters)
+    
+        try:    
+            response = self.modhandler.load(vector.interpreter).run_module(payload)
+        except ModuleException:
+            response = None
+        else:
+            return response
+
         
                 
-            
-
         
 
     

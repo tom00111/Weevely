@@ -5,6 +5,8 @@ Created on 28/ago/2011
 '''
 
 from core.module import Module, ModuleException
+from core.vector import VectorList, Vector as V
+from core.parameters import ParametersList, Parameter as P
 from random import choice
 from string import letters
 from core.http.request import Request
@@ -17,13 +19,16 @@ class Webdir(Module):
     :find.webdir auto | <start dir>
     '''
     
-    vectors = { 'shell.php' : { "fwrite()"       : "fwrite(fopen('%s','w'),'1');",
-                           "file_put_contents"             : "file_put_contents('%s', '1');"
-                            },
-            'shell.sh' : {
-                            "echo" : "echo '1' > %s"
-                            }
-           }
+    vectors = VectorList([
+       V('shell.php', 'fwrite', "fwrite(fopen('%s','w'),'1');"),
+       V('shell.php', "file_put_contents" , "file_put_contents('%s', '1');"),
+       V('shell.sh', "echo" , "echo '1' > %s"),
+    ])
+    
+
+    params = ParametersList('Find first writable directory and corresponding URL', vectors.get_names_list(),
+                    P(arg='rpath', help='Remote starting path', default='auto', pos=0))
+    
     
     def __init__( self, modhandler , url, password):
 
@@ -59,6 +64,7 @@ class Webdir(Module):
         return False    
                 
                         
+
 
     def run(self, start_dir):
         if self.url and self.dir:

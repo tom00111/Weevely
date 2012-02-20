@@ -19,6 +19,7 @@ class Terminal(Enviroinment):
 
         self.modhandler = modhandler
         
+        
         self.url = modhandler.url
         self.password = modhandler.password
         self.interpreter = modhandler.interpreter
@@ -26,11 +27,12 @@ class Terminal(Enviroinment):
         self.one_shot = one_shot
         self.completions = {}
     
-    
         if not self.interpreter:
             print '[!] [shell.php] No remote backdoor found. Check URL and password.'
     
         elif not one_shot:
+            
+            
             Enviroinment.__init__(self)
         
             self.history      = os.path.expanduser( '~/.weevely_history' )
@@ -52,7 +54,6 @@ class Terminal(Enviroinment):
         while self.interpreter:
             
             prompt        = self.prompt % (self.username, self.hostname, self.cwd)
-
                 
             cmd       = raw_input( prompt )
             cmd       = cmd.strip()
@@ -66,6 +67,7 @@ class Terminal(Enviroinment):
             
     def run_module_cmd(self, cmd_splitted):
         
+        
         if not self.interpreter:
             return
              
@@ -77,45 +79,43 @@ class Terminal(Enviroinment):
             
         else:
         
-            cmd_splitted[0] = cmd_splitted[0][1:]
-            
-            if len(cmd_splitted)==1:
-                output = self.run(cmd_splitted[0], [])
-            elif len(cmd_splitted)==2:
-                output =  self.run(cmd_splitted[0], [ cmd_splitted[1] ])
-            elif len(cmd_splitted)>2:
-                output =  self.run(cmd_splitted[0], cmd_splitted[1:])
+            if cmd_splitted[0][0] == ':':
+                interpreter = cmd_splitted[0][1:]
+                cmd_splitted = cmd_splitted[1:]
             else:
-                print '[!] Module name error'
+                interpreter = self.interpreter
+            
+
+            output =  self.run(interpreter, cmd_splitted)
    
         if output != None:
             print output       
             
-    def run_line_cmd(self, cmd_line):
-        
-                
-        if not self.interpreter:
-            return
-             
-        output = ''
-        
-        if not self.one_shot:
-
-            if self._handleDirectoryChange(cmd_line) == False:
-                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
-                    print self.modhandler.load('shell.php').ls_handler(cmd_line)
-                    return
-                
-                output = self.run(self.interpreter, [ cmd_line ])  
-                
-            else:
-                pass
-            
-        else:
-            output = self.run(self.interpreter, [ cmd_line ])  
-            
-        if output != None:
-            print output
+#    def run_line_cmd(self, cmd_line):
+#        
+#        if not self.interpreter:
+#            return
+#             
+#        output = ''
+#        
+#        
+#        if not self.one_shot:
+#
+#            if self._handleDirectoryChange(cmd_line) == False:
+#                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
+#                    print self.modhandler.load('shell.php').ls_handler(cmd_line)
+#                    return
+#                
+#                output = self.run(self.interpreter, [ cmd_line ])  
+#                
+#            else:
+#                pass
+#            
+#        else:
+#            output = self.run(self.interpreter, [ cmd_line ])  
+#            
+#        if output != None:
+#            print output
     
 
 
@@ -140,30 +140,32 @@ class Terminal(Enviroinment):
             return None
 
 
-    def run(self, module_name, module_arguments):
+    def run(self, module_name, module_arglist):        
+        
+        arguments = {}
+        pos = 0
+        for arg in module_arglist:
+            if '=' in arg:
+                name, value = arg.split('=')
+            else:
+                name = pos
+                value = arg
+                
+            arguments[name] = value
+            pos+=1
         
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
         else:
+
             try:
-                module_arguments_requested = self.modhandler.load(module_name).len_arguments
+                response = self.modhandler.load(module_name).run(arguments)
+                if response != None:
+                    return response
+            except KeyboardInterrupt:
+                print '[!] Stopped %s execution' % module_name
             except ModuleException, e:
-                print '[!] [%s] Error while loading: %s' % (e.module, e.error)   
-            
-            else: 
-                if module_arguments_requested != len(module_arguments): 
-                    print '[!] [%s] Error module needs %i arguments (not %i)\n' % (module_name, module_arguments_requested, len(module_arguments))
-                    if self.modhandler.module_info[module_name][0]: print '%s: %s' % (module_name, self.modhandler.module_info[module_name][1])
-                
-                else:
-                    try:
-                        response = self.modhandler.load(module_name).run(*module_arguments)
-                        if response != None:
-                            return response
-                    except KeyboardInterrupt:
-                        print '[!] Stopped %s execution' % module_name
-                    except ModuleException, e:
-                        print '[!] [%s] Error: %s' % (e.module, e.error) 
+                print '[!] [%s] Error: %s' % (e.module, e.error) 
         
       
     

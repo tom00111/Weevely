@@ -28,12 +28,12 @@ class Enviroinment:
         print ''
             
         self.modhandler.set_verbosity(2)
-        self.username = self.run('system.info', [ "whoami" ])
-        self.hostname = self.run('system.info', [ "hostname" ])
-        self.cwd = self.run('system.info', [ "basedir" ])
+        self.username = self.modhandler.load('system.info').run_module("whoami")
+        self.hostname = self.modhandler.load('system.info').run_module("hostname")
+        self.cwd = self.modhandler.load('system.info').run_module("basedir")
 
         try:
-            self.safe_mode = int(self.run('system.info', [ "safe_mode" ]))
+            self.safe_mode = int(self.modhandler.load('system.info').run_module("safe_mode"))
         except:
             self.safe_mode = None
         else:

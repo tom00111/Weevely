@@ -35,6 +35,7 @@ class ModHandler:
         self.verbosity=3
         
         self.interpreter = None
+        
         self.__load_interpreters()
         
         
@@ -47,10 +48,10 @@ class ModHandler:
             mod = __import__('modules.' + module_name, fromlist = ["*"])
             modclass = getattr(mod, mod.classname)
             self.modules[module_name]=modclass(self, self.url, self.password)
-            
             if module_name.startswith('shell.'):
                 self.loaded_shells.append(module_name)
             
+        
         return self.modules[module_name]
 
 
@@ -71,7 +72,6 @@ class ModHandler:
                 self.interpreter = vector.interpreter
                 break
    
-                    
                 
     
             

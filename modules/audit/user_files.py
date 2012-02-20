@@ -1,6 +1,9 @@
 
 
 from core.module import Module, ModuleException
+from core.vector import VectorList, Vector as V
+from core.parameters import ParametersList, Parameter as P
+
 
 classname = 'UserFiles'
 
@@ -9,6 +12,11 @@ class UserFiles(Module):
     :audit.user_files auto | home | web | <remote path> | load:<local_path_list.txt>
     """
     
+    params = ParametersList('Enumerate common restricted files for every system user', [],
+                    P(arg='common', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path']),
+                    P(arg='list', help='Path list from local file', mutual_exclusion = ['common', 'path']),
+                    P(arg='path', help='Single path', mutual_exclusion = ['common', 'list'])
+                    )
     
     common_files = { 
                     
@@ -34,24 +42,28 @@ class UserFiles(Module):
         self.usersfiles = {}    
         
         
-    def run(self, mode):
+    def run_module(self, mode):
         
-        if mode != 'auto' and mode not in self.common_files.keys():
+        custom_files = []
+        
+        listval =  self.params.get_parameter_value('list')
+        if listval:
+            try:
+                custom_files=open(listpar.value,'r').read().splitlines()
+            except:
+                raise ModuleException(self.name,  "Error opening path list \'%s\'" % listpar.value)
+        
+        pathval =  self.params.get_parameter_value('list')
+        if pathval:
+            custom_files = mode.split(',')
             
-            if mode.startswith('load:'):
-                try:
-                    custom_files=open(mode[5:],'r').read().splitlines()
-                except:
-                    raise ModuleException(self.name,  "Error opening path list \'%s\'" % mode[5:])
+        autoval = self.params.get_parameter_value('auto')
+        if autoval:
+            if autoval == 'any':
+                custom_files = self.common_files['home'] + self.common_files['web']
             else:
-                custom_files = mode.split(',')
-                
-            if custom_files:
-                self.common_files['custom'] = custom_files
-                mode = 'custom'
-            else:
-                raise ModuleException(self.name,  "Error, use auto | home | web | <file path> | load:<path_list.txt> as option ")
-            
+                custom_files = self.common_files[autoval]
+        
         self.modhandler.set_verbosity(1)
         self.modhandler.load('audit.users').run()
         self.modhandler.set_verbosity()
@@ -63,12 +75,9 @@ class UserFiles(Module):
         self.mprint('[%s] Enumerating %i users' % (self.name, len(user_list)))
         
         for user in user_list:
-            for current_mode in self.common_files:
-                if mode == 'auto' or current_mode == mode:
-                    for f in self.common_files[current_mode]:
-                        path_list.append(user.home + '/' + f)
+            for f in custom_files:
+                path_list.append(user.home + '/' + f)
                      
-        
         if path_list:
             self.modhandler.load('enum.paths').run('', path_list)
                     

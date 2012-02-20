@@ -6,6 +6,7 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Info'
     
@@ -13,7 +14,7 @@ class Info(Module):
     """Collect system informations
     :system.info auto | whoami | hostname | basedir | document_root | client_ip
     """
-    
+
     
     vectors = VectorList([
         Vector('shell.sh', 'whoami', "whoami"),
@@ -30,6 +31,13 @@ class Info(Module):
         Vector('shell.php', 'client_ip', "@print($_SERVER['REMOTE_ADDR']);")
         ])
 
+
+    
+    params = ParametersList('Collect system informations', 
+                            vectors.get_names_list(),
+                P(arg='info', help='', choices = vectors.get_names_list(), default='auto' )
+                )
+
     def __init__( self, modhandler , url, password):
 
 
@@ -37,7 +45,7 @@ class Info(Module):
         
         self.infos = {}
         
-    def run( self, info):
+    def run_module( self, info):
         
         if info in self.infos:
             return self.infos[info]
@@ -68,7 +76,7 @@ class Info(Module):
 
 
     def __execute_payload(self, vector, parameters):
-        return self.modhandler.load(vector.interpreter).run(vector.payloads[0])
+        return self.modhandler.load(vector.interpreter).run_module(vector.payloads[0])
         
 
 

