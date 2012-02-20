@@ -18,7 +18,7 @@ class Check(Module):
     
     
     vectors = VectorList([
-    V('shell.php', 'exists', "for($n=0; $n<2000;$n++) { $uid = @posix_getpwuid($n); if ($uid) echo join(':',$uid).\'\n\';  }"),
+    V('shell.php', 'exists', "$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);",),
        V('shell.php', "dir" , "is_dir('%s') && print(1);"),
        V('shell.php', "md5" , "print(md5_file('%s'));"),
        V('shell.php',  "r", "is_readable('%s') && print(1);"),
@@ -49,23 +49,6 @@ class Check(Module):
         
         Module.__init__(self, modhandler, url, password)    
     
-    def __execute_payload(self, interpreter, vector, remote_path, mode):
-        
-        payload = self.vectors[interpreter][vector] % (remote_path)
-        response = self.modhandler.load(interpreter).run(payload)
-            
-        if response == '1':
-            return True
-        elif (mode == 'md5' and response):
-            return response
-        else:
-            if mode != 'exists':
-                if not self.run(remote_path, 'exists'):
-                    self.mprint('File not exists.', 4)
-                
-        return False
-        
-    
 
     def run_module(self, remote_path, mode):
         
@@ -76,25 +59,39 @@ class Check(Module):
     
         response = self.__execute_payload(vector, [remote_path, mode])
         if response != None:
-            self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
             return response
     
 
     def __execute_payload(self, vector, parameters):
         
-        payload = self.__prepare_payload(vector, parameters)
+        remote_path = parameters[0]
+        mode = parameters[1]
+        
+        payload = self.__prepare_payload(vector, [remote_path])
     
         try:    
             response = self.modhandler.load(vector.interpreter).run_module(payload)
         except ModuleException:
             response = None
         else:
-            return response
+            
+            if response == '1':
+                return True
+            elif (mode == 'md5' and response):
+                return response
+            else:
+                if mode != 'exists':
+                    if not self.run_module(remote_path, 'exists'):
+                        self.mprint('File not exists.', 4)
+                    
+            return False
+            
 
         raise ModuleException(self.name,  "File check failed")
                 
         
     def __prepare_payload( self, vector, parameters ):
+
 
         if vector.payloads[0].count( '%s' ) == len(parameters):
             return vector.payloads[0] % tuple(parameters)

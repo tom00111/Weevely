@@ -45,47 +45,10 @@ if(@cktp($df,$f,'d')){
                     )
     
     
-
-    
-#    php_method = '''
-#@swp('%s','%s','%s','%s');
-#function ckmod($df, $m) { return ($m=="all")||($m=="w"&&is_writable($df))||($m=="r"&&is_readable($df))||($m=="x"&&is_executable($df)); }
-#function cktp($df, $f, $t) { return ($f!='.')&&($f!='..')&&($t=='all'||($t=='file'&&@is_file($df))||($t=='dir'&&@is_dir($df))); }
-#function swp($d, $type, $mod, $qty){
-#            $h = @opendir($d);
-#            while ($f = @readdir($h)) {
-#                    $df=$d.'/'.$f;
-#                    if(@cktp($df,$f,$type)&&@ckmod($df,$mod)) {
-#                            print($df."\\n");
-#                            if($qty=="first") return;
-#                    }
-#                    if(@cktp($df,$f,'dir')){
-#                            @swp($df, $type, $mod, $qty);
-#                    }
-#            }
-#            @closedir($h);
-#}
-#'''
-#    
-#    sh_method = "find %s %s %s %s 2>/dev/null"
-#    
-#    vectors = {
-#               "shell.sh" : {
-#                             'find' : sh_method
-#                },
-#               
-#               "shell.php" : {
-#              "php_recursive_find" : php_method
-#                              }
-#          }
-#    
-#    visible = True
-#    
     def __init__(self, modhandler, url, password):
         
         Module.__init__(self, modhandler, url, password)
         
-
 
     def __prepare_payload( self, vector, parameters ):  
 

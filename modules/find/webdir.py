@@ -40,20 +40,39 @@ class Webdir(Module):
         Module.__init__(self, modhandler, url, password)
         
 
-    def __execute_payload(self, interpreter, vector, dir_path, file_path, file_url, dir_url):
-        
-        payload = self.vectors[interpreter][vector] % file_path
-        self.modhandler.load(interpreter).run(payload)
 
-        if self.modhandler.load('file.check').run(file_path, 'exists'):
+
+    def __prepare_payload( self, vector, parameters ):
+
+        if vector.payloads[0].count( '%s' ) == len(parameters):
+            return vector.payloads[0] % tuple(parameters)
+        else:
+            raise ModuleException(self.name,  "Error payload parameter number does not corresponds")
+        
+    
+
+    def __execute_payload(self, vector, parameters):
+        
+        dir_path = parameters[0] 
+        file_path = parameters[1] 
+        file_url = parameters[2] 
+        dir_url = parameters[3]
+        
+        payload = self.__prepare_payload(vector, [ file_path ])
+        
+        self.modhandler.load(vector.interpreter).run_module(payload)
+
+        if self.modhandler.load('file.check').run_module(file_path, 'exists'):
+            
                 
             file_content = Request(file_url).read()
+            
             if( file_content == '1'):
                 self.dir = dir_path
                 self.url = dir_url
                 
             
-            if self.modhandler.load('shell.php').run("unlink('%s') && print('1');" % file_path) != '1':
+            if self.modhandler.load('shell.php').run_module("unlink('%s') && print('1');" % file_path) != '1':
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                 
             if self.dir and self.url:
@@ -66,14 +85,14 @@ class Webdir(Module):
                         
 
 
-    def run(self, start_dir):
+    def run_module(self, start_dir):
         if self.url and self.dir:
             self.mprint("[%s] Writable web dir: %s -> %s" % (self.name, self.dir, self.url))
             return
             
         if start_dir == 'auto':
             try:
-                root_find_dir = self.modhandler.load('system.info').run('basedir')
+                root_find_dir = self.modhandler.load('system.info').run_module('basedir')
             except ModuleException, e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
                 root_find_dir = None
@@ -88,8 +107,8 @@ class Webdir(Module):
             http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
             
             try:
-                writable_dirs = self.modhandler.load('find.perms').run('all', 'dir', 'w', root_find_dir).split('\n')
-            except Exception as e:
+                writable_dirs = self.modhandler.load('find.perms').run_module('any', 'd', 'w', root_find_dir).split('\n')
+            except ModuleException as e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
                 writable_dirs = []
                 
@@ -103,18 +122,30 @@ class Webdir(Module):
                 file_url = http_root + file_path.replace(root_find_dir,'')
                 dir_url = http_root + dir_path.replace(root_find_dir,'')
             
-                interpreter, vector = self._get_default_vector()
-                if interpreter and vector:
-                    response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-                    if response:
-                        return response
+            
+                vectors = self._get_default_vector2()
+                if not vectors:
+                    vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+                
+                for vector in vectors:
                     
-                for interpreter in self.vectors:
-                    if interpreter in self.modhandler.loaded_shells:
-                        for vector in self.vectors[interpreter]:
-                            response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-                            if response:
-                                return response
+                    response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
+                    if response != None:
+                        self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
+                        return response
+            
+#                interpreter, vector = self._get_default_vector()
+#                if interpreter and vector:
+#                    response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+#                    if response:
+#                        return response
+#                    
+#                for interpreter in self.vectors:
+#                    if interpreter in self.modhandler.loaded_shells:
+#                        for vector in self.vectors[interpreter]:
+#                            response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
+#                            if response:
+#                                return response
                  
         if not (self.url and self.dir):
             raise ModuleException(self.name,  "Writable web directory not found")
