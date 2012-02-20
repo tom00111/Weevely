@@ -73,7 +73,6 @@ class ParametersList:
             else:
                 print '[!] Error, invalid parameter %s' % (namepos)  
                 check=False
-        print args
                 
         return check    
                 

@@ -132,20 +132,7 @@ class Webdir(Module):
                     response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
                     if response != None:
                         self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
-                        return response
-            
-#                interpreter, vector = self._get_default_vector()
-#                if interpreter and vector:
-#                    response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-#                    if response:
-#                        return response
-#                    
-#                for interpreter in self.vectors:
-#                    if interpreter in self.modhandler.loaded_shells:
-#                        for vector in self.vectors[interpreter]:
-#                            response = self.__execute_payload(interpreter, vector, dir_path, file_path, file_url, dir_url)
-#                            if response:
-#                                return response
+                        return 
                  
         if not (self.url and self.dir):
             raise ModuleException(self.name,  "Writable web directory not found")
