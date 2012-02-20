@@ -67,7 +67,6 @@ class Terminal(Enviroinment):
             
     def run_module_cmd(self, cmd_splitted):
         
-        
         if not self.interpreter:
             return
              
@@ -84,38 +83,37 @@ class Terminal(Enviroinment):
                 cmd_splitted = cmd_splitted[1:]
             else:
                 interpreter = self.interpreter
-            
-
+                
             output =  self.run(interpreter, cmd_splitted)
    
         if output != None:
             print output       
             
-#    def run_line_cmd(self, cmd_line):
-#        
-#        if not self.interpreter:
-#            return
-#             
-#        output = ''
-#        
-#        
-#        if not self.one_shot:
-#
-#            if self._handleDirectoryChange(cmd_line) == False:
-#                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
-#                    print self.modhandler.load('shell.php').ls_handler(cmd_line)
-#                    return
-#                
-#                output = self.run(self.interpreter, [ cmd_line ])  
-#                
-#            else:
-#                pass
-#            
-#        else:
-#            output = self.run(self.interpreter, [ cmd_line ])  
-#            
-#        if output != None:
-#            print output
+    def run_line_cmd(self, cmd_line):
+        
+        if not self.interpreter:
+            return
+             
+        output = ''
+        
+        
+        if not self.one_shot:
+
+            if self._handleDirectoryChange(cmd_line) == False:
+                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
+                    print self.modhandler.load('shell.php').ls_handler(cmd_line)
+                    return
+                
+                output = self.run(self.interpreter, [ cmd_line ])  
+                
+            else:
+                pass
+            
+        else:
+            output = self.run(self.interpreter, [ cmd_line ])  
+            
+        if output != None:
+            print output
     
 
 

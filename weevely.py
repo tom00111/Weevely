@@ -85,7 +85,11 @@ if __name__ == "__main__":
             
             try:
                 terminal = Terminal (ModHandler(url, password), True)
-                terminal.run_module_cmd(sys.argv[3:])
+                
+                if sys.argv[3][0] == module_trigger:
+                    terminal.run_module_cmd(sys.argv[3:])
+                else:
+                    terminal.run_line_cmd(' '.join(sys.argv[3:]))
                 
                 
             except KeyboardInterrupt:

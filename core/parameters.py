@@ -34,18 +34,16 @@ class ParametersList:
         
         check=True
         
+        
         for namepos in args:
             param = self.__get_parameter(namepos)
-            
-            print param.choices
             
             if param:
                 
                 value = args[namepos]
                 
-                
                 if param.choices and (value not in param.choices):
-                    print '[!] Error, invalid choice \'%s\' for \'%s\'\nChoose from \'%s\'' % (value, namepos, '\', \''.join(param.choices))             
+                    print '[!] Error, invalid choice \'%s\' for \'%s\'\n[!] Choose from \'%s\'' % (value, namepos, '\', \''.join(param.choices))             
                     check=False
                     continue
                 
@@ -75,8 +73,9 @@ class ParametersList:
             else:
                 print '[!] Error, invalid parameter %s' % (namepos)  
                 check=False
+        print args
                 
-            return check    
+        return check    
                 
                 
                 

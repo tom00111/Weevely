@@ -87,10 +87,6 @@ if(@cktp($df,$f,'d')){
         
 
 
-
-
-
-            
     def __prepare_payload( self, vector, parameters ):  
 
         path = parameters[0]
@@ -103,29 +99,23 @@ if(@cktp($df,$f,'d')){
                 qty = '-print -quit'
             elif qty == 'any':
                 qty = ''
-            else:
-                raise ModuleException(self.name,  "Find failed. Use first|all as first parameter.")
                 
             if type == 'any':
                 type = ''
-            elif type == 'file':
+            elif type == 'f':
                 type = '-type f'
-            elif type == 'dir':
+            elif type == 'd':
                 type = '-type d'
-            else:
-                raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
              
             if mod == 'any':
                 mod = ''
             elif mod == 'w':
                 mod = '-writable'
             elif mod == 'r':
-                mod = '-executable'
-            elif mod == 'x':
                 mod = '-readable'
-            else:
-                raise ModuleException(self.name,  "Find failed. Use file|dir|all as second parameter.")
-        
+            elif mod == 'x':
+                mod = '-executable'
+            
         return vector.payloads[0] % (path, type, mod, qty)
         
 
