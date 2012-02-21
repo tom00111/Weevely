@@ -34,7 +34,7 @@ class Info(Module):
 
     
     params = ParametersList('Collect system informations', 
-                            vectors.get_names_list(),
+                            vectors,
                 P(arg='info', help='', choices = vectors.get_names_list(), default='auto' )
                 )
 

@@ -34,7 +34,7 @@ fclose($pipes[2]); proc_close($h);"""),
             ])
     
     
-    params = ParametersList('System shell', vectors.get_names_list(),
+    params = ParametersList('System shell', vectors,
                     P(arg='cmd', help='Shell command', required=True, pos=0),
                     P(arg='stderr', help='Print standard error', default=True, type=bool)
                     )

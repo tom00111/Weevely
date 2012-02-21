@@ -22,12 +22,13 @@ class Parameter:
         
 class ParametersList:
     
-    def __init__(self, module_description, vectors_list, *parameters):
+    def __init__(self, module_description, vectors, *parameters):
         
         self.module_description = module_description
         self.parameters = list(parameters)
-        if vectors_list:
-            self.parameters.append(Parameter(arg='vector', help='Force vector', choices = vectors_list, oneshot = False))
+        self.vectors = vectors
+        if vectors:
+            self.parameters.append(Parameter(arg='vector', help='Vector to force', choices = vectors.get_names_list(), oneshot = False))
         
         
     def set_check_args(self, args):

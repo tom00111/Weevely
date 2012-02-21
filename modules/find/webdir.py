@@ -26,7 +26,7 @@ class Webdir(Module):
     ])
     
 
-    params = ParametersList('Find first writable directory and corresponding URL', vectors.get_names_list(),
+    params = ParametersList('Find first writable directory and corresponding URL', vectors,
                     P(arg='rpath', help='Remote starting path', default='auto', pos=0))
     
     

@@ -31,7 +31,7 @@ class Download(Module):
 
 
     
-    params = ParametersList('Download binary/ascii files from target', vectors.get_names_list(),
+    params = ParametersList('Download binary/ascii files from target', vectors,
                     P(arg='rpath', help='Remote file path', required=True, pos=0),
                     P(arg='lpath', help='Local file path', required=True, pos=1)
                     )

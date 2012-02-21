@@ -7,6 +7,8 @@ from core.module import Module, ModuleException
 from tempfile import NamedTemporaryFile
 from core.parameters import ParametersList, Parameter as P
 from os import remove
+from modules.file.download import Download
+
 
 classname = 'Read'
     
@@ -15,7 +17,9 @@ class Read(Module):
     :file.read <remote path> 
     '''
         
-    params = ParametersList('Read file from remote filesystem', [],
+    vectors = Download.vectors
+        
+    params = ParametersList('Read file from remote filesystem', vectors,
                     P(arg='rpath', help='Choose remote file path', required=True, pos=0)
                     )
     
@@ -27,10 +31,11 @@ class Read(Module):
           
     def run_module(self, remote_path):
         
-        
         file = NamedTemporaryFile() 
         file.close()
         
+        # Passing vector to file.download
+        self.modhandler.load('file.download').params.set_check_args({'vector':self.params.vector})
         response = self.modhandler.load('file.download').run_module(remote_path, file.name, True)
         
         if response:

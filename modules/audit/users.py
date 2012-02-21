@@ -39,7 +39,7 @@ class Users(Module):
         ])
     
 
-    params = ParametersList('Enumerate users and /etc/passwd content', vectors.get_names_list())
+    params = ParametersList('Enumerate users and /etc/passwd content', vectors)
     
     def __init__( self, modhandler , url, password):
 

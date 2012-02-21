@@ -28,7 +28,7 @@ class Check(Module):
     ])
     
 
-    params = ParametersList('Check remote files type, md5 and permission', vectors.get_names_list(),
+    params = ParametersList('Check remote files type, md5 and permission', vectors,
                     P(arg='rpath', help='Choose remote file path', required=True, pos=0),
                     P(arg='mode', help='Choose mode', required=True, choices=vectors.get_names_list(), pos=1))
     
