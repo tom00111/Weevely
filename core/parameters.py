@@ -63,9 +63,8 @@ class ParametersList:
                 if param.mutual_exclusion:
                     
                     for excluded in param.mutual_exclusion:
-                        p = self.__get_parameter(excluded)
-                        if p.value != None:
-                            print '[!] Error, parameter %s is mutually exclusive with %s' % (p.name, param.name) 
+                        if self.get_parameter_value(excluded):
+                            print '[!] Error, parameter \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
                             check=False
                             continue     
                     

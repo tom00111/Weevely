@@ -1,6 +1,7 @@
 
 
 from core.module import Module, ModuleException
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Paths'
 
@@ -9,7 +10,11 @@ class Paths(Module):
     :enum.paths <local_path_list.txt> 
     """
      
-    def run(self, list_path, list = []):
+    params = ParametersList('Enumerate remote paths', None,
+                P(arg='lpath', help='Path of local wordlist', required=True, pos=0))
+
+     
+    def run_module(self, list_path, list = []):
         
         if not list and list_path:
             try:
@@ -23,14 +28,14 @@ class Paths(Module):
             
             output = path + '' + '\t'*(3-((len(path)+1)/8))
             
-            if self.modhandler.load('file.check').run(path, 'exists'):
+            if self.modhandler.load('file.check').run_module(path, 'exists'):
                 output += '\texists'
                 
-                if self.modhandler.load('file.check').run(path, 'r'):
+                if self.modhandler.load('file.check').run_module(path, 'r'):
                     output += ', +readable'
-                if self.modhandler.load('file.check').run(path, 'w'):
+                if self.modhandler.load('file.check').run_module(path, 'w'):
                     output += ', +writable'
-                if self.modhandler.load('file.check').run(path, 'x'):
+                if self.modhandler.load('file.check').run_module(path, 'x'):
                     output += ', +excutable'
                                          
                 self.mprint(output)

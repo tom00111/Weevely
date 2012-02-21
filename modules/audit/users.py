@@ -19,12 +19,13 @@ class User:
         
         self.line = line
         self.name = linesplit[0]
-        
-        if len(linesplit) > 5 and linesplit[5]:
-            self.home = linesplit[5]
-        else:
-            self.home = '/home/' + self.name
+        self.home = '/home/' + self.name
             
+        
+        if len(linesplit) > 6:
+             self.uid = linesplit[2]
+             self.home = linesplit[5]
+             self.shell = linesplit[6]
     
 class Users(Module):
     """Enumerate users and /etc/passwd content
@@ -39,7 +40,9 @@ class Users(Module):
         ])
     
 
-    params = ParametersList('Enumerate users and /etc/passwd content', vectors)
+    params = ParametersList('Enumerate users in /etc/passwd content', vectors,
+                    P(arg='filter', help='Show only real users', default=False, type=bool, pos=0))
+
     
     def __init__( self, modhandler , url, password):
 
@@ -49,7 +52,7 @@ class Users(Module):
         self.usersinfo = {}
         
                 
-    def run_module(self):
+    def run_module(self, filter_real_users):
         
         
         vectors = self._get_default_vector2()
@@ -58,7 +61,7 @@ class Users(Module):
         
         for vector in vectors:
             
-            response = self.__execute_payload(vector, [])
+            response = self.__execute_payload(vector, [filter_real_users])
             if response != None:
                 self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
@@ -66,13 +69,16 @@ class Users(Module):
 
     def __execute_payload(self, vector, parameters):
         
-        payload = self.__prepare_payload(vector, parameters)
+        filter_real_users = parameters[0]
+        
+        payload = self.__prepare_payload(vector, [])
     
         try:    
             response = self.modhandler.load(vector.interpreter).run_module(payload)
         except ModuleException:
             response = None
             
+        pwdfile = ''
             
         if response and ':0:0:' in response:
             
@@ -80,10 +86,20 @@ class Users(Module):
             
             for line in response.split('\n'):
                 if line:
+                    
                     user = User(line)
+                    
+                    if filter_real_users:
+                        if (user.uid == 0) or (user.uid > 999) or (('false' not in user.shell) and ('/home/' in user.home)):
+                            pwdfile += line + '\n'
+                            
+                    else:
+                            pwdfile += line + '\n'
+                        
                     self.usersinfo[user]=user
             
-            return response
+            
+            return pwdfile
 
         raise ModuleException(self.name,  "Users enumeration failed")
                 

@@ -13,9 +13,9 @@ class UserFiles(Module):
     """
     
     params = ParametersList('Enumerate common restricted files for every system user', [],
-                    P(arg='common', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path']),
-                    P(arg='list', help='Path list from local file', mutual_exclusion = ['common', 'path']),
-                    P(arg='path', help='Single path', mutual_exclusion = ['common', 'list'])
+                    P(arg='auto', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path']),
+                    P(arg='list', help='Path list from local file', mutual_exclusion = ['auto', 'path']),
+                    P(arg='path', help='Single path', mutual_exclusion = ['auto', 'list'])
                     )
     
     common_files = { 
@@ -42,30 +42,29 @@ class UserFiles(Module):
         self.usersfiles = {}    
         
         
-    def run_module(self, mode):
+    def run_module(self, auto, list, path):
+        
+        # Only one parameter is not None
         
         custom_files = []
         
-        listval =  self.params.get_parameter_value('list')
-        if listval:
+        if list:
             try:
-                custom_files=open(listpar.value,'r').read().splitlines()
+                custom_files=open(list,'r').read().splitlines()
             except:
                 raise ModuleException(self.name,  "Error opening path list \'%s\'" % listpar.value)
         
-        pathval =  self.params.get_parameter_value('list')
-        if pathval:
-            custom_files = mode.split(',')
+        if path:
+            custom_files = path.split(',')
             
-        autoval = self.params.get_parameter_value('auto')
-        if autoval:
-            if autoval == 'any':
+        if auto:
+            if auto == 'any':
                 custom_files = self.common_files['home'] + self.common_files['web']
             else:
                 custom_files = self.common_files[autoval]
         
         self.modhandler.set_verbosity(1)
-        self.modhandler.load('audit.users').run()
+        self.modhandler.load('audit.users').run_module()
         self.modhandler.set_verbosity()
         
         
@@ -79,10 +78,7 @@ class UserFiles(Module):
                 path_list.append(user.home + '/' + f)
                      
         if path_list:
-            self.modhandler.load('enum.paths').run('', path_list)
-                    
-                       
-                            
+            self.modhandler.load('enum.paths').run_module('', path_list)
                     
                     
         
