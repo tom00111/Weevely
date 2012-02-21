@@ -23,7 +23,7 @@ class User:
             
         
         if len(linesplit) > 6:
-             self.uid = linesplit[2]
+             self.uid = int(linesplit[2])
              self.home = linesplit[5]
              self.shell = linesplit[6]
     
@@ -41,7 +41,7 @@ class Users(Module):
     
 
     params = ParametersList('Enumerate users in /etc/passwd content', vectors,
-                    P(arg='filter', help='Show only real users', default=False, type=bool, pos=0))
+                    P(arg='filter', help='Try to show real users only', default=False, type=bool, pos=0))
 
     
     def __init__( self, modhandler , url, password):
@@ -60,10 +60,8 @@ class Users(Module):
             vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
         for vector in vectors:
-            
             response = self.__execute_payload(vector, [filter_real_users])
             if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
         
 
@@ -82,7 +80,7 @@ class Users(Module):
             
         if response and ':0:0:' in response:
             
-            self.mprint("[%s] Enumerating user using method '%s'" % (self.name, vector))
+            self.mprint("[%s] Enumerating user using method '%s'" % (self.name, vector.name))
             
             for line in response.split('\n'):
                 if line:
@@ -97,6 +95,7 @@ class Users(Module):
                             pwdfile += line + '\n'
                         
                     self.usersinfo[user]=user
+            
             
             
             return pwdfile
