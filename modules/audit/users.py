@@ -90,12 +90,12 @@ class Users(Module):
                     if filter_real_users:
                         if (user.uid == 0) or (user.uid > 999) or (('false' not in user.shell) and ('/home/' in user.home)):
                             pwdfile += line + '\n'
-                            
+                            self.usersinfo[user]=user
                     else:
                             pwdfile += line + '\n'
-                        
-                    self.usersinfo[user]=user
+                            self.usersinfo[user]=user
             
+                    
             
             
             return pwdfile

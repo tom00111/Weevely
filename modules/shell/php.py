@@ -81,7 +81,7 @@ class Php(Module):
         request.setPayload(cmd, self.current_mode)
         if post_data:
             request.setPostData(post_data)
-        
+    
         debug_level = 3
         self.mprint( "Request: %s" % (cmd), debug_level)
         

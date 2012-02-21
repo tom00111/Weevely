@@ -64,7 +64,7 @@ class UserFiles(Module):
                 custom_files = self.common_files[autoval]
         
         self.modhandler.set_verbosity(1)
-        self.modhandler.load('audit.users').run_module()
+        self.modhandler.load('audit.users').run_module(True)
         self.modhandler.set_verbosity()
         
         
