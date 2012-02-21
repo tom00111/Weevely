@@ -5,6 +5,8 @@ Created on 22/ago/2011
 '''
 
 from core.module import Module, ModuleException
+from core.vector import VectorList, Vector as V
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Name'
     
@@ -14,8 +16,9 @@ class Name(Module):
     :find.name e|ei|c|ci <string> <start path> 
     '''
     
-    php_method = '''
-@swp('%s','%s','%s');
+    
+    vectors = VectorList([
+       V('shell.php', 'php_recursive', """@swp('%s','%s','%s');
 function ckdir($df, $f) { return ($f!='.')&&($f!='..')&&@is_dir($df); }
 function match($df, $f, $s, $m) { return (($m=='e')&&$f==$s)||(($m=='c')&&preg_match("/".$s."/",$f))||(($m=='ei')&&strcasecmp($s,$f)==0)||(($m=='ci')&&preg_match("/".$s."/i",$f)); }
 function swp($d, $m, $s){
@@ -26,22 +29,17 @@ function swp($d, $m, $s){
                     if(@ckdir($df,$f)) @swp($df, $m, $s);
             }
             @closedir($h);
-}
+}"""),
+       V('shell.sh', "find" , "find %s %s %s 2>/dev/null")
+    ])
+    
 
-?>
-'''
+    params = ParametersList('Find files with matching name', vectors,
+                    P(arg='match', help='Match if Equal, Equal case insensitive, Contains, Contains case insensitive', choices=['e', 'ei', 'c', 'ci'], pos = 0), 
+                    P(arg='str', help='String to match', required=True, pos=1), 
+                    P(arg='rpath', help='Remote starting path', default='.', required = True, pos=2)
+                    )
     
-    sh_method = "find %s %s %s 2>/dev/null"
-    
-    vectors = {
-               "shell.sh" : {
-                             'find' : sh_method
-                },
-               
-               "shell.php" : {
-              "php_recursive_find" : php_method
-                              }
-          }
     
     visible = True
     
@@ -50,57 +48,58 @@ function swp($d, $m, $s){
         Module.__init__(self, modhandler, url, password)
         
 
-    def __prepare_vector(self,interpreter, mod, string, path):
+    def __prepare_payload(self, vector, params):
         
-        
-        if not mod in ('e', 'ei', 'c', 'ci'):
-            raise ModuleException(self.name,  "Find name failed. Use e|ei|c|ci as parameter.")
+        mod = params[0]
+        match = params[1]
+        path = params[2]
         
         str_mod = mod
-        str_string = string
+        str_match = match
+        str_path = path
         
-        if interpreter == 'shell.sh':
+        if vector.interpreter == 'shell.sh':
 
             if mod == 'e' or mod == 'c':
                 str_mod = '-name' 
             elif mod == 'ei' or mod == 'ci':
                 str_mod = '-iname'
-                
+            
             if mod == 'c' or mod == 'ci':
-                str_string = '\'*' + string + '*\''
+                str_match = '\'*' + str_match + '*\''
 
             
-        return (path, str_mod, str_string)
+        return vector.payloads[0] % (str_path, str_mod, str_match)
 
-
-    def __execute_payload(self, interpreter, vector, mod, string, path):
-        
-        response = None
-        payload = self.vectors[interpreter][vector] % self.__prepare_vector(interpreter, mod, string, path)
-        self.mprint("[%s] Finding by name using method '%s'" % (self.name,vector)  )
-                  
-        if interpreter == 'shell.sh':
-            response = self.modhandler.load(interpreter).run(payload, False)
-        elif interpreter == 'shell.php':
-            response = self.modhandler.load(interpreter).run(payload)
             
-        return response
 
-    def run(self, mod, string, path):
+    def run_module(self, match, str, rpath):
+            
+        vectors = self._get_default_vector2()
+        if not vectors:
+            vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
-        interpreter, vector = self._get_default_vector()
-        if interpreter and vector:
-            return self.__execute_payload(interpreter, vector, mod, string, path)
+        for vector in vectors:
+            
+            response = self.__execute_payload(vector, [match, str, rpath])
+            if response != None:
+                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
+                return response
         
-        for interpreter in self.vectors:
-            if interpreter in self.modhandler.loaded_shells:
-                for vector in self.vectors[interpreter]:
-                    response = self.__execute_payload(interpreter, vector, mod, string, path)
-                    if response:
-                        return response
+        raise ModuleException(self.name,  "Files not found")
                     
-        raise ModuleException(self.name,  "No file found.")
-            
+                    
+    def __execute_payload(self, vector, parameters):
+        
+        payload = self.__prepare_payload(vector, parameters)
+    
+        try:    
+            response = self.modhandler.load(vector.interpreter).run_module(payload)
+        except ModuleException:
+            response = None
+        else:
+            return response
+
 
         
 
