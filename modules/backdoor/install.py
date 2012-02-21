@@ -6,6 +6,7 @@ Created on 28/ago/2011
 
 from core.module import Module, ModuleException
 from core.backdoor import Backdoor
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Install'
     

