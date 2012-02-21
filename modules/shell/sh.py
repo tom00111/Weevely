@@ -100,7 +100,6 @@ fclose($pipes[2]); proc_close($h);"""),
                 
             if response:
                 self.payload = vector.payloads[0]
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return
 
                 

@@ -13,6 +13,7 @@ Created on 22/ago/2011
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 from threading import Timer
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Tcp'
     
@@ -27,6 +28,10 @@ class Tcp(Module):
             
             ])
 
+    params = ParametersList('Send reverse TCP shell ', vectors,
+            P(arg='port', help='Remote path', required=True, type=int, pos=0)
+            )
+
     def __init__( self, modhandler , url, password):
 
         self.last_vector = None
@@ -35,7 +40,7 @@ class Tcp(Module):
         Module.__init__(self, modhandler, url, password)
         
                 
-    def run(self, port):
+    def run_module(self, port):
 
         t = Timer(5.0, self.__check_module_state)
         t.start()
@@ -59,7 +64,7 @@ class Tcp(Module):
     def __execute_payload(self, vector, parameters):
         
         payload = self.__prepare_payload(vector, parameters)
-        return self.modhandler.load(vector.interpreter).run(payload, False)
+        return self.modhandler.load(vector.interpreter).run_module(payload, False)
         
         
     def __prepare_payload( self, vector, parameters):
@@ -72,7 +77,7 @@ class Tcp(Module):
     
     def __check_module_state(self):
         if self.last_vector and not self.done:
-            self.mprint('[%s] Backdoor \'%s\' seems spawned. End commands with ";" if needed' % (self.name, self.last_vector))
+            self.mprint('[%s] Port \'%s\' seems open. End commands with ";" if needed' % (self.name, self.last_vector))
             self.done = True
            
     
