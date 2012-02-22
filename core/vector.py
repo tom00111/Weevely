@@ -33,7 +33,8 @@ class Vector:
         elif isinstance(payloads, types.ListType):
             pos = 0
             for p in payloads:
-                self.payloads[pos] = p
+               self.payloads[pos] = p
+               pos+=1
         elif isinstance (payloads, types.StringTypes):
             self.payloads[0] = payloads
         else:

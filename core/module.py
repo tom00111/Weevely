@@ -40,6 +40,7 @@ class Module:
         if check1:
 
             check2, arglist = self.params.get_check_args_list()
+            
             if check2:
                 output = self.run_module(*arglist)
                 self.params.clean()
