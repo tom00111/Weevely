@@ -33,7 +33,7 @@ break;
             ])
 
     
-    params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
+    params = ParametersList('Bruteforce single ftp user using a local wordlist', vectors,
             P(arg='user', help='User to bruteforce', required=True, pos=0),
             P(arg='lpath', help='Path of local wordlist', required=True, pos=1),
             P(arg='sline', help='Start line of local wordlist', default='all', pos=2),
