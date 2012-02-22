@@ -18,7 +18,7 @@ class Ftp_users(Module):
     '''
     
     params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
-            P(arg='lpath', help='Path of local wordlist', required=True, pos=0),
+            P(arg='lpath', help='Path of local wordlist. Use \'auto\' to use only user and its reverse as password.', required=True, pos=0),
             P(arg='host', help='FTP host', default='127.0.0.1', pos=1),
             P(arg='port', help='FTP port', default=21, type=int, pos=2))
 
