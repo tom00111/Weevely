@@ -7,6 +7,7 @@ Created on 22/ago/2011
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 import random
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Query'
  
@@ -28,14 +29,16 @@ echo $table."\n";
 }""")
             ])
 
+    params = ParametersList('Execute SQL query', None,
+            P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),
+            P(arg='user', help='SQL user', required=True, pos=1),
+            P(arg='pwd', help='SQL password', required=True, pos=2),
+            P(arg='query', help='SQL query', required=True, pos=3),
+            P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=4)
+            )
 
 
-    def __init__( self, modhandler , url, password):
-
-        Module.__init__(self, modhandler, url, password)
-        
-        
-    def run( self, mode, host, user, pwd , query ):
+    def run_module( self, mode, user, pwd, query, host):
 
         
         if mode == 'mysql':
@@ -55,7 +58,6 @@ echo $table."\n";
         for vector in vectors:
             response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
             if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
                 
         
@@ -63,7 +65,7 @@ echo $table."\n";
         
         payload = self.__prepare_payload(vector, parameters) 
         
-        response = self.modhandler.load(vector.interpreter).run(payload)
+        response = self.modhandler.load(vector.interpreter).run_module(payload)
         if response:
             return response
         return None

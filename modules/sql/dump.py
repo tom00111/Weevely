@@ -7,6 +7,7 @@ Created on 22/ago/2011
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 import random
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Dump'
  
@@ -15,6 +16,7 @@ class Dump(Module):
     '''Get SQL database dump
     :sql.dump mysql <host> <user> <pass> <db name> <table name>|any
     '''
+
     
     vectors = VectorList( [
             Vector('shell.sh', 'mysqldump', "mysqldump -h %s -u %s --password=%s %s %s") ,
@@ -90,6 +92,14 @@ while ($i < mysql_num_rows ($tableQ))
             ])
 
 
+    params = ParametersList('Get SQL mysqldump-like database dump', vectors,
+            P(arg='dbms', help='DBMS', choices=['mysql'], required=True, pos=0),
+            P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
+            P(arg='pwd', help='SQL password', required=True, pos=2),
+            P(arg='db', help='Database name', required=True, pos=3),
+            P(arg='table', help='Table name to dump (any to dump entire database)', default='any', pos=4),
+            P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=5))
+
 
     def __init__( self, modhandler , url, password):
             
@@ -99,7 +109,7 @@ while ($i < mysql_num_rows ($tableQ))
         
         
 
-    def run( self, mode, host, user, pwd , db, table ):
+    def run_module( self, mode, user, pwd , db, table, host ):
         
         if mode != 'mysql':
             raise ModuleException(self.name,  "Only 'mysql' database is supported so far")
@@ -129,7 +139,7 @@ while ($i < mysql_num_rows ($tableQ))
         self.structure[db] = {}
           
         payload = self.__prepare_payload(vector, [host, user, pwd, db, table]) 
-        response = self.modhandler.load(vector.interpreter).run(payload)
+        response = self.modhandler.load(vector.interpreter).run_module(payload)
         
         self.modhandler.set_verbosity()
         

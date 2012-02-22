@@ -7,6 +7,7 @@ Created on 22/ago/2011
 from core.module import Module, ModuleException
 from core.vector import VectorList, Vector
 import random
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Summary'
  
@@ -21,6 +22,12 @@ class Summary(Module):
             Vector('sql.query', 'mysql', [ "SHOW DATABASES;", "SHOW TABLES FROM %s;", "SHOW COLUMNS FROM %s.%s;" ]) 
             ])
 
+    params = ParametersList('Get SQL mysqldump-like database dump', vectors,
+            P(arg='dbms', help='DBMS', choices=['mysql'], required=True, pos=0),
+            P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
+            P(arg='pwd', help='SQL password', required=True, pos=2),
+            P(arg='db', help='Database name', required=True, pos=3),
+            P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=4))
 
 
     def __init__( self, modhandler , url, password):
@@ -31,7 +38,7 @@ class Summary(Module):
         
         
 
-    def run( self, mode, host, user, pwd , db ):
+    def run_module( self, mode, user, pwd , db, host ):
 
         vectors = self._get_default_vector2()
         if not vectors:
@@ -56,7 +63,7 @@ class Summary(Module):
         # tables
         payload = self.__prepare_payload(vector, [db], 1) 
  
-        response = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
+        response = self.modhandler.load(vector.interpreter).run_module(mode, user, pwd, payload, host)
         
         if response:
             for table in response.split('\n'):
@@ -66,7 +73,7 @@ class Summary(Module):
                 
                 # columns
                 cpayload = self.__prepare_payload(vector, [db, table], 2) 
-                cresponse = self.modhandler.load(vector.interpreter).run(mode, host, user, pwd, payload)
+                cresponse = self.modhandler.load(vector.interpreter).run_module(mode, user, pwd, payload, host)
                 if cresponse:
                     for column in response.split('\n'):   
                         self.structure[db][table][column]=[]

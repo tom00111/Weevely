@@ -29,7 +29,7 @@ break;
             ])
 
     params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
-            P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),
+            P(arg='dbms', help='DBMS', choices=['mysql', 'postgres'], required=True, pos=0),
             P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
             P(arg='lpath', help='Path of local wordlist', required=True, pos=2),
             P(arg='sline', help='Start line of local wordlist', default='all', pos=3),
@@ -78,7 +78,6 @@ break;
         for vector in vectors:
             response = self.__execute_payload(vector, [sql_connect, host, user, rand_post_name, start_line, wl_splitted])
             if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
                 
         

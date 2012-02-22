@@ -77,7 +77,6 @@ break;
         for vector in vectors:
             response = self.__execute_payload(vector, [host, port, user, rand_post_name, start_line, wl_splitted])
             if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                 return response
                 
         
