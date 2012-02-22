@@ -22,9 +22,6 @@ class Sql_users(Module):
             P(arg='lpath', help='Path of local wordlist. Use \'auto\' to use only user and its reverse as password.', required=True, pos=1),
             P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=2))
 
-    def __init__( self, modhandler , url, password):
-        
-        Module.__init__(self, modhandler, url, password)
         
         
     def __generate_wl_from_user(self, user):

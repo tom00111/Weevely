@@ -33,25 +33,7 @@ class Check(Module):
                     P(arg='mode', help='Choose mode', required=True, choices=vectors.get_names_list(), pos=1))
     
     
-#    vectors = { 'shell.php' : { 
-#                           "exists"             : "$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);",
-#                           "dir"            : "is_dir('%s') && print(1);",
-#                           "md5"            : "print(md5_file('%s'));",
-#                           "r"            : "is_readable('%s') && print(1);",
-#                           "w"            : "is_writable('%s') && print(1);",
-#                           "x"            : "is_executable('%s') && print(1);",
-#                           "file"            : "is_file('%s') && print(1);"
-#                            }
-#           }
-#    
-    def __init__(self, modhandler, url, password):
-
-        
-        Module.__init__(self, modhandler, url, password)    
-    
-
     def run_module(self, remote_path, mode):
-        
         
         # Skip default vector load, here vector=mode
         

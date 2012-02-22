@@ -6,6 +6,7 @@ Created on 13/set/2011
 
 
 from core.module import Module, ModuleException
+from core.parameters import ParametersList, Parameter as P
 
 classname = 'Binaries'
     
@@ -13,6 +14,11 @@ class Binaries(Module):
     '''Enumerate binaries in common PATH folders
     :enum.binaries auto | <name> 
     '''
+
+
+    params = ParametersList('Enumerate available binaries in common PATH folders', None,
+                    P(arg='name', help='Search binary name, or \'auto\' for common binaries', pos=0), 
+                    )
 
     bins_path = [ "/usr/bin",
              "/usr/local/bin",
@@ -37,12 +43,8 @@ class Binaries(Module):
              'mysql' : '',
              'nc' : ''
              }
-
-    def __init__(self, modhandler, url, password):
         
-        Module.__init__(self, modhandler, url, password)
-        
-    def run( self, binary_name):
+    def run_module( self, binary_name):
         
         path_list =  []
         
@@ -56,7 +58,5 @@ class Binaries(Module):
                 path_list.append(path + '/' + binary_name)
             
         if path_list:
-            self.modhandler.load('enum.paths').run('', path_list)
+            self.modhandler.load('enum.paths').run_module('', path_list)
 
-            
-        

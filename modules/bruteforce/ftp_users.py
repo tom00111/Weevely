@@ -22,9 +22,7 @@ class Ftp_users(Module):
             P(arg='host', help='FTP host', default='127.0.0.1', pos=1),
             P(arg='port', help='FTP port', default=21, type=int, pos=2))
 
-    def __init__( self, modhandler , url, password):
-        
-        Module.__init__(self, modhandler, url, password)
+
         
         
     def __generate_wl_from_user(self, user):
