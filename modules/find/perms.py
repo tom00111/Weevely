@@ -41,7 +41,7 @@ if(@cktp($df,$f,'d')){
                     P(arg='qty', help='How many files display', choices=['first', 'any'], default='any'), 
                     P(arg='type', help='Type', choices=['f','d', 'any'], default='any'), 
                     P(arg='perm', help='Permission', choices=['w','r','x','any'], default='r'),
-                    P(arg='rpath', help='Remote starging path', default='.')
+                    P(arg='rpath', help='Remote starting path', default='.')
                     )
     
     

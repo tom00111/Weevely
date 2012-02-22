@@ -18,7 +18,21 @@ class Parameter:
         
     def set_value(self, value):
         value = self.value
-
+    
+    
+    def __repr__(self):
+        
+        choices = ''
+        if self.choices:
+            choices = '(%s)' % (', '.join(self.choices))
+            
+        value = ''
+        if self.value:
+            value = str(self.value)
+            
+        tabs = '\t'*(3-((len(self.arg)+len(value) + 4)/8))
+            
+        return '%s = %s %s %s %s' % (self.arg, value, tabs, self.help, choices)
         
 class ParametersList:
     
@@ -28,7 +42,28 @@ class ParametersList:
         self.parameters = list(parameters)
         self.vectors = vectors
         if vectors:
-            self.parameters.append(Parameter(arg='vector', help='Vector to force', choices = vectors.get_names_list(), oneshot = False))
+            self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), oneshot = False))
+        
+    def __repr__(self):
+        
+        output=''
+        
+        for parameter in self.parameters:
+            
+            if parameter.required:
+                formatarg = '<%s%s>' 
+            else:
+                formatarg = '[%s%s]' 
+                
+            if parameter.pos != -1:
+                output += '%s ' % (formatarg % ( parameter.arg, ''))
+            else:
+                output += '%s ' % (formatarg % ( parameter.arg, '='))                
+            
+        output += '\n'
+        for parameter in self.parameters:
+            output = '%s\n%s' % (output, parameter)
+        return output
         
         
     def set_check_args(self, args):
@@ -40,7 +75,7 @@ class ParametersList:
             param = self.__get_parameter(namepos)
             
             if param:
-                
+                print param
                 value = args[namepos]
                 
                 if param.choices and (value not in param.choices):

@@ -74,26 +74,22 @@ if __name__ == "__main__":
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
 
-        if sys.argv[3] == ':help':
-            print help_string
-            ModInfos().print_module_infos()
+        
+        
+        url = sys.argv[1]
+        password = sys.argv[2]        
+        
+        try:
+            terminal = Terminal (ModHandler(url, password), True)
             
-        else:
+            if sys.argv[3][0] == module_trigger:
+                terminal.run_module_cmd(sys.argv[3:])
+            else:
+                terminal.run_line_cmd(' '.join(sys.argv[3:]))
             
-            url = sys.argv[1]
-            password = sys.argv[2]        
             
-            try:
-                terminal = Terminal (ModHandler(url, password), True)
-                
-                if sys.argv[3][0] == module_trigger:
-                    terminal.run_module_cmd(sys.argv[3:])
-                else:
-                    terminal.run_line_cmd(' '.join(sys.argv[3:]))
-                
-                
-            except KeyboardInterrupt:
-                print '\n[!] Exiting. Bye ^^'
+        except KeyboardInterrupt:
+            print '\n[!] Exiting. Bye ^^'
     else:
         
         print help_string

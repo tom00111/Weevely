@@ -74,7 +74,7 @@ class Terminal(Enviroinment):
     
         ## Help call
         if cmd_splitted[0] == help_string:
-            self.modhandler.modinfo.print_module_infos()
+            self.modhandler.print_modules()
             
         else:
         
@@ -96,6 +96,9 @@ class Terminal(Enviroinment):
              
         output = ''
         
+        if cmd_line == help_string:
+            self.modhandler.print_modules()
+            return
         
         if not self.one_shot:
 
