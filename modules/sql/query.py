@@ -29,7 +29,7 @@ echo $table."\n";
 }""")
             ])
 
-    params = ParametersList('Execute SQL query', None,
+    params = ParametersList('Execute SQL query', vectors,
             P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),
             P(arg='user', help='SQL user', required=True, pos=1),
             P(arg='pwd', help='SQL password', required=True, pos=2),

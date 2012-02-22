@@ -22,7 +22,7 @@ class Summary(Module):
             Vector('sql.query', 'mysql', [ "SHOW DATABASES;", "SHOW TABLES FROM %s;", "SHOW COLUMNS FROM %s.%s;" ]) 
             ])
 
-    params = ParametersList('Get SQL mysqldump-like database dump', vectors,
+    params = ParametersList('Get SQL summary of database or single tables', vectors,
             P(arg='dbms', help='DBMS', choices=['mysql'], required=True, pos=0),
             P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
             P(arg='pwd', help='SQL password', required=True, pos=2),

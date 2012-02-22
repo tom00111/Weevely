@@ -41,7 +41,7 @@ class ParametersList:
         self.module_description = module_description
         self.parameters = list(parameters)
         self.vectors = vectors
-        if vectors:
+        if vectors and len(vectors)>1:
             self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), oneshot = False))
         
     def __repr__(self):
@@ -62,7 +62,7 @@ class ParametersList:
             
         output += '\n'
         for parameter in self.parameters:
-            output = '%s\n%s' % (output, parameter)
+            output += '\n%s' % (parameter)
         return output
         
         
