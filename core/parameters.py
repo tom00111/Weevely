@@ -43,8 +43,8 @@ class ParametersList:
         self.vectors = vectors
         if vectors and len(vectors)>1:
             self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), oneshot = False))
-        
-    def __repr__(self):
+      
+    def summary(self):
         
         output=''
         
@@ -59,11 +59,20 @@ class ParametersList:
                 output += '%s ' % (formatarg % ( parameter.arg, ''))
             else:
                 output += '%s ' % (formatarg % ( parameter.arg, '='))                
-            
-        output += '\n'
+        
+        return output
+    
+    def help(self):
+        
+        output = ''
         for parameter in self.parameters:
             output += '\n%s' % (parameter)
         return output
+        
+        
+    def __repr__(self):
+        
+        return self.summary() + self.help()
         
         
     def set_check_args(self, args):

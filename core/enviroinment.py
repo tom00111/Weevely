@@ -23,9 +23,9 @@ class Enviroinment:
             self.prompt = "%s@%s:%s php> "
             
         print ''
-        print '[' + self.interpreter + '] Show help with :help command'
-        print '[' + self.interpreter + '] Run modules with :<module> <arg 1> ... <arg N>'
+        print '[' + self.interpreter + '] Show module help with :help [name] . Available modules:'
         print ''
+        self.modhandler.modinfo.summary()
             
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run_module("whoami")

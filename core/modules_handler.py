@@ -53,25 +53,6 @@ class ModHandler:
             
         
         return self.modules[module_name]
-
-
-    def print_modules(self, name=None, dir = None, recursion = True):
-        
-        if not dir:
-            dir = self.path_modules
-        
-        for f in os.listdir(dir):
-            
-            f = dir + os.sep + f
-            
-            if os.path.isdir(f) and recursion:
-                self.print_modules(None, f, False)
-            if os.path.isfile(f) and f.endswith('.py') and not f.endswith('__init__.py'):
-                f = f[8:-3].replace('/','.')
-                mod = __import__('modules.' + f, fromlist = ["*"])
-                modclass = getattr(mod, mod.classname)
-                if (name and name == f) or (not name):
-                    print '\n[%s] %s\n[%s] :%s %s' % (f, modclass.params.module_description, f, f, modclass.params)
                     
     def set_verbosity(self, v = 3):
         self.verbosity = v        

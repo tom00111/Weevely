@@ -6,31 +6,28 @@ class ModInfos:
 
     def __init__(self):
         self.module_info = {}
-        self.load_module_infos()
+        self.load_infos()
 
-    def load_module_infos(self, path_modules = 'modules', recursion = True):
+
+    def load_infos(self, name=None, dir = 'modules', recursion = True):
         
-        for f in os.listdir(path_modules):
+        for f in os.listdir(dir):
             
-            f = path_modules + os.sep + f
+            f = dir + os.sep + f
             
             if os.path.isdir(f) and recursion:
-                self.load_module_infos(f, False)
+                self.load_infos(None, f, False)
             if os.path.isfile(f) and f.endswith('.py') and not f.endswith('__init__.py'):
                 f = f[8:-3].replace('/','.')
                 mod = __import__('modules.' + f, fromlist = ["*"])
                 modclass = getattr(mod, mod.classname)
-                self.module_info[f] = [ modclass.visible, modclass.__doc__ ]
-                
-        return self.module_info
+                self.module_info[f] = [ modclass.params.module_description, modclass.params.summary(), modclass.params.help() ]
                     
 
-    def print_module_summary(self):
-        
-        
+    def summary(self):
+
         module_dict={}
         
-        print ''
         for mod in self.module_info:
             parts = mod.split('.')
             if parts[0] not in module_dict:
@@ -42,46 +39,23 @@ class ModInfos:
             
         for mod in ordered_module_dict:
             print '[%s] %s' % (mod, ', '.join(module_dict[mod]))
-
-
-    def print_module_infos(self):
-        
-        module_dict={}
-        
+            
         print ''
-        for mod in self.module_info:
-            parts = mod.split('.')
-            if parts[0] not in module_dict:
-                module_dict[parts[0]] = {}
-            module_dict[parts[0]][parts[1]] = self.module_info[mod][1]
-            
-        ordered_module_dict = module_dict.keys()
-        ordered_module_dict.sort()
+
+
+    def help(self, module):
         
-        for pkg in ordered_module_dict:
+        for modname in self.module_info:
             
-            oldpkg=''
+            if (module in modname) or not module:
+                
+                descr = self.module_info[modname][0]
+                usage = self.module_info[modname][1]
+                help = ''
+                if module:
+                   help = '%s' % self.module_info[modname][2]
+                
+                print '\n[%s] %s\nUsage :%s %s\n%s' % (modname, descr, modname, usage, help)
+                
+
             
-            for mod in module_dict[pkg]:
-                
-                if pkg != oldpkg:
-                    output = '[%s] [%s]' % ( pkg,  mod )
-                    oldpkg = pkg
-                else:
-                    output = '%s[%s]' % ( ' '*(len(pkg)+3), mod )
-                
-                print output,
-                
-                if module_dict[pkg][mod] and len(module_dict[pkg][mod])>1:
-                    lines = module_dict[pkg][mod].split('\n')
-                    usageline = lines[-1].strip()
-                    titleline = lines[0].strip()
-                    
-                    print titleline
-                    for line in lines[1:-1]:
-                        print ' '*(len(pkg)+2), line.strip()
-                    print usageline,
-                else:
-                    print ''
-                    
-                print ''

@@ -40,8 +40,7 @@ Run single command or module
 
 Generate PHP backdoor script
   weevely generate <password> <output path> 
-
-Show help with command :help and run modules with :<module name>. Available modules:'''  
+'''  
     
 if __name__ == "__main__":
 
