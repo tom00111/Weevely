@@ -28,10 +28,8 @@ class ModHandler(Helper):
 
         Helper.__init__(self)
         
-        self.modinfo = ModInfos()
-        self.module_info = self.modinfo.module_info
         
-        self.conf = Config(self.modinfo.module_info.keys())
+        self.conf = Config(self.module_info.keys())
         
         self.verbosity=3
         
@@ -43,7 +41,7 @@ class ModHandler(Helper):
     def load(self, module_name):
         
         if not module_name in self.modules:
-            if module_name not in self.modinfo.module_info.keys():
+            if module_name not in self.module_info.keys():
                 raise ModuleException("!",  "Module not found in path %s." % (self.path_modules) )
             
             mod = __import__('modules.' + module_name, fromlist = ["*"])
