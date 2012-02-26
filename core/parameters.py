@@ -84,13 +84,11 @@ class ParametersList:
             param = self.__get_parameter(namepos)
             
             if param:
-                print param
                 value = args[namepos]
                 
                 if param.choices and (value not in param.choices):
                     print '[!] Error, invalid choice \'%s\' for \'%s\'\n[!] Choose from \'%s\'' % (value, namepos, '\', \''.join(param.choices))             
                     check=False
-                    continue
                 
                 if param.type:
                     try:
@@ -98,11 +96,10 @@ class ParametersList:
                     except ValueError:
                         print '[!] Error, parameter invalid type (%s)' % (repr(param.type))             
                         check=False
-                        continue
+
                     if not isinstance(value, param.type):
                         print '[!] Error, parameter invalid type (%s)' % (repr(param.type)) 
                         check=False
-                        continue
                     
                 if param.mutual_exclusion:
                     
@@ -110,14 +107,18 @@ class ParametersList:
                         if self.get_parameter_value(excluded):
                             print '[!] Error, parameter \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
                             check=False
-                            continue     
-                    
-                param.value = value
                 
             else:
                 print '[!] Error, invalid parameter %s' % (namepos)  
                 check=False
                 
+            if check:
+                param.value = value
+                
+                
+        if not check:
+            print '[!] Usage: %s' % self.summary()
+        
         return check    
                 
                 

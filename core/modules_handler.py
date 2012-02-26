@@ -3,10 +3,10 @@ from module import ModuleException
 from vector import VectorList, Vector 
 from config import Config
 from modules_info import ModInfos
+from helper import Helper
 
 
-
-class ModHandler:
+class ModHandler(Helper):
     
     vectors = VectorList([
         Vector('shell.sh', 'system_shell', ""),
@@ -26,6 +26,8 @@ class ModHandler:
 
         self.loaded_shells = []    
         self.modules = {}
+
+        Helper.__init__(self)
         
         self.modinfo = ModInfos()
         self.module_info = self.modinfo.module_info

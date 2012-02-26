@@ -77,7 +77,7 @@ class Terminal(Enviroinment):
             modname = ''
             if len(cmd_splitted)>1:
                 modname = cmd_splitted[1]
-            self.modhandler.modinfo.help(modname)
+            print self.modhandler.helps(modname)
             
         else:
         
@@ -100,7 +100,7 @@ class Terminal(Enviroinment):
         output = ''
         
         if cmd_line == help_string:
-            self.modhandler.modinfo.help(cmd_line[len(help_string):])
+            print self.modhandler.helps(cmd_line[len(help_string):])
             return
         
         if not self.one_shot:
