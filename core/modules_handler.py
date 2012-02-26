@@ -2,7 +2,6 @@ import os
 from module import ModuleException
 from vector import VectorList, Vector 
 from config import Config
-from modules_info import ModInfos
 from helper import Helper
 
 
