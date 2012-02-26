@@ -6,6 +6,7 @@ class Helper:
 
     def __init__(self):
         self.module_info = {}
+        self.ordered_module_names = {}
         self.load_infos()
 
 
