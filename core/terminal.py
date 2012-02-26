@@ -25,7 +25,9 @@ class Terminal(Enviroinment):
         self.interpreter = modhandler.interpreter
 
         self.one_shot = one_shot
-        self.completions = {}
+        
+        self.completions = []
+        self.completion_prefix = ''
     
         if not self.interpreter:
             print '[!] [shell.php] No remote backdoor found. Check URL and password.'
@@ -53,7 +55,7 @@ class Terminal(Enviroinment):
         
         while self.interpreter:
             
-            prompt        = self.prompt % (self.username, self.hostname, self.cwd)
+            prompt        = self._format_prompt()
                 
             cmd       = raw_input( prompt )
             cmd       = cmd.strip()
@@ -122,26 +124,20 @@ class Terminal(Enviroinment):
             print output
     
 
-
-
     def __complete( self, text, state ):
-        
-        try:
-            matches = self.completions[text]
-        except KeyError:
+            matches = self.modhandler.help_completion(text)
+            output = '\n%s\n%s' % ( '\n'.join(matches),  self._format_prompt())
+            print output,        
+            return []
 
-            matches = []
-            for module_name in ([ ':' + x for x in self.modhandler.module_info.keys() ] + [ ':help' ]):
-                
-                if module_name.startswith(text):
-                    matches.append(module_name)
-                    
-            self.completions[text] = matches
             
-        try:
-            return matches[state]
-        except IndexError:
-            return None
+        
+#            output = '\n%s\n%s' % ( '\n'.join(matches),  self._format_prompt())
+#            print output,
+
+#            if len(matches) == 1:
+#                readline.insert_text(matches[0])
+#                readline.redisplay()
 
 
     def run(self, module_name, module_arglist):        

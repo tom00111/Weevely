@@ -38,6 +38,13 @@ class Enviroinment:
                 print '[!] Safe mode is enabled'
                 
         self.modhandler.set_verbosity()
+ 
+ 
+
+    def _format_prompt(self):
+        
+        return self.prompt % (self.username, self.hostname, self.cwd)
+        
     
     def _handleDirectoryChange( self, cmd):
         

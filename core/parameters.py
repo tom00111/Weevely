@@ -26,13 +26,20 @@ class Parameter:
         if self.choices:
             choices = '(%s)' % (', '.join(self.choices))
             
+        type = ''
+        if self.type:
+            type = 'Type: %s' % repr(self.type.__name__)                    
+            if isinstance(True, self.type):
+                type += ' (True, False)'
+            
+            
         value = ''
         if self.value:
             value = str(self.value)
             
         tabs = '\t'*(3-((len(self.arg)+len(value) + 4)/8))
             
-        return '%s = %s %s %s %s' % (self.arg, value, tabs, self.help, choices)
+        return '%s = %s %s %s %s %s' % (self.arg, value, tabs, self.help, choices, type)
         
 class ParametersList:
     

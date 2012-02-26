@@ -48,6 +48,26 @@ class Helper:
         return output
 
 
+    def help_completion(self, module):
+        
+        matches = []
+        
+        for group in self.ordered_groups:
+            
+            for modname in self.modules_names_by_group[group]:
+                    
+                if(modname == module):
+                    return modname
+                    
+                # Considering module name with or without :
+                elif (modname.startswith(module)) or (modname.startswith(module[1:])) or not module:
+                    
+                    usage = self.module_info[modname][1]
+                    matches.append(':%s %s' % (modname, usage))
+        
+        return matches
+                    
+
     def helps(self, module):
         
         output = ''
@@ -61,7 +81,7 @@ class Helper:
             for modname in self.modules_names_by_group[group]:
                     
                 # Considering module name with or without :
-                if (module in modname) or (module[1:] in modname) or not module:
+                if (modname.startswith(module)) or (modname.startswith(module[1:])) or not module:
                     
                     descr = self.module_info[modname][0]
                     usage = self.module_info[modname][1]
