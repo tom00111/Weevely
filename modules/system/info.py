@@ -34,8 +34,8 @@ class Info(Module):
 
     
     params = ParametersList('Collect system informations', 
-                            vectors,
-                P(arg='info', help='', choices = vectors.get_names_list(), default='auto' )
+                            [],
+                P(arg='info', help='', choices = vectors.get_names_list(), default='auto', pos=0 )
                 )
 
     def __init__( self, modhandler , url, password):

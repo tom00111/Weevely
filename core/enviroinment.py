@@ -25,7 +25,7 @@ class Enviroinment:
         print ''
         print '[' + self.interpreter + '] Show module help with :help [name] . Available modules:'
         print ''
-        self.modhandler.modinfo.summary()
+        self.modhandler.modinfo.summaries()
             
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run_module("whoami")
