@@ -57,10 +57,10 @@ class Helper:
             for modname in self.modules_names_by_group[group]:
                     
                 if(modname == module):
-                    return modname
+                    return [ modname ]
                     
                 # Considering module name with or without :
-                elif (modname.startswith(module)) or (modname.startswith(module[1:])) or not module:
+                elif (modname.startswith(module[1:])) or not module:
                     
                     usage = ''
                     if not only_name:

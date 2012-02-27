@@ -11,7 +11,8 @@ import readline, atexit, os, re, shlex
 module_trigger = ':'
 help_string = ':help'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-    
+respace = re.compile('.*\s+$', re.M)
+
             
 class Terminal(Enviroinment):
     
@@ -26,8 +27,8 @@ class Terminal(Enviroinment):
 
         self.one_shot = one_shot
         
-        self.matching_words = self.modhandler.help_completion('', only_name=True)
-        self.completion_prefix = ''
+        self.matching_words =  self.modhandler.help_completion('') + [help_string]
+        self.completion_prefix = ':'
     
         if not self.interpreter:
             print '[!] [shell.php] No remote backdoor found. Check URL and password.'
@@ -40,8 +41,8 @@ class Terminal(Enviroinment):
             self.history      = os.path.expanduser( '~/.weevely_history' )
 
             try:
-                
-                readline.parse_and_bind( 'tab: menu-complete' )
+                readline.set_completer_delims(' \t\n;')
+                readline.parse_and_bind( 'tab: complete' )
                 readline.set_completer( self.__complete )
                 #readline.set_completion_display_matches_hook(self.__suggest)
                 readline.read_history_file( self.history )
@@ -125,38 +126,41 @@ class Terminal(Enviroinment):
             print output
     
 
-    def __suggest(substitution, matches, longest_match_length):
-        print 'AHAAA'
 
-#    def __complete( self, text, state ):
-#
-#            try:
-#    
-#                matches = self.modhandler.help_completion(text)
-#                output = '\n%s\n%s' % ( '\n'.join(matches),  self._format_prompt())
-#                print output
+
+#    def __complete( self, prefix, index ):
+#        
+#        try:
+#            if index == 0:
+#                output = '\n%s\n%s%s' % ('\n'.join(self.modhandler.help_completion(prefix)), self._format_prompt(), prefix)
+#                print output,
+#        except Exception, e:
+#            print e
 #                
-#            except Exception, e:
-#                print '[!] Error completing: %s' % e
-#            
-#            else:
-#                return matches[state]
 
-    def __complete( self, prefix, index ):
+
+    def __complete(self, text, state):
         
-        try:
-            if prefix != self.completion_prefix:
-                self.matching_words = self.modhandler.help_completion(prefix, only_name=True)
-                self.completion_prefix = prefix
-            try:
-                if index == 0:
-                    print '\n%s' % ('\n'.join(self.modhandler.help_completion(prefix)))
-                return self.matching_words[index]
-            except IndexError:
-                return None
-        except Exception, e:
-            print e
-                
+        
+        "Generic readline completion entry point."
+        buffer = readline.get_line_buffer()
+        line = readline.get_line_buffer().split()
+        # show all commands
+        if not line:
+            return [c + ' ' for c in self.matching_words][state]
+        # account for last argument ending in a space
+        if respace.match(buffer):
+            line.append('')
+        # resolve command to the implementation function
+        cmd = line[0].strip()
+        if cmd in self.matching_words:
+            return [cmd + ' '][state]
+        results = [c + ' ' for c in self.matching_words if c.startswith(cmd)] + [None]
+        if len(results) == 2:
+            return results[state].split()[0] + ' '
+        return results[state]
+        
+        
 
     def run(self, module_name, module_arglist):        
         
