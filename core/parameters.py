@@ -36,10 +36,15 @@ class Parameter:
         value = ''
         if self.value:
             value = str(self.value)
+        
+        exclusions = ''
+        if self.mutual_exclusion:
+            exclusions = '(Mutual exclusions: \'%s\')' % '\', \''.join(self.mutual_exclusion)
+        
             
         tabs = '\t'*(3-((len(self.arg)+len(value) + 4)/8))
             
-        return '%s = %s %s %s %s %s' % (self.arg, value, tabs, self.help, choices, type)
+        return '%s = %s %s %s %s %s %s' % (self.arg, value, tabs, self.help, choices, type, exclusions)
         
 class ParametersList:
     

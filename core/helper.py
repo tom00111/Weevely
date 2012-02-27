@@ -48,7 +48,7 @@ class Helper:
         return output
 
 
-    def help_completion(self, module):
+    def help_completion(self, module, only_name = False):
         
         matches = []
         
@@ -62,7 +62,9 @@ class Helper:
                 # Considering module name with or without :
                 elif (modname.startswith(module)) or (modname.startswith(module[1:])) or not module:
                     
-                    usage = self.module_info[modname][1]
+                    usage = ''
+                    if not only_name:
+                        usage = self.module_info[modname][1]
                     matches.append(':%s %s' % (modname, usage))
         
         return matches

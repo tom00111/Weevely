@@ -13,7 +13,7 @@ class UserFiles(Module):
     """
     
     params = ParametersList('Enumerate common restricted files for every system user', [],
-                    P(arg='auto', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path']),
+                    P(arg='auto', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path'], default='any'),
                     P(arg='list', help='Path list from local file', mutual_exclusion = ['auto', 'path']),
                     P(arg='path', help='Single path', mutual_exclusion = ['auto', 'list'])
                     )

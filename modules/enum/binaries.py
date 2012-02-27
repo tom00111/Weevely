@@ -17,7 +17,7 @@ class Binaries(Module):
 
 
     params = ParametersList('Enumerate available binaries in common PATH folders', None,
-                    P(arg='name', help='Search binary name, or \'auto\' for common binaries', pos=0), 
+                    P(arg='name', help='Search binary name, or \'auto\' for common binaries', pos=0, default='auto'), 
                     )
 
     bins_path = [ "/usr/bin",
