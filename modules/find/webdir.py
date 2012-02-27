@@ -76,7 +76,7 @@ class Webdir(Module):
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                 
             if self.dir and self.url:
-                print "[find.webdir] Writable web dir: %s -> %s" % (self.dir, self.url)
+                print "[find.webdir] Writable web dir found with method '%s': %s -> %s" % (vector.name, self.dir, self.url)
                 return True
                 
             
@@ -131,7 +131,6 @@ class Webdir(Module):
                     
                     response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
                     if response != None:
-                        self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                         return 
                  
         if not (self.url and self.dir):
