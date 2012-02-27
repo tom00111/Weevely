@@ -80,6 +80,13 @@ class ParametersList:
         for parameter in self.parameters:
             output += '\n%s' % (parameter)
         return output
+
+    def __print_namepos(self,s):
+        try: 
+            int(s)
+            return 'at position %s' % s
+        except ValueError:
+            return 'in parameter \'%s\'' % s
         
         
     def __repr__(self):
@@ -99,7 +106,7 @@ class ParametersList:
                 value = args[namepos]
                 
                 if param.choices and (value not in param.choices):
-                    print '[!] Error, invalid choice \'%s\' for \'%s\'\n[!] Choose from \'%s\'' % (value, namepos, '\', \''.join(param.choices))             
+                    print '[!] Error using \'%s\' %s. Options: \'%s\'' % (value, self.__print_namepos(namepos), '\', \''.join(param.choices))             
                     check=False
                 
                 if param.type:
@@ -117,11 +124,11 @@ class ParametersList:
                     
                     for excluded in param.mutual_exclusion:
                         if self.get_parameter_value(excluded):
-                            print '[!] Error, parameter \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
+                            print '[!] Error, parameters \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
                             check=False
                 
             else:
-                print '[!] Error, invalid parameter %s' % (namepos)  
+                print '[!] Error, invalid parameter %s' % (self.__print_namepos(namepos))  
                 check=False
                 
             if check:
@@ -169,11 +176,13 @@ class ParametersList:
         check = True
         args_list =  []
         
+        error_required = []
+        
         for param in self.parameters:
             if param.value == None:
                 
                 if param.required:
-                    print '[!] Error, parameter %s required' % (param.arg)
+                    error_required.append(param.arg)
                     check = False
                     continue
   
@@ -182,6 +191,9 @@ class ParametersList:
             else:
                 setattr(self, param.arg, param.value)
         
+        
+        if error_required:
+            print '[!] Error, required parameters: \'%s\' ' % ('\', \''.join(error_required))
         return check, args_list
             
         
