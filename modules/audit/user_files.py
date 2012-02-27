@@ -13,7 +13,7 @@ class UserFiles(Module):
     """
     
     params = ParametersList('Enumerate common restricted files for every system user', [],
-                    P(arg='auto', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path'], default='any'),
+                    P(arg='auto', help='Enumerate file in /home/*, /home/*/public_html or both', choices = ['home', 'web', 'any'], mutual_exclusion = ['list', 'path']),
                     P(arg='list', help='Path list from local file', mutual_exclusion = ['auto', 'path']),
                     P(arg='path', help='Single path', mutual_exclusion = ['auto', 'list'])
                     )
@@ -44,24 +44,26 @@ class UserFiles(Module):
         
     def run_module(self, auto, list, path):
         
-        # Only one parameter is not None
-        
         custom_files = []
         
         if list:
             try:
                 custom_files=open(list,'r').read().splitlines()
             except:
-                raise ModuleException(self.name,  "Error opening path list \'%s\'" % listpar.value)
+                raise ModuleException(self.name,  "Error opening path list \'%s\'" % list)
         
-        if path:
+        elif path:
             custom_files = path.split(',')
             
-        if auto:
+        elif auto:
             if auto == 'any':
                 custom_files = self.common_files['home'] + self.common_files['web']
             else:
-                custom_files = self.common_files[autoval]
+                custom_files = self.common_files[auto]
+                
+        else:
+            print '[!] Error, required one of this parameters: %s' % (self.params.summary())
+            return
         
         self.modhandler.set_verbosity(1)
         self.modhandler.load('audit.users').run_module(True)

@@ -28,7 +28,6 @@ class Terminal(Enviroinment):
         self.one_shot = one_shot
         
         self.matching_words =  self.modhandler.help_completion('') + [help_string]
-        self.completion_prefix = ':'
     
         if not self.interpreter:
             print '[!] [shell.php] No remote backdoor found. Check URL and password.'
@@ -44,7 +43,6 @@ class Terminal(Enviroinment):
                 readline.set_completer_delims(' \t\n;')
                 readline.parse_and_bind( 'tab: complete' )
                 readline.set_completer( self.__complete )
-                #readline.set_completion_display_matches_hook(self.__suggest)
                 readline.read_history_file( self.history )
                 
             except IOError:
@@ -125,18 +123,6 @@ class Terminal(Enviroinment):
         if output != None:
             print output
     
-
-
-
-#    def __complete( self, prefix, index ):
-#        
-#        try:
-#            if index == 0:
-#                output = '\n%s\n%s%s' % ('\n'.join(self.modhandler.help_completion(prefix)), self._format_prompt(), prefix)
-#                print output,
-#        except Exception, e:
-#            print e
-#                
 
 
     def __complete(self, text, state):

@@ -173,7 +173,6 @@ class ParametersList:
                 
     def get_check_args_list(self):
         
-        check = True
         args_list =  []
         
         error_required = []
@@ -183,7 +182,6 @@ class ParametersList:
                 
                 if param.required:
                     error_required.append(param.arg)
-                    check = False
                     continue
   
             if param.oneshot:
@@ -192,8 +190,11 @@ class ParametersList:
                 setattr(self, param.arg, param.value)
         
         
+        
         if error_required:
-            print '[!] Error, required parameters: \'%s\' ' % ('\', \''.join(error_required))
-        return check, args_list
+            print '[!] Error, required parameters: \'%s\'\n[!] Usage: %s' % ('\', \''.join(error_required), self.summary())
+            return False, args_list
+        
+        return True, args_list
             
         

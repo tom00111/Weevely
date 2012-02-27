@@ -13,9 +13,6 @@ class Helper:
 
 
     def load_infos(self, name=None, dir = 'modules', recursion = True):
-
-        
-
         
         for f in os.listdir(dir):
             

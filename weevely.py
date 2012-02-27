@@ -68,7 +68,7 @@ if __name__ == "__main__":
             
     elif len(sys.argv) == 4 and sys.argv[1] == 'test':
         try:
-         Test().run( sys.argv[2], sys.argv[3] )
+         Test( ModHandler(sys.argv[2], sys.argv[3]) ).runtest()
         except Exception, e:
             print '\n[!] Test error: %s ' % str(e)
             raise

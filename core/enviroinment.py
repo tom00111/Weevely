@@ -22,7 +22,7 @@ class Enviroinment:
         else:
             self.prompt = "%s@%s:%s php> "
             
-        print '\n[%s] Show modules help with :help [name]. Available modules:\n%s' % (self.interpreter, self.modhandler.summaries())
+        print '[+] List modules with <tab> and show help with :help [module name]\n'
             
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run_module("whoami")
