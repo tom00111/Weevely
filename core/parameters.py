@@ -62,6 +62,10 @@ class ParametersList:
         
         for parameter in self.parameters:
             
+            # Skip printing vectors from summaries
+            if parameter.arg == 'vector':
+                continue
+            
             if parameter.required:
                 formatarg = '<%s%s>' 
             else:
@@ -98,34 +102,35 @@ class ParametersList:
         
         check=True
         
-        
         for namepos in args:
             param = self.__get_parameter(namepos)
             
             if param:
                 value = args[namepos]
                 
-                if param.choices and (value not in param.choices):
-                    print '[!] Error using \'%s\' %s. Options: \'%s\'' % (value, self.__print_namepos(namepos), '\', \''.join(param.choices))             
-                    check=False
-                
-                if param.type:
-                    try:
-                        value = ast.literal_eval(value)
-                    except ValueError:
-                        print '[!] Error, parameter invalid type (%s)' % (repr(param.type))             
-                        check=False
+                if value:
 
-                    if not isinstance(value, param.type):
-                        print '[!] Error, parameter invalid type (%s)' % (repr(param.type)) 
+                    if param.choices and (value not in param.choices):
+                        print '[!] Error using \'%s\' %s. Options: \'%s\'' % (value, self.__print_namepos(namepos), '\', \''.join(param.choices))             
                         check=False
                     
-                if param.mutual_exclusion:
-                    
-                    for excluded in param.mutual_exclusion:
-                        if self.get_parameter_value(excluded):
-                            print '[!] Error, parameters \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
+                    if param.type:
+                        try:
+                            value = ast.literal_eval(value)
+                        except ValueError:
+                            print '[!] Error, parameter invalid type (%s)' % (repr(param.type))             
                             check=False
+    
+                        if not isinstance(value, param.type):
+                            print '[!] Error, parameter invalid type (%s)' % (repr(param.type)) 
+                            check=False
+                        
+                    if param.mutual_exclusion:
+                        
+                        for excluded in param.mutual_exclusion:
+                            if self.get_parameter_value(excluded):
+                                print '[!] Error, parameters \'%s\' and \'%s\' are mutually exclusive' % (param.arg, excluded) 
+                                check=False
                 
             else:
                 print '[!] Error, invalid parameter %s' % (self.__print_namepos(namepos))  
