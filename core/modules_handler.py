@@ -71,6 +71,20 @@ class ModHandler(Helper):
    
                 
     
+    def set(self, parameters):
+        
+        if len(parameters) != 3:
+            print '[!] Error. Usage: :set module.parameter <value>'
+            return
+        
+        
+        mod = parameters[0]
+        par = parameters[1]
+        val = parameters[2]
+        
+        self.load(mod).params.set_check_args({ par : val })
+            
+
             
     
                 

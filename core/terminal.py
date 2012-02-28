@@ -10,6 +10,7 @@ import readline, atexit, os, re, shlex
 
 module_trigger = ':'
 help_string = ':help'
+set_string = ':set'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 respace = re.compile('.*\s+$', re.M)
 
@@ -80,10 +81,14 @@ class Terminal(Enviroinment):
             if len(cmd_splitted)>1:
                 modname = cmd_splitted[1]
             print self.modhandler.helps(modname)
-            
+               
+        elif cmd_splitted[0] == set_string:
+            self.modhandler.set(cmd_splitted[1:])
+               
         else:
+
         
-            if cmd_splitted[0][0] == ':':
+            if cmd_splitted[0][0] == module_trigger:
                 interpreter = cmd_splitted[0][1:]
                 cmd_splitted = cmd_splitted[1:]
             else:
@@ -100,10 +105,6 @@ class Terminal(Enviroinment):
             return
              
         output = ''
-        
-        if cmd_line == help_string:
-            print self.modhandler.helps(cmd_line[len(help_string):])
-            return
         
         if not self.one_shot:
 
@@ -145,7 +146,6 @@ class Terminal(Enviroinment):
         if len(results) == 2:
             return results[state].split()[0] + ' '
         return results[state]
-        
         
 
     def run(self, module_name, module_arglist):        

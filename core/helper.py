@@ -86,7 +86,8 @@ class Helper:
                     usage = self.module_info[modname][1]
                     help = ''
                     if module:
-                       help = '\t%s\n' % self.module_info[modname][2]
+                       #help = '\t%s\n' % self.module_info[modname][2]
+                       help = self.load(modname).params.help()
                     
                     output += '\t[%s] %s\n\tUsage :%s %s\n\t%s\n' % (modname, descr, modname, usage, help)
              
