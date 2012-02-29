@@ -15,14 +15,15 @@ class Enviroinment:
     
     
     def __init__(self):
-        
+
+        self.interpreter = self.modhandler.load_interpreters()
+
         if self.interpreter == 'shell.sh':
             self.prompt = "%s@%s:%s$ "
         else:
             self.prompt = "%s@%s:%s php> "
             
-        print '[+] List modules with <tab> and show help with %s [module name]\n' % help_string
-            
+
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run_module("whoami")
         self.hostname = self.modhandler.load('system.info').run_module("hostname")
@@ -37,8 +38,25 @@ class Enviroinment:
                 print '[!] Safe mode is enabled'
                 
         self.modhandler.set_verbosity()
+        
+        print '\n[+] List modules with <tab> and show help with %s [module name]\n' % help_string
+        
+        self.matching_words =  self.modhandler.help_completion('') + [help_string]
+        self.__init_completion()
+             
  
- 
+    def __init_completion(self):
+        
+            try:
+                readline.set_completer_delims(' \t\n;')
+                readline.parse_and_bind( 'tab: complete' )
+                readline.set_completer( self.__complete )
+                readline.read_history_file( self.configs.historyfile )
+                
+            except IOError:
+                pass
+            atexit.register( readline.write_history_file, self.configs.historyfile )
+
 
     def _format_prompt(self):
         
@@ -75,6 +93,30 @@ class Enviroinment:
             return True
 
         return False    
-                
-                
-                
+
+
+    def __complete(self, text, state):
+        """Generic readline completion entry point."""
+        
+        
+        
+        buffer = readline.get_line_buffer()
+        line = readline.get_line_buffer().split()
+        
+        if ' ' in buffer:
+            return []
+        
+        # show all commands
+        if not line:
+            return [c + ' ' for c in self.matching_words][state]
+        # account for last argument ending in a space
+        if respace.match(buffer):
+            line.append('')
+        # resolve command to the implementation function
+        cmd = line[0].strip()
+        if cmd in self.matching_words:
+            return [cmd + ' '][state]
+        results = [c + ' ' for c in self.matching_words if c.startswith(cmd)] + [None]
+        if len(results) == 2:
+            return results[state].split()[0] + ' '
+        return results[state]                

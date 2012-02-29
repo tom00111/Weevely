@@ -16,6 +16,7 @@ class Parameter:
         
         self.value = default
         
+        
     def set_value(self, value):
         value = self.value
     
@@ -27,14 +28,14 @@ class Parameter:
             choices = '(%s)' % (', '.join(self.choices))
             
         type = ''
-        if self.type:
+        if self.type != None:
             type = 'Type: %s' % repr(self.type.__name__)                    
             if isinstance(True, self.type):
                 type += ' (True, False)'
             
             
         value = ''
-        if self.value:
+        if self.value != None:
             value = str(self.value)
         
         exclusions = ''
@@ -56,9 +57,6 @@ class ParametersList:
         if vectors and len(vectors)>1:
             self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), passed = False))
       
-#        for param in self.parameters:
-#            setattr(self, param.arg, param.default)
-        
       
     def param_summary(self):
     
@@ -128,6 +126,7 @@ class ParametersList:
         for namepos in args:
             param = self.__get_parameter(namepos)
             
+        
             if param:
                 value = args[namepos]
                 
@@ -160,9 +159,12 @@ class ParametersList:
                 check=False
                 
             if check:
-                if not oneshot:
+                
+                # Saved only if not oneshot (set with :set) 
+                # or if not-passed vector (anyway they will be not saved)
+                
+                if not oneshot or not param.passed:
                     param.value = value    
-                    #setattr(self, param.arg, param.value)
         
                 
                 oneshot_parameters[param.arg] = value
@@ -211,12 +213,11 @@ class ParametersList:
             oneshot_value = None
             if param.arg in argdict:
                 oneshot_value = argdict[param.arg]
-            
             perm_value = param.value
             
-            if oneshot_value:
+            if oneshot_value != None:
                 best_value = oneshot_value
-            elif perm_value:
+            elif perm_value != None:
                 best_value = perm_value
             else:
                 if param.required:

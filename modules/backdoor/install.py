@@ -11,9 +11,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Install'
     
 class Install(Module):
-    """Install another Weevely backdoor 
-    :backdoor.install <password> <remote path>
-    """
+    """Install another Weevely backdoor"""
     
     params = ParametersList('Upload further Weevely backdoor', None,
             P(arg='pwd', help='Password to generate PHP backdoor', required=True, pos=0),

@@ -37,11 +37,11 @@ class Sql_users(Module):
             except Exception, e:
                 raise ModuleException(self.name, "Error opening %s: %s" % (filename, str(e)))
     
-        usersresponse = self.modhandler.load('audit.users').run_module(filter_real_users=True)
+        usersresponse = self.modhandler.load('audit.etc_passwd').run_module(filter_real_users=True)
         
         
         if usersresponse:
-            users = [ u.name for u in self.modhandler.load('audit.users').usersinfo ]
+            users = [ u.name for u in self.modhandler.load('audit.etc_passwd').usersinfo ]
             
             for user in users:
                 

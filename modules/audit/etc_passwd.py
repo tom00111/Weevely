@@ -8,7 +8,7 @@ from core.module import Module, ModuleException
 from core.vector import VectorList, Vector as V
 from core.parameters import ParametersList, Parameter as P
 
-classname = 'Users'
+classname = 'EtcPasswd'
     
     
 class User:
@@ -27,10 +27,8 @@ class User:
              self.home = linesplit[5]
              self.shell = linesplit[6]
     
-class Users(Module):
-    """Enumerate users and /etc/passwd content
-    :audit.users 
-    """
+class EtcPasswd(Module):
+    """Enumerate users and /etc/passwd content"""
     
     
     vectors = VectorList([

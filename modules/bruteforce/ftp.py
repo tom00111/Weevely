@@ -13,9 +13,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Ftp'
  
 class Ftp(Module):
-    '''Bruteforce ftp user
-    :bruteforce.ftp <host> <port> <user> <local_file_list.txt> <start_line>|all
-    '''
+    '''Bruteforce ftp user'''
     
     vectors = VectorList([
             Vector('shell.php', 'brute_ftp_php', [ """$h="%s"; $p="%s"; $u="%s"; $w=$_POST["%s"]; 

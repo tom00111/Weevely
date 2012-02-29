@@ -61,4 +61,4 @@ class ModuleException(Exception):
         self.module = module
         self.error = value
     def __str__(self):
-        return self.error
+        return '%s %s' % (self.module, self.error)

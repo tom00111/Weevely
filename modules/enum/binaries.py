@@ -58,5 +58,5 @@ class Binaries(Module):
                 path_list.append(path + '/' + binary_name)
             
         if path_list:
-            self.modhandler.load('enum.paths').run_module('', path_list)
+            self.modhandler.load('enum.paths').run_module('',  list=path_list)
 

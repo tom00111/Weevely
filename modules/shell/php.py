@@ -45,11 +45,9 @@ class Php(Module):
         
         proxy = self.params.get_parameter_value('proxy')
         if proxy:
-            self.mprint('[shell.php] Proxy that uses cache can break weevely requests. Use proxychains.')
+            self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
 
-        self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
-        
         
 
     def _probe(self):

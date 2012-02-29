@@ -6,7 +6,8 @@ Created on 22/ago/2011
 
 from core.module import ModuleException
 from core.enviroinment import Enviroinment
-import readline, atexit, os, re, shlex
+from core.configs import Configs
+import os, re, shlex
 
 module_trigger = ':'
 help_string = ':show'
@@ -22,43 +23,26 @@ class Terminal(Enviroinment):
     def __init__( self, modhandler, one_shot = False):
 
         self.modhandler = modhandler
+        self.interpreter = None
         
         
         self.url = modhandler.url
         self.password = modhandler.password
-        self.interpreter = modhandler.interpreter
 
         self.one_shot = one_shot
         
-        self.matching_words =  self.modhandler.help_completion('') + [help_string]
     
-        self.__load_rcfile(os.path.expanduser( rcfile ))
-
+        self.configs = Configs()
     
-        if not self.interpreter:
-            print '[!] [shell.php] No remote backdoor found. Check URL and password.'
-    
-        elif not one_shot:
-            
+        if not one_shot:
             Enviroinment.__init__(self)
-        
-            self.history      = os.path.expanduser( historyfile )
-
-            try:
-                readline.set_completer_delims(' \t\n;')
-                readline.parse_and_bind( 'tab: complete' )
-                readline.set_completer( self.__complete )
-                readline.read_history_file( self.history )
-                
-            except IOError:
-                pass
-    
-            atexit.register( readline.write_history_file, self.history )
 
 
     def loop(self):
         
-        while self.interpreter:
+#        while self.interpreter:
+        
+        while True:
             
             prompt        = self._format_prompt()
                 
@@ -74,8 +58,8 @@ class Terminal(Enviroinment):
             
     def run_module_cmd(self, cmd_splitted):
         
-        if not self.interpreter:
-            return
+#        if not self.interpreter:
+#            return
              
         output = ''
     
@@ -86,20 +70,20 @@ class Terminal(Enviroinment):
                 modname = cmd_splitted[1]
             print self.modhandler.helps(modname),
                
-        ### Set call
+        ## Set call
         elif cmd_splitted[0] == set_string:            
             if len(cmd_splitted)>2:
                 modname = cmd_splitted[1]
                 self.set(modname, cmd_splitted[2:])
-               
+           
+        ## Command call    
         else:
 
-        
+            interpreter = None
             if cmd_splitted[0][0] == module_trigger:
                 interpreter = cmd_splitted[0][1:]
                 cmd_splitted = cmd_splitted[1:]
-            else:
-                interpreter = self.interpreter
+                
                 
             output =  self.run(interpreter, cmd_splitted)
    
@@ -108,8 +92,8 @@ class Terminal(Enviroinment):
             
     def run_line_cmd(self, cmd_line):
         
-        if not self.interpreter:
-            return
+#        if not self.interpreter:
+#            return
              
         output = ''
         
@@ -120,45 +104,17 @@ class Terminal(Enviroinment):
                     print self.modhandler.load('shell.php').ls_handler(cmd_line)
                     return
                 
-                output = self.run(self.interpreter, [ cmd_line ])  
+                output = self.run(None, [ cmd_line ])  
                 
             else:
                 pass
             
         else:
-            output = self.run(self.interpreter, [ cmd_line ])  
+            output = self.run(None, [ cmd_line ])  
             
         if output != None:
             print output
     
-
-
-    def __complete(self, text, state):
-        """Generic readline completion entry point."""
-        
-        
-        
-        buffer = readline.get_line_buffer()
-        line = readline.get_line_buffer().split()
-        
-        if ' ' in buffer:
-            return []
-        
-        # show all commands
-        if not line:
-            return [c + ' ' for c in self.matching_words][state]
-        # account for last argument ending in a space
-        if respace.match(buffer):
-            line.append('')
-        # resolve command to the implementation function
-        cmd = line[0].strip()
-        if cmd in self.matching_words:
-            return [cmd + ' '][state]
-        results = [c + ' ' for c in self.matching_words if c.startswith(cmd)] + [None]
-        if len(results) == 2:
-            return results[state].split()[0] + ' '
-        return results[state]
-        
 
     def __format_arglist(self, module_arglist):
         
@@ -183,17 +139,28 @@ class Terminal(Enviroinment):
             print '[!] Error module with name \'%s\' not found' % (module_name)
         else:
            arguments = self.__format_arglist(module_arglist)
-           check, params = self.modhandler.load(module_name).params.set_and_check_parameters(arguments, oneshot=False)
+           module_class = self.modhandler.load(module_name, init_module=False)
            
-           erroutput = ''
+           check, params = module_class.params.set_and_check_parameters(arguments, oneshot=False)
+           
+            
+           erroutput = '[%s] ' % module_name
            if not check:
                erroutput += 'Error setting parameters. '
                
-           print '%sCurrent values: %s' % (erroutput, self.modhandler.load(module_name).params.param_summary())
+           print '%sValues: %s' % (erroutput, module_class.params.param_summary()),
 
  
     def run(self, module_name, module_arglist):        
         
+        if module_name == None:
+            if not self.interpreter:
+                self.interpreter = self.modhandler.load_interpreters()
+                 
+                
+            module_name = self.interpreter
+            
+
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
         else:
@@ -207,30 +174,16 @@ class Terminal(Enviroinment):
                 print '[!] Stopped %s execution' % module_name
             except ModuleException, e:
                 print '[!] [%s] Error: %s' % (e.module, e.error) 
-        
-      
+           
 
     def __load_rcfile(self, path):
-        
-        if not os.path.exists(path):
-            return
-        
-        try:
-            rcfile = open(path, 'r')
-        except Exception, e:
-            print "[!] Error opening rc file."
             
-            
-        cmd_list = [c for c in rcfile.read().split('\n') if c and c[0] != '#']
-        
-        print "[+] Opened rc file with %i commands" % len(cmd_list)
-        
-        for cmd in cmd_list:
+        for cmd in self.config.rc_commands:
             
             cmd       = cmd.strip()
             
             if cmd:
-                print '[+] %s' % (cmd)
+                print '[rc] %s' % (cmd)
                 
                 if cmd[0] == module_trigger:
                     self.run_module_cmd(shlex.split(cmd))

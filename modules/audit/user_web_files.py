@@ -43,7 +43,7 @@ class UserWebFiles(Module):
         self.mprint('[%s] Enumerating %i paths in %s' % (self.name, len(path_list), home))
 
         if path_list:
-            self.modhandler.load('enum.paths').run_module('', path_list)
+            self.modhandler.load('enum.paths').run_module('', list=path_list)
                     
                        
                             

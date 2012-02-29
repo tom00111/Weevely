@@ -43,12 +43,10 @@ class Info(Module):
 
         Module.__init__(self, modhandler, url, password)
         
-        self.infos = {}
         
     def run_module( self, info):
         
-        if info in self.infos:
-            return self.infos[info]
+        infos = []
         
         vectors = self._get_default_vector2()
         if not vectors:
@@ -56,11 +54,11 @@ class Info(Module):
         
         for vector in vectors:
             
-            if vector.name not in self.infos and (info == 'auto' or info == vector.name):
+            if (vector.name not in infos) and (info == 'auto' or info == vector.name):
             
                 response = self.__execute_payload(vector, [info])
                 if response:
-                    self.infos[vector.name] = response
+                    infos.append(vector.name)
                     
                     if info != 'auto':
                         return response

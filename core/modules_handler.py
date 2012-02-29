@@ -31,31 +31,34 @@ class ModHandler(Helper):
         self.verbosity=3
         
         self.interpreter = None
-    
             
-        self.__load_interpreters()
+#        self.__load_interpreters()
         
         
-    def load(self, module_name):
+    def load(self, module_name, init_module = True):
         
         if not module_name in self.modules:
             if module_name not in self.module_info.keys():
-                raise ModuleException("!",  "Module not found in path %s." % (self.path_modules) )
+                raise ModuleException(module_name,   "Module not found in path '%s'." % (self.path_modules) )
             
             mod = __import__('modules.' + module_name, fromlist = ["*"])
             modclass = getattr(mod, mod.classname)
+            if not init_module:
+                return modclass
+            
             self.modules[module_name]=modclass(self, self.url, self.password)
             if module_name.startswith('shell.'):
                 self.loaded_shells.append(module_name)
             
         
         return self.modules[module_name]
+         
                     
     def set_verbosity(self, v = 3):
         self.verbosity = v        
                 
                 
-    def __load_interpreters(self):
+    def load_interpreters(self):
         
         for vector in self.vectors:
             
@@ -65,7 +68,10 @@ class ModHandler(Helper):
                 print '[!] [%s] %s' % (e.module, e.error)   
             else:
                 self.interpreter = vector.interpreter
-                break
+                return self.interpreter
+            
+        
+        raise ModuleException('[!]', 'No remote backdoor found. Check URL and password.') 
    
                 
                 

