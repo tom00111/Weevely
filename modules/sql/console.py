@@ -14,9 +14,7 @@ classname = 'Console'
 
     
 class Console(Module):
-    '''Start SQL console
-    :sql.console mysql|postgres <host> <user> <pass>
-    '''
+    '''Start SQL console'''
     
     params = ParametersList('Start SQL console', None,
             P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),

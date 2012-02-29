@@ -117,7 +117,7 @@ class ParametersList:
         return self.summary() + self.help()
         
         
-    def set_and_check_parameters(self, args, oneshot = True):
+    def set_and_check_parameters(self, args, oneshot = False):
         
         check=True
         

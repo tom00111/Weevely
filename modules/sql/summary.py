@@ -46,6 +46,7 @@ class Summary(Module):
         for vector in vectors:
             response = self.__execute_payload(vector, [mode, host, user, pwd, db])
             if response != None:
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return response
         
     def __execute_payload(self, vector, parameters):

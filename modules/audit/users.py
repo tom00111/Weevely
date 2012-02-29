@@ -80,7 +80,7 @@ class Users(Module):
             
         if response and ':0:0:' in response:
             
-            self.mprint("[%s] Enumerating user using method '%s'" % (self.name, vector.name))
+            self.params.set_and_check_parameters({'vector' : vector.name})
             
             for line in response.split('\n'):
                 if line:

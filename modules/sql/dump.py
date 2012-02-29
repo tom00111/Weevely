@@ -120,6 +120,7 @@ while ($i < mysql_num_rows ($tableQ))
         for vector in vectors:
             response = self.__execute_payload(vector, [mode, host, user, pwd, db, table])
             if response != None:
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return response
         
     def __execute_payload(self, vector, parameters):

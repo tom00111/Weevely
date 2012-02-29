@@ -87,6 +87,7 @@ class Upload(Module):
         for vector in vectors:
             response = self.__execute_payload(vector, [file_encoded_content,  file_local_md5, remote_path])
             if response:
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return
 
         

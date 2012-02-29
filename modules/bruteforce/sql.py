@@ -78,6 +78,7 @@ break;
         for vector in vectors:
             response = self.__execute_payload(vector, [sql_connect, host, user, rand_post_name, start_line, wl_splitted])
             if response != None:
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return response
                 
         

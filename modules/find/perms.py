@@ -92,7 +92,7 @@ if(@cktp($df,$f,'d')){
             
             response = self.__execute_payload(vector, [path, qty, type, mod])
             if response != None:
-                self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return response
         
         raise ModuleException(self.name,  "Files not found")

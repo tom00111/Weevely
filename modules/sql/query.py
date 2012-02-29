@@ -58,6 +58,7 @@ echo $table."\n";
         for vector in vectors:
             response = self.__execute_payload(vector, [sql_connect, sql_query, sql_fetch, host, user, pwd, query])
             if response != None:
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return response
                 
         

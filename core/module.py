@@ -48,12 +48,7 @@ class Module:
     def _get_default_vector2(self):
         
         conf_vector = self.params.get_parameter_value('vector')
-        
-        if not conf_vector:
-            conf_vector = self.modhandler.conf.get_vector(self.name)
-        
         vector = self.vectors.get_vector_by_name(conf_vector)
-        
         
         if vector:
             return [ vector ]

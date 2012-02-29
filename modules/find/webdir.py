@@ -131,6 +131,7 @@ class Webdir(Module):
                     
                     response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
                     if response != None:
+                        self.params.set_and_check_parameters({'vector' : vector.name})
                         return 
                  
         if not (self.url and self.dir):

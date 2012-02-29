@@ -63,7 +63,6 @@ class Info(Module):
                     self.infos[vector.name] = response
                     
                     if info != 'auto':
-                        self.mprint('[%s] Loaded using \'%s\' method' % (self.name, vector.name))
                         return response
                     else:                
                         tabs = '\t'*(3-((len(vector.name)+1)/8))

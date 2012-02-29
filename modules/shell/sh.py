@@ -61,7 +61,7 @@ fclose($pipes[2]); proc_close($h);"""),
             rand     = random.randint( 11111, 99999 )
             response = self.run_module( "echo %d" % rand, True, vector.payloads[0] )
             if response == str(rand):
-                self.mprint("[%s] Loaded using method '%s'" % (self.name, vector.name))
+                self.params.set_and_check_parameters({'vector' : vector.name})
                 return True
 
         except:

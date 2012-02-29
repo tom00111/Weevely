@@ -83,6 +83,7 @@ class Reversetcp(Module):
     
     def __check_module_state(self):
         if self.last_vector and not self.done:
+            self.params.set_and_check_parameters({'vector' : self.last_vector})
             self.mprint('[%s] Reverse backdoor \'%s\' seems connected, waiting for commands' % (self.name, self.last_vector))
             self.done = True
            

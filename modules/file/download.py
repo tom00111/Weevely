@@ -115,7 +115,6 @@ class Download(Module):
             
             if self.modhandler.load('file.check').run_module(self.file_path, 'exists'):
                 
-                self.mprint("[%s] Reading file via \'%s\' and removing" % (self.name, self.url))
                 
                 response = Request(self.url).read()
                 
@@ -155,13 +154,14 @@ class Download(Module):
             elif not  remote_md5 == response_md5:
                 self.mprint('[%s] MD5 hash of \'%s\' file mismatch, file corrupted' % (self.name, local_path))
             else:
-                self.mprint('[%s] File correctly downloaded to \'%s\' using method \'%s\'' % (self.name, local_path, self.vector.name))
+                self.mprint('[%s] File correctly downloaded to \'%s\'.' % (self.name, local_path))
                 return response
 
      
     def run_module(self, remote_path, local_path, returnFileData = False):
     
         vectors = self._get_default_vector2()
+        
         if not vectors:
             vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
         
@@ -171,6 +171,8 @@ class Download(Module):
             if response != None:
                     
                 file_response = self.__process_response(response, remote_path, local_path)
+                self.params.set_and_check_parameters({'vector' : self.vector.name})
+                
                 if returnFileData:
                     return file_response
                 else:

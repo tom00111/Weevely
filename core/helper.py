@@ -74,7 +74,7 @@ class Helper:
         for group in self.ordered_groups:
             
             if not module:
-                output += '[%s]\n' % group
+                output += '[%s]' % group
             
             for modname in self.modules_names_by_group[group]:
                     
