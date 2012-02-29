@@ -132,8 +132,14 @@ class Terminal(Enviroinment):
     def __complete(self, text, state):
         """Generic readline completion entry point."""
         
+        
+        
         buffer = readline.get_line_buffer()
         line = readline.get_line_buffer().split()
+        
+        if ' ' in buffer:
+            return []
+        
         # show all commands
         if not line:
             return [c + ' ' for c in self.matching_words][state]
