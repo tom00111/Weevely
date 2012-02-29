@@ -9,7 +9,7 @@ from core.enviroinment import Enviroinment
 import readline, atexit, os, re, shlex
 
 module_trigger = ':'
-help_string = ':help'
+help_string = ':show'
 set_string = ':set'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 respace = re.compile('.*\s+$', re.M)
@@ -80,10 +80,13 @@ class Terminal(Enviroinment):
             modname = ''
             if len(cmd_splitted)>1:
                 modname = cmd_splitted[1]
-            print self.modhandler.helps(modname)
+            print self.modhandler.helps(modname),
                
-        elif cmd_splitted[0] == set_string:
-            self.modhandler.set(cmd_splitted[1:])
+        ### Set call
+        elif cmd_splitted[0] == set_string:            
+            if len(cmd_splitted)>2:
+                modname = cmd_splitted[1]
+                self.set(modname, cmd_splitted[2:])
                
         else:
 
@@ -127,9 +130,8 @@ class Terminal(Enviroinment):
 
 
     def __complete(self, text, state):
+        """Generic readline completion entry point."""
         
-        
-        "Generic readline completion entry point."
         buffer = readline.get_line_buffer()
         line = readline.get_line_buffer().split()
         # show all commands
@@ -148,7 +150,7 @@ class Terminal(Enviroinment):
         return results[state]
         
 
-    def run(self, module_name, module_arglist):        
+    def __format_arglist(self, module_arglist):
         
         arguments = {}
         pos = 0
@@ -162,10 +164,31 @@ class Terminal(Enviroinment):
             arguments[name] = value
             pos+=1
         
+        return arguments
+
+
+    def set(self, module_name, module_arglist):
+        
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
         else:
+           arguments = self.__format_arglist(module_arglist)
+           check, params = self.modhandler.load(module_name).params.set_and_check_parameters(arguments, oneshot=False)
+           
+           erroutput = ''
+           if not check:
+               erroutput += 'Error setting parameters. '
+               
+           print '%sCurrent values: %s' % (erroutput, self.modhandler.load(module_name).params.param_summary())
 
+ 
+    def run(self, module_name, module_arglist):        
+        
+        if module_name not in self.modhandler.module_info.keys():
+            print '[!] Error module with name \'%s\' not found' % (module_name)
+        else:
+            arguments = self.__format_arglist(module_arglist)
+        
             try:
                 response = self.modhandler.load(module_name).run(arguments)
                 if response != None:

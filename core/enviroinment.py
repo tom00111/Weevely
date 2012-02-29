@@ -7,10 +7,8 @@ Created on 22/ago/2011
 from core.module import ModuleException
 import readline, atexit, os, re, shlex
 
-module_trigger = ':'
-help_string = ':help'
-cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-    
+
+help_string = ':show'
 
 class Enviroinment:
     
@@ -22,7 +20,7 @@ class Enviroinment:
         else:
             self.prompt = "%s@%s:%s php> "
             
-        print '[+] List modules with <tab> and show help with :help [module name]\n'
+        print '[+] List modules with <tab> and show help with %s [module name]\n' % help_string
             
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run_module("whoami")

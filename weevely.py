@@ -41,8 +41,8 @@ Generate PHP backdoor script
   weevely generate <password> <output path> 
   
 Show modules help
-  weevely <url> <password> :help [module name]
-'''  
+  weevely <url> <password> %s [module name]
+'''  % help_string
     
 if __name__ == "__main__":
 

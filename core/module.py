@@ -36,13 +36,12 @@ class Module:
         
         
         output = None
-        check1 = self.params.set_check_args(args)
+        check1, argdict = self.params.set_and_check_parameters(args, oneshot=True)
+        
         if check1:
-
-            check2, arglist = self.params.get_check_args_list()
+            check2, arglist = self.params.get_parameters_list(argdict)
             if check2:
                 output = self.run_module(*arglist)
-                self.params.clean()
         
         return output
     

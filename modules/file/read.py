@@ -13,10 +13,7 @@ from modules.file.download import Download
 classname = 'Read'
     
 class Read(Module):
-    '''Read file from remote filesystem
-    :file.read <remote path> 
-    '''
-        
+
     vectors = Download.vectors
         
     params = ParametersList('Read file from remote filesystem', vectors,
@@ -35,7 +32,7 @@ class Read(Module):
         file.close()
         
         # Passing vector to file.download
-        self.modhandler.load('file.download').params.set_check_args({'vector':self.params.vector})
+        self.modhandler.load('file.download').params.set_and_check_parameters({'vector':self.params.get_parameter_value('vector')})
         response = self.modhandler.load('file.download').run_module(remote_path, file.name, True)
         
         if response:
