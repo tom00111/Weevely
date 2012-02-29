@@ -10,7 +10,7 @@ class Helper:
         self.ordered_groups = []
         
         self.load_infos()
-
+        
 
     def load_infos(self, name=None, dir = 'modules', recursion = True):
         

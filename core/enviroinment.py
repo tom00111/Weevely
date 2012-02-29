@@ -9,6 +9,7 @@ import readline, atexit, os, re, shlex
 
 
 help_string = ':show'
+cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 
 class Enviroinment:
     

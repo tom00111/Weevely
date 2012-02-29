@@ -54,6 +54,9 @@ class ParametersList:
         if vectors and len(vectors)>1:
             self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list()))
       
+#        for param in self.parameters:
+#            setattr(self, param.arg, param.default)
+        
       
     def param_summary(self):
     
@@ -157,7 +160,7 @@ class ParametersList:
             if check:
                 if not oneshot:
                     param.value = value    
-                    setattr(self, param.arg, param.value)
+                    #setattr(self, param.arg, param.value)
         
                 oneshot_parameters[param.arg] = value
                 
@@ -179,11 +182,17 @@ class ParametersList:
     def get_parameter_value(self, namepos):
         
         par = self.__get_parameter(namepos)
-        
         if par and par.value:
             return par.value
-        
         return None
+
+    def get_parameter_choices(self, namepos):
+        
+        par = self.__get_parameter(namepos)
+        if par and par.choices:
+            return par.choices
+        return None
+
 
                 
     def get_parameters_list(self, argdict):
