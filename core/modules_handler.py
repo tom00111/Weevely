@@ -1,7 +1,6 @@
 import os
 from module import ModuleException
 from vector import VectorList, Vector 
-from config import Config
 from helper import Helper
 
 
@@ -29,12 +28,11 @@ class ModHandler(Helper):
         Helper.__init__(self)
         
         
-        self.conf = Config(self.module_info.keys())
-        
         self.verbosity=3
         
         self.interpreter = None
-        
+    
+            
         self.__load_interpreters()
         
         

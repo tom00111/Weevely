@@ -13,6 +13,8 @@ help_string = ':show'
 set_string = ':set'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 respace = re.compile('.*\s+$', re.M)
+rcfile = '~/.weevely.rc'
+historyfile = '~/.weevely_history'
 
             
 class Terminal(Enviroinment):
@@ -30,15 +32,17 @@ class Terminal(Enviroinment):
         
         self.matching_words =  self.modhandler.help_completion('') + [help_string]
     
+        self.__load_rcfile(os.path.expanduser( rcfile ))
+
+    
         if not self.interpreter:
             print '[!] [shell.php] No remote backdoor found. Check URL and password.'
     
         elif not one_shot:
             
-            
             Enviroinment.__init__(self)
         
-            self.history      = os.path.expanduser( '~/.weevely_history' )
+            self.history      = os.path.expanduser( historyfile )
 
             try:
                 readline.set_completer_delims(' \t\n;')
@@ -205,4 +209,33 @@ class Terminal(Enviroinment):
                 print '[!] [%s] Error: %s' % (e.module, e.error) 
         
       
+
+    def __load_rcfile(self, path):
+        
+        if not os.path.exists(path):
+            return
+        
+        try:
+            rcfile = open(path, 'r')
+        except Exception, e:
+            print "[!] Error opening rc file."
+            
+            
+        cmd_list = [c for c in rcfile.read().split('\n') if c and c[0] != '#']
+        
+        print "[+] Opened rc file with %i commands" % len(cmd_list)
+        
+        for cmd in cmd_list:
+            
+            cmd       = cmd.strip()
+            
+            if cmd:
+                print '[+] %s' % (cmd)
+                
+                if cmd[0] == module_trigger:
+                    self.run_module_cmd(shlex.split(cmd))
+                else:
+                    self.run_line_cmd(cmd)    
     
+        
+        

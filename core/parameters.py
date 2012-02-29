@@ -2,7 +2,7 @@ import ast
 
 class Parameter:
     
-    def __init__(self, arg, help='', required = False, pos=-1, default = None, choices = [], type = None, mutual_exclusion=[]):
+    def __init__(self, arg, help='', required = False, pos=-1, default = None, choices = [], type = None, mutual_exclusion=[], passed = True):
         self.arg = arg
         self.help = help
         self.required = required
@@ -11,6 +11,8 @@ class Parameter:
         self.type = type
         self.pos = pos
         self.mutual_exclusion = mutual_exclusion
+        
+        self.passed = passed
         
         self.value = default
         
@@ -52,7 +54,7 @@ class ParametersList:
         self.parameters = list(parameters)
         self.vectors = vectors
         if vectors and len(vectors)>1:
-            self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list()))
+            self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), passed = False))
       
 #        for param in self.parameters:
 #            setattr(self, param.arg, param.default)
@@ -162,6 +164,7 @@ class ParametersList:
                     param.value = value    
                     #setattr(self, param.arg, param.value)
         
+                
                 oneshot_parameters[param.arg] = value
                 
                 
@@ -220,7 +223,7 @@ class ParametersList:
                    error_required.append(param.arg)
                    continue               
             
-            if best_value != None:
+            if best_value != None and param.passed:
                 args_list.append(best_value)
             
         if error_required:

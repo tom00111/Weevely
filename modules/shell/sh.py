@@ -91,7 +91,6 @@ fclose($pipes[2]); proc_close($h);"""),
 
     def run_module( self, cmd, err_to_stdout = True, payload = None ):
         
-        
         if not payload: 
             if not self.payload:
                 self.__slack_probe()
