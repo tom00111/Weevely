@@ -11,9 +11,9 @@ class UserFiles(Module):
     """Enumerate common restricted files in home and public_html folders"""
     
     params = ParametersList('Enumerate common restricted files for every system user', [],
-                    P(arg='auto', help='Specify home for \'/home/*\', web for \'/home/*/public_html\', any for both', default='any'),
-                    P(arg='list', help='Path list from local file', default = 'nofile'),
-                    P(arg='path', help='Single path', default = 'nopath')
+                    P(arg='auto', help='Specify home for \'/home/*\', web for \'/home/*/public_html\', any for both'),
+                    P(arg='list', help='Path list from local file', mutual_exclusion=['auto', 'path']),
+                    P(arg='path', help='Single path', mutual_exclusion=['list', 'auto'])
                     )
     
     common_files = { 
@@ -44,13 +44,13 @@ class UserFiles(Module):
  
         custom_files = []
         
-        if list != 'nofile':
+        if list != None:
             try:
                 custom_files=open(list,'r').read().splitlines()
             except:
                 raise ModuleException(self.name,  "Error opening path list \'%s\'" % list)
         
-        elif path != 'nopath':
+        elif path != None:
             custom_files = path.split(',')
             
         elif auto:

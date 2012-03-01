@@ -224,7 +224,7 @@ class ParametersList:
                    error_required.append(param.arg)
                    continue               
             
-            if best_value != None and param.passed:
+            if param.passed:
                 args_list.append(best_value)
             
         if error_required:
