@@ -28,9 +28,9 @@ class Terminal(Enviroinment):
         self.password = modhandler.password
 
         self.one_shot = one_shot
-        
-    
+
         self.configs = Configs()
+        self.__load_rcfile()
     
         if not one_shot:
             Enviroinment.__init__(self)
@@ -169,9 +169,9 @@ class Terminal(Enviroinment):
                 print '[!] [%s] Error: %s' % (e.module, e.error) 
            
 
-    def __load_rcfile(self, path):
+    def __load_rcfile(self):
             
-        for cmd in self.config.rc_commands:
+        for cmd in self.configs.rc_commands:
             
             cmd       = cmd.strip()
             

@@ -1,8 +1,8 @@
 import os
 
 dirpath = '~/.weevely/'
-rcfile = 'weevelyrc'
-historyfile = 'weevely_history'
+rcfilepath = 'weevelyrc'
+historyfilepath = 'weevely_history'
 
 class Configs:
     
@@ -18,10 +18,16 @@ class Configs:
             
     def __load_rc(self):
         
-        rcpath = self.dirpath + historyfile
+        rcpath = self.dirpath + rcfilepath
         
         if not os.path.exists(rcpath):
-            return []
+            
+            try:
+                rcfile = open(rcpath, 'w').close()
+            except Exception, e:
+                print "[!] Error creating rc file."
+            else:
+                return []
         
         try:
             rcfile = open(rcpath, 'r')
@@ -31,5 +37,5 @@ class Configs:
             return [c for c in rcfile.read().split('\n') if c and c[0] != '#']
 
     def __historyfile(self):
-        return self.dirpath + historyfile
+        return self.dirpath + historyfilepath
             
