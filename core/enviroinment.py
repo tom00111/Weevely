@@ -10,6 +10,7 @@ import readline, atexit, os, re, shlex
 
 help_string = ':show'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
+respace = re.compile('.*\s+$', re.M)
 
 class Enviroinment:
     
@@ -98,25 +99,41 @@ class Enviroinment:
     def __complete(self, text, state):
         """Generic readline completion entry point."""
         
-        
-        
-        buffer = readline.get_line_buffer()
-        line = readline.get_line_buffer().split()
-        
-        if ' ' in buffer:
-            return []
-        
-        # show all commands
-        if not line:
-            return [c + ' ' for c in self.matching_words][state]
-        # account for last argument ending in a space
-        if respace.match(buffer):
-            line.append('')
-        # resolve command to the implementation function
-        cmd = line[0].strip()
-        if cmd in self.matching_words:
-            return [cmd + ' '][state]
-        results = [c + ' ' for c in self.matching_words if c.startswith(cmd)] + [None]
-        if len(results) == 2:
-            return results[state].split()[0] + ' '
-        return results[state]                
+        try:
+            buffer = readline.get_line_buffer()
+            line = readline.get_line_buffer().split()
+            
+            if ' ' in buffer:
+                return []
+            
+            # show all commands
+            if not line:
+                all_cmnds = [c + ' ' for c in self.matching_words]
+                if len(all_cmnds) > state:
+                    return all_cmnds[state]
+                else:
+                    return []
+                
+            # account for last argument ending in a space
+            if respace.match(buffer):
+                line.append('')
+            # resolve command to the implementation function
+            
+            cmd = line[0].strip()
+            
+            if cmd in self.matching_words:
+                return [cmd + ' '][state]
+            
+            results = [c + ' ' for c in self.matching_words if c.startswith(cmd)] + [None]
+            if len(results) == 2:
+                if results[state]:
+                    return results[state].split()[0] + ' '
+                else:
+                    return []
+            return results[state]           
+             
+        except Exception, e:
+            print '[!] Completion error: %s' % e
+            import traceback
+            traceback.print_exc()
+            

@@ -87,7 +87,7 @@ class Helper:
                     if module:
                        help = self.load(modname).params.help()
                     
-                    output += '\n\t[%s] %s\n\tUsage :%s %s\n\t%s\n' % (modname, descr, modname, usage, help)
+                    output += '\n    [%s] %s\n    Usage :%s %s\n    %s\n' % (modname, descr, modname, usage, help)
              
         if module and not output:
             output += '[!] Error, module \'%s\' not found' % (module) 

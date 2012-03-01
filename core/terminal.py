@@ -12,8 +12,6 @@ import os, re, shlex
 module_trigger = ':'
 help_string = ':show'
 set_string = ':set'
-cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
-respace = re.compile('.*\s+$', re.M)
 rcfile = '~/.weevely.rc'
 historyfile = '~/.weevely_history'
 
@@ -40,8 +38,6 @@ class Terminal(Enviroinment):
 
     def loop(self):
         
-#        while self.interpreter:
-        
         while True:
             
             prompt        = self._format_prompt()
@@ -58,9 +54,6 @@ class Terminal(Enviroinment):
             
     def run_module_cmd(self, cmd_splitted):
         
-#        if not self.interpreter:
-#            return
-             
         output = ''
     
         ## Help call
