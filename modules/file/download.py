@@ -113,6 +113,9 @@ class Download(Module):
         if self.vector.name == 'copy' or self.vector.name == 'symlink':
             
             
+            if not self.file_path.endswith('.html') and not self.file_path.endswith('.htm'):
+                self.mprint("[%s] Warning, method '%s' use HTTP file download. Assure that remote file\n[%s] has a downloadable extension like 'html', or use another vector" % (self.name, self.vector.name, self.name))
+                    
             if self.modhandler.load('file.check').run_module(self.file_path, 'exists'):
                 
                 

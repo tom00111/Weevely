@@ -6,11 +6,9 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Paths'
 
 class Paths(Module):
-    """Enumerate paths on remote filesystem
-    :enum.paths <local_path_list.txt> 
-    """
+    """Enumerate paths on remote filesystem"""
      
-    params = ParametersList('Enumerate remote paths', None,
+    params = ParametersList('Enumerate remote paths specified by wordlist', None,
                 P(arg='lpath', help='Path of local wordlist', required=True, pos=0))
 
      
