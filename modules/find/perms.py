@@ -103,7 +103,7 @@ if(@cktp($df,$f,'d')){
         payload = self.__prepare_payload(vector, parameters)
     
         try:    
-            response = self.modhandler.load(vector.interpreter).run_module(payload)
+            response = self.modhandler.load(vector.interpreter).run({ 0 : payload })
         except ModuleException:
             response = None
         else:

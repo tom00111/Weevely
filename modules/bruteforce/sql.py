@@ -39,10 +39,16 @@ break;
     def __init__( self, modhandler , url, password):
         
         self.chunksize = 5000
+        self.substitutive_wl = []
         Module.__init__(self, modhandler, url, password)
         
         
-    def run_module( self, mode, user, filename, start_line, host, substitutive_wl = []):
+    def set_substitutive_wl(self, substitutive_wl=[]):
+        """Cleaned after use"""
+        self.substitutive_wl = substitutive_wl
+        
+        
+    def run_module( self, mode, user, filename, start_line, host):
 
         if mode == 'mysql':
             sql_connect = "mysql_connect"
@@ -57,8 +63,9 @@ break;
         if 'localhost' not in host and '127.0.0.1' not in host:
             self.chunksize = 20
 
-        if substitutive_wl:
-            wl_splitted = substitutive_wl
+        if self.substitutive_wl:
+            wl_splitted = self.substitutive_wl[:]
+            self.substitutive_wl = []
         else:
             
             try:
@@ -105,7 +112,10 @@ break;
             joined_wl='\n'.join(wl[startword:endword])
         
             payload = self.__prepare_payload(vector, parameters[:-2]) 
-            response = self.modhandler.load(vector.interpreter).run_module(payload, post_data = {rand_post_name : joined_wl})
+            if vector.interpreter == 'shell.php':
+                self.modhandler.load(vector.interpreter).set_post_data({rand_post_name : joined_wl})
+            response = self.modhandler.load(vector.interpreter).run({ 0 : payload})
+            
             if response:
                 if response.startswith('+'):
                     return "[%s] FOUND! (%s)" % (self.name,response[1:])

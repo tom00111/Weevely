@@ -49,13 +49,15 @@ class Download(Module):
         self.transfer_dir = None
         self.transfer_url_dir = None
         
+        self.lastreadfile = None
+        
         
         Module.__init__(self, modhandler, url, password)
 
         
     def _probe(self):
         
-        if self.modhandler.load('shell.php').run_module("is_callable('base64_encode') && print('1');") == '1':
+        if self.modhandler.load('shell.php').run({ 0 : "is_callable('base64_encode') && print('1');" }) == '1':
             self.encoder_callable = True
         else:
             self.mprint('[%s] PHP \'base64_encode\' transfer methods not available.' % self.name)
@@ -78,7 +80,7 @@ class Download(Module):
             if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
                 
                 try:
-                    self.modhandler.load('find.webdir').run_module('auto')
+                    self.modhandler.load('find.webdir').run({'rpath': 'auto'})
                 except ModuleException, e:
                     self.mprint('[!] [' + e.module + '] ' + e.error)
                     return
@@ -96,7 +98,7 @@ class Download(Module):
             payload = self.__prepare_payload(vector, [remote_path])
             
             
-        response = self.modhandler.load(vector.interpreter).run_module(payload)
+        response = self.modhandler.load(vector.interpreter).run({0 : payload})
         
         if response:
             
@@ -116,12 +118,12 @@ class Download(Module):
             if not self.file_path.endswith('.html') and not self.file_path.endswith('.htm'):
                 self.mprint("[%s] Warning, method '%s' use HTTP file download. Assure that remote file\n[%s] has a downloadable extension like 'html', or use another vector" % (self.name, self.vector.name, self.name))
                     
-            if self.modhandler.load('file.check').run_module(self.file_path, 'exists'):
+            if self.modhandler.load('file.check').run({'rpath' : self.file_path, 'mode': 'exists'}):
                 
                 
                 response = Request(self.url).read()
                 
-                if self.modhandler.load('shell.php').run_module("unlink('%s') && print('1');" % self.file_path) != '1':
+                if self.modhandler.load('shell.php').run({0: "unlink('%s') && print('1');" % self.file_path}) != '1':
                     self.mprint("[!] [%s] Error cleaning support file %s" % (self.name, self.file_path))
                     
                     
@@ -149,7 +151,7 @@ class Download(Module):
             
     
             response_md5 = md5(response).hexdigest()
-            remote_md5 = self.modhandler.load('file.check').run_module(remote_path, 'md5')
+            remote_md5 = self.modhandler.load('file.check').run({'rpath' : remote_path, 'mode' : 'md5'})
             
             if not remote_md5:
                 self.mprint('[!] [%s] MD5 hash method is not callable with \'%s\', check disabled' % (self.name, remote_path))
@@ -161,7 +163,7 @@ class Download(Module):
                 return response
 
      
-    def run_module(self, remote_path, local_path, returnFileData = False):
+    def run_module(self, remote_path, local_path):
     
         vectors = self._get_default_vector2()
         
@@ -176,10 +178,9 @@ class Download(Module):
                 file_response = self.__process_response(response, remote_path, local_path)
                 self.params.set_and_check_parameters({'vector' : self.vector.name})
                 
-                if returnFileData:
-                    return file_response
-                else:
-                    return
+                self.lastreadfile = file_response
+                
+                return
                     
         raise ModuleException(self.name,  "File read failed")
         

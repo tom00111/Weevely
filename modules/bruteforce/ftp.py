@@ -43,9 +43,15 @@ break;
     def __init__( self, modhandler , url, password):
         
         self.chunksize = 5000
+        self.substitutive_wl = []
         Module.__init__(self, modhandler, url, password)
         
         
+    def set_substitutive_wl(self, substitutive_wl=[]):
+        """Cleaned after use"""
+        self.substitutive_wl = substitutive_wl
+        
+                
     def run_module( self, user, filename, start_line, host, port, substitutive_wl = []):
 
         if start_line == 'all':
@@ -54,8 +60,8 @@ break;
         if host not in ('localhost', '127.0.0.1'):
             self.chunksize = 20
 
-        if substitutive_wl:
-            wl_splitted = substitutive_wl
+        if self.substitutive_wl:
+            wl_splitted = self.substitutive_wl[:]
         else:
             
             try:
@@ -95,7 +101,7 @@ break;
         # Check if port open using second payload
         
         payload_check = self.__prepare_payload(vector, [host, port], 1) 
-        response_check = self.modhandler.load(vector.interpreter).run_module(payload_check)
+        response_check = self.modhandler.load(vector.interpreter).run({0: payload_check})
         if response_check != '1':
             self.mprint('[%s] Error, port \'%s:%i\' close' % (self.name, host, port))
         else:
@@ -115,7 +121,10 @@ break;
             
                 payload = self.__prepare_payload(vector, parameters[:-2]) 
                 
-                response = self.modhandler.load(vector.interpreter).run_module(payload, post_data = {rand_post_name : joined_wl})
+                if vector.interpreter == 'shell.php':
+                    self.modhandler.load(vector.interpreter).set_post_data({rand_post_name : joined_wl})
+                response = self.modhandler.load(vector.interpreter).run({ 0 : payload})
+                
                 
                 if response:
                     if response.startswith('+'):

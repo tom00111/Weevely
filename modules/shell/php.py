@@ -30,7 +30,11 @@ class Php(Module):
         self.path = None
         self.proxy = None
         
+        self.post_data = {}
+        
         self.current_mode = None
+                    
+        self.use_current_path = True
                     
         self.available_modes = self.params.get_parameter_choices('mode')
                     
@@ -56,7 +60,7 @@ class Php(Module):
             
             rand = str(random.randint( 11111, 99999 ))
             
-            if self.run_module('echo %s;' % (rand)) == rand:
+            if self.run({ 0 : 'echo %s;' % (rand) }) == rand:
                 self.current_mode = currentmode
                 self.params.set_and_check_parameters({'mode' : currentmode}, False)
                 break
@@ -65,22 +69,38 @@ class Php(Module):
             raise ModuleException(self.name,  "PHP interpreter initialization failed")
         else:
             
-            if self.run_module('is_callable("is_dir") && is_callable("chdir") && print(1);', False) != '1':
+            if self.run({ 0: 'is_callable("is_dir") && is_callable("chdir") && print(1);' }) != '1':
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
                 
+                
+    def set_post_data(self, post_data = {}):
+        """Post data is cleaned after every use """
+        
+        self.post_data = post_data
        
-    def run_module(self, cmd, use_current_path=True, post_data={}):
+       
+    def run_module(self, cmd, mode, proxy):
 
+        if mode:
+            self.mode = mode
+            
+        if proxy:
+            self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
+            self.proxy = { 'http' : proxy }
+            
 
-        if use_current_path and self.cwd_vector and self.path:
+        if self.use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
-        if post_data:
-            request.setPostData(post_data)
+        
+        if self.post_data:
+            request.setPostData(self.post_data.copy())
+            self.post_data = {}
+            
     
         debug_level = 5
         self.mprint( "Request: %s" % (cmd), debug_level)
@@ -104,7 +124,9 @@ class Php(Module):
 
     def cwd_handler (self, path):
         
-        response = self.run_module("is_dir('%s') && print(1);" % path, False)
+        self.use_current_path = False
+        response = self.run({ 0 : "is_dir('%s') && print(1);" % path })
+        self.use_current_path = True
         if response == '1':
             self.path = path
             return True
@@ -124,7 +146,11 @@ class Php(Module):
             path = '.'
             
             
-        response = self.run_module( ls_vector % (path), False)
+        
+        self.use_current_path = False
+        response = self.run( { 0:  ls_vector % (path) })
+        self.use_current_path = True
+        
         if not response:
             self.mprint('[!] Error listing files in \'%s\', incorrect permission or safe mode enabled' % path)
             

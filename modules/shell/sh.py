@@ -88,7 +88,7 @@ fclose($pipes[2]); proc_close($h);"""),
                 
         raise ModuleException("shell.sh",  "Shell interpreter initialization failed")
                 
-
+              
     def run_module( self, cmd, err_to_stdout = True, payload = None ):
         
         if not payload: 
@@ -107,7 +107,7 @@ fclose($pipes[2]); proc_close($h);"""),
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
         
-        return self.modhandler.load('shell.php').run_module(payload)
+        return self.modhandler.load('shell.php').run({ 0 :  payload })
 
 
 

@@ -37,7 +37,7 @@ class Sql_users(Module):
             except Exception, e:
                 raise ModuleException(self.name, "Error opening %s: %s" % (filename, str(e)))
     
-        usersresponse = self.modhandler.load('audit.etc_passwd').run_module(filter_real_users=True)
+        usersresponse = self.modhandler.load('audit.etc_passwd').run({"filter": "True"})
         
         
         if usersresponse:
@@ -50,8 +50,9 @@ class Sql_users(Module):
                 else:
                     wl_splitted = self.__generate_wl_from_user(user) + wl_splitted
             
-                response = self.modhandler.load('bruteforce.sql').run_module(mode, user, '', 0, host, substitutive_wl = wl_splitted)
-                
+                self.modhandler.load('bruteforce.sql').set_substitutive_wl(wl_splitted)
+                response = self.modhandler.load('bruteforce.sql').run({'dbms' : mode, 'user' : user, 'lpath' : '', 'sline' : 0, 'host' : host})
+                                                                             
                 if response:
                     self.mprint(response)
                 else:

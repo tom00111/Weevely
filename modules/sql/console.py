@@ -38,7 +38,8 @@ class Console(Module):
                 cmd       = cmd.strip()
                 
                 if cmd:
-                    response = self.modhandler.load('sql.query').run_module(mode, user, pwd, cmd, host)
+                    response = self.modhandler.load('sql.query').run({'dbms' : mode, 'user' : user, 'pwd': pwd, 'query' : cmd, 'host' : host})
+                    
                     if response:
                         print response
                     else:

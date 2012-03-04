@@ -70,7 +70,7 @@ class EtcPasswd(Module):
         payload = self.__prepare_payload(vector, [])
     
         try:    
-            response = self.modhandler.load(vector.interpreter).run_module(payload)
+            response = self.modhandler.load(vector.interpreter).run({0 : payload})
         except ModuleException:
             response = None
             

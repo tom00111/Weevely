@@ -11,9 +11,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Suidsgid'
     
 class Suidsgid(Module):
-    '''Find files with superuser flags
-    :find.suidsgid suid | sgid | any <path> 
-    '''
+    '''Find files with superuser flags'''
     
     vectors = VectorList([
        V('shell.sh', "find" , "find %s %s 2>/dev/null")
@@ -53,7 +51,7 @@ class Suidsgid(Module):
         payload = self.__prepare_payload(vector, parameters)
     
         try:    
-            response = self.modhandler.load(vector.interpreter).run_module(payload)
+            response = self.modhandler.load(vector.interpreter).run({0 : payload})
         except ModuleException:
             response = None
         else:

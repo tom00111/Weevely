@@ -12,9 +12,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Check'
     
 class Check(Module):
-    '''Check remote files type, md5 and permission
-    :file.check <remote path> exists|file|dir|md5|r|w|x
-    '''
+    '''Check remote files type, md5 and permission'''
     
     
     vectors = VectorList([
@@ -52,7 +50,7 @@ class Check(Module):
         payload = self.__prepare_payload(vector, [remote_path])
     
         try:    
-            response = self.modhandler.load(vector.interpreter).run_module(payload)
+            response = self.modhandler.load(vector.interpreter).run({ 0 : payload})
         except ModuleException:
             response = None
         else:
@@ -63,7 +61,7 @@ class Check(Module):
                 return response
             else:
                 if mode != 'exists':
-                    if not self.run_module(remote_path, 'exists'):
+                    if not self.run({'rpath' : remote_path, 'mode' :  'exists'}):
                         self.mprint('File not exists.', 4)
                     
             return False

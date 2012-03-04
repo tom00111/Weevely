@@ -140,7 +140,7 @@ while ($i < mysql_num_rows ($tableQ))
         self.structure[db] = {}
           
         payload = self.__prepare_payload(vector, [host, user, pwd, db, table]) 
-        response = self.modhandler.load(vector.interpreter).run_module(payload)
+        response = self.modhandler.load(vector.interpreter).run({ 0: payload })
         
         self.modhandler.set_verbosity()
         

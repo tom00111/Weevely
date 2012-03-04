@@ -73,7 +73,7 @@ class Info(Module):
 
 
     def __execute_payload(self, vector, parameters):
-        return self.modhandler.load(vector.interpreter).run_module(vector.payloads[0])
+        return self.modhandler.load(vector.interpreter).run({ 0 : vector.payloads[0]})
         
 
 

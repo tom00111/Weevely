@@ -33,8 +33,9 @@ class Read(Module):
         
         # Passing vector to file.download
         self.modhandler.load('file.download').params.set_and_check_parameters({'vector':self.params.get_parameter_value('vector')})
-        response = self.modhandler.load('file.download').run_module(remote_path, file.name, True)
-        
+        self.modhandler.load('file.download').run({'rpath' : remote_path, 'lpath' : file.name})
+        response = self.modhandler.load('file.download').lastreadfile[:]
+        self.modhandler.load('file.download').lastreadfile = None
         if response:
             remove(file.name)
             return response

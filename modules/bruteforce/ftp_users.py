@@ -38,7 +38,7 @@ class Ftp_users(Module):
             except Exception, e:
                 raise ModuleException(self.name, "Error opening %s: %s" % (filename, str(e)))
     
-        usersresponse = self.modhandler.load('audit.etc_passwd').run_module(filter_real_users=True)
+        usersresponse = self.modhandler.load('audit.etc_passwd').run({ 'filter' : 'True'})
         
         if usersresponse:
             users = [ u.name for u in self.modhandler.load('audit.etc_passwd').usersinfo ]
@@ -50,7 +50,10 @@ class Ftp_users(Module):
                 else:
                     wl_splitted = self.__generate_wl_from_user(user) + wl_splitted
             
-                response = self.modhandler.load('bruteforce.ftp').run_module(user, '', 0, host, port, substitutive_wl = wl_splitted)
+                
+                self.modhandler.load('bruteforce.ftp').set_substitutive_wl(wl_splitted)
+                response = self.modhandler.load('bruteforce.ftp').run({'user' : user, 'lpath' : '', 'sline' : 0, 'host' : host, 'port' : port})
+                
                 
                 if response:
                     self.mprint(response)

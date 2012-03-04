@@ -66,7 +66,7 @@ echo $table."\n";
         
         payload = self.__prepare_payload(vector, parameters) 
         
-        response = self.modhandler.load(vector.interpreter).run_module(payload)
+        response = self.modhandler.load(vector.interpreter).run({ 0: payload })
         if response:
             return response
         return None

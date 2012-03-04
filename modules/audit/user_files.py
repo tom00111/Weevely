@@ -64,7 +64,7 @@ class UserFiles(Module):
             return
         
         self.modhandler.set_verbosity(1)
-        self.modhandler.load('audit.etc_passwd').run_module(True)
+        self.modhandler.load('audit.etc_passwd').run({'filter' : 'True'})
         self.modhandler.set_verbosity()
         
         
@@ -78,7 +78,8 @@ class UserFiles(Module):
                 path_list.append(user.home + '/' + f)
                      
         if path_list:
-            self.modhandler.load('enum.paths').run_module('',  list=path_list)            
-        
+            
+            self.modhandler.load('enum.paths').set_list(path_list)
+            self.modhandler.load('enum.paths').run({'lpath' : ''})
         
             

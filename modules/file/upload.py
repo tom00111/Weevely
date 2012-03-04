@@ -33,6 +33,8 @@ class Upload(Module):
     def __init__(self, modhandler, url, password):
         Module.__init__(self, modhandler, url, password)    
         
+        self.file_content = None
+        
         self.rand_post_name = ''.join([choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(4)])
         
         
@@ -44,26 +46,30 @@ class Upload(Module):
         remote_path = parameters[2]
 
         payload = vector.payloads[0] % (remote_path, self.rand_post_name)
-        
-        self.modhandler.load(vector.interpreter).run_module(payload, post_data = {self.rand_post_name : file_encoded_content})
+        self.modhandler.load(vector.interpreter).set_post_data({self.rand_post_name : file_encoded_content})
+        self.modhandler.load(vector.interpreter).run({0 : payload})
         
             
-        file_remote_md5 = self.modhandler.load('file.check').run_module(remote_path, 'md5')
+        file_remote_md5 = self.modhandler.load('file.check').run({'rpath' : remote_path, 'mode' : 'md5'})
         if file_remote_md5 == file_local_md5:
             self.mprint('[%s] File \'%s\' uploaded.' % (self.name, remote_path))
             return True
         else:
-            file_exists = self.modhandler.load('file.check').run_module(remote_path, 'exists')
+            file_exists = self.modhandler.load('file.check').run({'rpath' : remote_path, 'mode' :'exists'})
             if file_exists:
                 self.mprint('[!] [%s] MD5 hash of \'%s\' file mismatch, file corrupted.' % (self.name, remote_path))
             else:
                 self.mprint ('[!] [%s] File \'%s\' creation failed, check remote path and permissions.' % ( self.name, remote_path))
     
+    def set_file_content(self, content):
+        """Cleaned after use"""
+        
+        self.file_content = content
 
-    def run_module( self, local_path, remote_path, file_content = None):
+    def run_module( self, local_path, remote_path):
         
                 
-        if not file_content:
+        if not self.file_content:
         
             try:
                 local_file = open(local_path, 'r')
@@ -71,12 +77,15 @@ class Upload(Module):
                 raise ModuleException(self.name,  "Open file '%s' failed" % (local_path))
             
             file_content = local_file.read()
+        else:
+            file_content = self.file_content[:]
+            self.file_content = None
             
             
         file_local_md5 = md5(file_content).hexdigest()
         file_encoded_content = b64encode(file_content)
 
-        if self.modhandler.load('file.check').run_module(remote_path, 'exists'):
+        if self.modhandler.load('file.check').run({'rpath' : remote_path, 'mode' : 'exists'}):
             raise ModuleException(self.name,  "Remote file %s exists" % (remote_path))
             
                 

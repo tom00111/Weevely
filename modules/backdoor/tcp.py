@@ -62,7 +62,7 @@ class Tcp(Module):
     def __execute_payload(self, vector, parameters):
         
         payload = self.__prepare_payload(vector, parameters)
-        return self.modhandler.load(vector.interpreter).run_module(payload, False)
+        return self.modhandler.load(vector.interpreter).run({ 'cmd' : payload, 'stderr' :  'False'})
         
         
     def __prepare_payload( self, vector, parameters):

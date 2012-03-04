@@ -64,7 +64,7 @@ class Summary(Module):
         # tables
         payload = self.__prepare_payload(vector, [db], 1) 
  
-        response = self.modhandler.load(vector.interpreter).run_module(mode, user, pwd, payload, host)
+        response = self.modhandler.load(vector.interpreter).run({'dbms' : mode, 'user' : user, 'pwd': pwd, 'query' : payload, 'host' : host})
         
         if response:
             for table in response.split('\n'):
@@ -74,7 +74,10 @@ class Summary(Module):
                 
                 # columns
                 cpayload = self.__prepare_payload(vector, [db, table], 2) 
-                cresponse = self.modhandler.load(vector.interpreter).run_module(mode, user, pwd, payload, host)
+                #cresponse = self.modhandler.load(vector.interpreter).run_module(mode, user, pwd, payload, host)
+                
+                cresponse = self.modhandler.load(vector.interpreter).run({'dbms' : mode, 'user' : user, 'pwd': pwd, 'query' : payload, 'host' : host})
+        
                 if cresponse:
                     for column in response.split('\n'):   
                         self.structure[db][table][column]=[]

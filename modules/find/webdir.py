@@ -60,9 +60,9 @@ class Webdir(Module):
         
         payload = self.__prepare_payload(vector, [ file_path ])
         
-        self.modhandler.load(vector.interpreter).run_module(payload)
+        self.modhandler.load(vector.interpreter).run({0 : payload})
 
-        if self.modhandler.load('file.check').run_module(file_path, 'exists'):
+        if self.modhandler.load('file.check').run({'rpath' : file_path, 'mode' : 'exists'}):
             
                 
             file_content = Request(file_url).read()
@@ -72,7 +72,7 @@ class Webdir(Module):
                 self.url = dir_url
                 
             
-            if self.modhandler.load('shell.php').run_module("unlink('%s') && print('1');" % file_path) != '1':
+            if self.modhandler.load('shell.php').run( { 0 : "unlink('%s') && print('1');" % file_path }) != '1':
                 print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
                 
             if self.dir and self.url:
@@ -92,7 +92,7 @@ class Webdir(Module):
             
         if start_dir == 'auto':
             try:
-                root_find_dir = self.modhandler.load('system.info').run_module('basedir')
+                root_find_dir = self.modhandler.load('system.info').run({ 0 : 'basedir' })
             except ModuleException, e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
                 root_find_dir = None
@@ -107,7 +107,7 @@ class Webdir(Module):
             http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
             
             try:
-                writable_dirs = self.modhandler.load('find.perms').run_module('any', 'd', 'w', root_find_dir).split('\n')
+                writable_dirs = self.modhandler.load('find.perms').run({'qty' :  'any','type' : 'd', 'perm' : 'w', 'rpath' : root_find_dir }).split('\n')
             except ModuleException as e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
                 writable_dirs = []

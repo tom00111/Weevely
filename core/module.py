@@ -42,8 +42,12 @@ class Module:
             check2, arglist = self.params.get_parameters_list(argdict)
 
             if check2:
-                output = self.run_module(*arglist)
-        
+                
+                try:
+                    output = self.run_module(*arglist)
+                except ModuleException, e:
+                    print '[!] [%s] Error: %s' % (e.module, e.error) 
+                
         return output
     
     def _get_default_vector2(self):
