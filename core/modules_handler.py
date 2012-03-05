@@ -6,10 +6,7 @@ from helper import Helper
 
 class ModHandler(Helper):
     
-    vectors = VectorList([
-        Vector('shell.sh', 'system_shell', ""),
-        Vector('shell.php', 'php_shell', "")
-        ])
+    interpreters_priorities = [ 'shell.sh', 'shell.php' ]
     
     
     def __init__(self, url = None, password = None, path_modules = 'modules'):
@@ -35,7 +32,7 @@ class ModHandler(Helper):
 #        self.__load_interpreters()
         
         
-    def load(self, module_name, init_module = True):
+    def load(self, module_name, init_module = True, disable_interpreter_probe=False):
         
         if not module_name in self.modules:
             if module_name not in self.module_info.keys():
@@ -57,21 +54,29 @@ class ModHandler(Helper):
     def set_verbosity(self, v = 3):
         self.verbosity = v        
                 
+    def get_default_interpreter(self):
+        
+        for mod in self.loaded_shells:
+            for interp in self.interpreters_priorities:
+                if mod == interp:
+                    return mod
+            
+                
                 
     def load_interpreters(self):
         
-        for vector in self.vectors:
+        for interpr in self.interpreters_priorities:
             
             try:
-                self.load(vector.interpreter)
+                self.load(interpr)
             except ModuleException, e:
                 print '[!] [%s] %s' % (e.module, e.error)   
             else:
-                self.interpreter = vector.interpreter
+                self.interpreter = interpr
                 return self.interpreter
             
         
         raise ModuleException('[!]', 'No remote backdoor found. Check URL and password.') 
-   
+#   
                 
                 

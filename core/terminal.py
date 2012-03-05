@@ -21,7 +21,6 @@ class Terminal(Enviroinment):
     def __init__( self, modhandler, one_shot = False):
 
         self.modhandler = modhandler
-        self.interpreter = None
         
         
         self.url = modhandler.url
@@ -85,15 +84,12 @@ class Terminal(Enviroinment):
             
     def run_line_cmd(self, cmd_line):
         
-#        if not self.interpreter:
-#            return
-             
         output = ''
         
         if not self.one_shot:
 
             if self._handleDirectoryChange(cmd_line) == False:
-                if self.interpreter == 'shell.php' and cmd_line.startswith('ls'):
+                if 'shell.sh' not in self.modhandler.loaded_shells and cmd_line.startswith('ls'):
                     print self.modhandler.load('shell.php').ls_handler(cmd_line)
                     return
                 
@@ -147,13 +143,11 @@ class Terminal(Enviroinment):
     def run(self, module_name, module_arglist):        
         
         if module_name == None:
-            if not self.interpreter:
-                self.interpreter = self.modhandler.load_interpreters()
-                 
-                
-            module_name = self.interpreter
+            if 'shell.sh' in self.modhandler.loaded_shells:
+                module_name = 'shell.sh'
+            else:
+                module_name = 'shell.php'
             
-
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
         else:

@@ -1,7 +1,7 @@
 import os
 
 dirpath = '~/.weevely/'
-rcfilepath = 'weevelyrc'
+rcfilepath = 'weevely.rc'
 historyfilepath = 'weevely_history'
 
 class Configs:

@@ -28,6 +28,8 @@ class Info(Module):
         Vector('shell.php', 'basedir', "@print(getcwd());"),
         Vector('shell.php', 'safe_mode', "(ini_get('safe_mode') && print(1)) || print(0);"),
         Vector('shell.php', 'script', "@print($_SERVER['SCRIPT_NAME']);"),
+        Vector('shell.php', 'uname', "@print(php_uname());"),
+        Vector('shell.php', 'os', "@print(PHP_OS);"),
         Vector('shell.php', 'client_ip', "@print($_SERVER['REMOTE_ADDR']);")
         ])
 
@@ -49,11 +51,11 @@ class Info(Module):
         infos = []
         
         vectors = self._get_default_vector2()
+        
         if not vectors:
             vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
-        
+                  
         for vector in vectors:
-            
             if (vector.name not in infos) and (info == 'auto' or info == vector.name):
             
                 response = self.__execute_payload(vector, [info])

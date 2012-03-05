@@ -17,18 +17,19 @@ class Enviroinment:
     
     def __init__(self):
 
-        self.interpreter = self.modhandler.load_interpreters()
 
-        if self.interpreter == 'shell.sh':
-            self.prompt = "%s@%s:%s$ "
-        else:
-            self.prompt = "%s@%s:%s php> "
             
 
         self.modhandler.set_verbosity(2)
         self.username = self.modhandler.load('system.info').run({ 0: "whoami" })
         self.hostname = self.modhandler.load('system.info').run({ 0: "hostname"})
         self.cwd = self.modhandler.load('system.info').run({ 0 : "basedir"})
+
+        if 'shell.sh' in self.modhandler.loaded_shells:
+            self.prompt = "%s@%s:%s$ "
+        else:
+            self.prompt = "%s@%s:%s php> "
+
 
         try:
             self.safe_mode = int(self.modhandler.load('system.info').run({ 0: "safe_mode" }))

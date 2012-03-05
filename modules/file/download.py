@@ -49,7 +49,7 @@ class Download(Module):
         self.transfer_dir = None
         self.transfer_url_dir = None
         
-        self.lastreadfile = None
+        self.lastreadfile = ''
         
         
         Module.__init__(self, modhandler, url, password)
@@ -84,15 +84,19 @@ class Download(Module):
                 except ModuleException, e:
                     self.mprint('[!] [' + e.module + '] ' + e.error)
                     return
-                
+               
                 self.transfer_url_dir = self.modhandler.load('find.webdir').url
                 self.transfer_dir = self.modhandler.load('find.webdir').dir
+                
+                if not self.transfer_url_dir or not self.transfer_dir:
+                    return
             
                 filename = '/' + str(randint(11, 999)) + remote_path.split('/').pop();
                 self.file_path = self.transfer_dir + filename
                 self.url = self.transfer_url_dir + filename
             
             payload = self.__prepare_payload(vector, [remote_path, self.file_path])
+            
         else:
             
             payload = self.__prepare_payload(vector, [remote_path])

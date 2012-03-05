@@ -15,9 +15,7 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Upload'
     
 class Upload(Module):    
-    '''Upload binary/ascii file to the target filesystem
-    :file.upload <locale path> <remote path>
-    '''
+    '''Upload binary/ascii file to the target filesystem'''
     
     
     vectors = VectorList([

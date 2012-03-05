@@ -13,7 +13,10 @@ classname = 'Sh'
     
 class Sh(Module):
     '''Shell to execute system commands
-    :shell.sh "<command>" 
+    
+    Every run should be run_module to avoid recursive
+    interpreter probing
+    
     '''
     
     visible = False
@@ -54,7 +57,7 @@ fclose($pipes[2]); proc_close($h);"""),
         
         
         
-    def __execute_slack_probe(self, vector):
+    def __execute_probe(self, vector):
         
         
         try:
@@ -70,7 +73,7 @@ fclose($pipes[2]); proc_close($h);"""),
         return False
         
         
-    def __slack_probe( self ):
+    def _probe( self ):
 
         vectors = self._get_default_vector2() 
         
@@ -79,21 +82,19 @@ fclose($pipes[2]); proc_close($h);"""),
         
         
         for vector in vectors:
-            response = self.__execute_slack_probe(vector)
+            response = self.__execute_probe(vector)
                 
             if response:
                 self.payload = vector.payloads[0]
                 return
 
-                
+        
         raise ModuleException("shell.sh",  "Shell interpreter initialization failed")
                 
               
     def run_module( self, cmd, err_to_stdout = True, payload = None ):
         
         if not payload: 
-            if not self.payload:
-                self.__slack_probe()
             payload = self.payload
             
 
@@ -107,7 +108,7 @@ fclose($pipes[2]); proc_close($h);"""),
             cmd     = cmd.split()[0]
             payload = payload % ( args, cmd )
         
-        return self.modhandler.load('shell.php').run({ 0 :  payload })
+        return self.modhandler.load('shell.php').run_module(payload)
 
 
 

@@ -34,7 +34,9 @@ class Module:
     
     def run(self, args = {}):
         
-        
+        if not self.modhandler.interpreter and not self.modhandler.load_interpreters():
+            self.modhandler.load_interpreters()
+            
         output = None
         check1, argdict = self.params.set_and_check_parameters(args, oneshot=True)
         

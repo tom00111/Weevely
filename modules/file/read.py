@@ -6,7 +6,7 @@ Created on 24/ago/2011
 from core.module import Module, ModuleException
 from tempfile import NamedTemporaryFile
 from core.parameters import ParametersList, Parameter as P
-from os import remove
+from os import remove, path
 from modules.file.download import Download
 
 
@@ -36,7 +36,7 @@ class Read(Module):
         self.modhandler.load('file.download').run({'rpath' : remote_path, 'lpath' : file.name})
         response = self.modhandler.load('file.download').lastreadfile[:]
         self.modhandler.load('file.download').lastreadfile = None
-        if response:
+        if response and path.exists(file.name):
             remove(file.name)
             return response
             

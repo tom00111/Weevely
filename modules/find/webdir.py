@@ -107,7 +107,8 @@ class Webdir(Module):
             http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
             
             try:
-                writable_dirs = self.modhandler.load('find.perms').run({'qty' :  'any','type' : 'd', 'perm' : 'w', 'rpath' : root_find_dir }).split('\n')
+                writable_dirs_string = self.modhandler.load('find.perms').run({'qty' :  'any','type' : 'd', 'perm' : 'w', 'rpath' : root_find_dir })
+                writable_dirs = [ d for d in writable_dirs_string.split('\n') if d]
             except ModuleException as e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
                 writable_dirs = []

@@ -5,7 +5,7 @@ class VectorList(list):
     def get_vectors_by_interpreters(self, shells):
         vect=[]
         for v in self:
-            #if v.interpreter in shells:
+            if v.interpreter in shells:
                 vect.append(v)
         return vect
     
@@ -22,6 +22,9 @@ class VectorList(list):
         sorted = [v for v in self for n in names if n == v.name]
         print sorted
     
+    def __repr__(self):
+        for v in self:
+            print v
 
 class Vector:
     def __init__(self, interpreter, name, payloads):

