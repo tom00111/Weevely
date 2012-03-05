@@ -53,14 +53,14 @@ class ModHandler(Helper):
                     
     def set_verbosity(self, v = 3):
         self.verbosity = v        
-                
-    def get_default_interpreter(self):
-        
-        
-        for interp in self.interpreters_priorities:
-            if interp in self.loaded_shells:
-                return interp
-        
+#                
+#    def get_default_interpreter(self):
+#        
+#        
+#        for interp in self.interpreters_priorities:
+#            if interp in self.loaded_shells:
+#                return interp
+#        
                 
                 
     def load_interpreters(self):

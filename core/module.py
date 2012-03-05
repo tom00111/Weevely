@@ -34,7 +34,7 @@ class Module:
     
     def run(self, args = {}):
         
-        if not self.modhandler.interpreter and not self.modhandler.load_interpreters():
+        if not self.modhandler.interpreter:
             self.modhandler.load_interpreters()
             
         output = None
