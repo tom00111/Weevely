@@ -69,13 +69,13 @@ class UserFiles(Module):
         
         
         path_list = []
-        user_list = self.modhandler.load('audit.etc_passwd').usersinfo
+        user_dict = self.modhandler.load('audit.etc_passwd').usersinfo
             
-        self.mprint('[%s] Enumerating %i users' % (self.name, len(user_list)))
+        self.mprint('[%s] Enumerating %i users' % (self.name, len(user_dict.keys())))
         
-        for user in user_list:
+        for username in user_dict:
             for f in custom_files:
-                path_list.append(user.home + '/' + f)
+                path_list.append(user_dict[username].home + '/' + f)
                      
         if path_list:
             

@@ -79,11 +79,11 @@ class Download(Module):
     
             if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
                 
-                try:
-                    self.modhandler.load('find.webdir').run({'rpath': 'auto'})
-                except ModuleException, e:
-                    self.mprint('[!] [' + e.module + '] ' + e.error)
+                self.modhandler.set_verbosity(2)
+                if not self.modhandler.load('find.webdir').run({'rpath': 'auto'}):
+                    self.modhandler.set_verbosity()
                     return
+                self.modhandler.set_verbosity()
                
                 self.transfer_url_dir = self.modhandler.load('find.webdir').url
                 self.transfer_dir = self.modhandler.load('find.webdir').dir

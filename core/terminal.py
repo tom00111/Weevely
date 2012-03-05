@@ -142,11 +142,9 @@ class Terminal(Enviroinment):
  
     def run(self, module_name, module_arglist):        
         
+        
         if module_name == None:
-            if 'shell.sh' in self.modhandler.loaded_shells:
-                module_name = 'shell.sh'
-            else:
-                module_name = 'shell.php'
+            module_name = self.modhandler.get_default_interpreter()
             
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)

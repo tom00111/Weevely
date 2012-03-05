@@ -33,7 +33,11 @@ class Read(Module):
         
         # Passing vector to file.download
         self.modhandler.load('file.download').params.set_and_check_parameters({'vector':self.params.get_parameter_value('vector')})
+        
+        self.modhandler.set_verbosity(1)
         self.modhandler.load('file.download').run({'rpath' : remote_path, 'lpath' : file.name})
+        self.modhandler.set_verbosity()
+        
         response = self.modhandler.load('file.download').lastreadfile[:]
         self.modhandler.load('file.download').lastreadfile = None
         if response and path.exists(file.name):

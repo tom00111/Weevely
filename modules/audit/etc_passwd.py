@@ -69,10 +69,7 @@ class EtcPasswd(Module):
         
         payload = self.__prepare_payload(vector, [])
     
-        try:    
-            response = self.modhandler.load(vector.interpreter).run({0 : payload})
-        except ModuleException:
-            response = None
+        response = self.modhandler.load(vector.interpreter).run({0 : payload})
             
         pwdfile = ''
             
@@ -88,10 +85,10 @@ class EtcPasswd(Module):
                     if filter_real_users:
                         if (user.uid == 0) or (user.uid > 999) or (('false' not in user.shell) and ('/home/' in user.home)):
                             pwdfile += line + '\n'
-                            self.usersinfo[user]=user
+                            self.usersinfo[user.name]=user
                     else:
                             pwdfile += line + '\n'
-                            self.usersinfo[user]=user
+                            self.usersinfo[user.name]=user
             
                     
             

@@ -48,7 +48,7 @@ class Module:
                 try:
                     output = self.run_module(*arglist)
                 except ModuleException, e:
-                    print '[!] [%s] Error: %s' % (e.module, e.error) 
+                    self.mprint('[!] [%s] Error: %s' % (e.module, e.error))
                 
         return output
     

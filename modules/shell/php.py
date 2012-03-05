@@ -158,7 +158,8 @@ class Php(Module):
         self.use_current_path = True
         
         if not response:
-            self.mprint('[!] Error listing files in \'%s\', incorrect permission or safe mode enabled' % path)
+            
+            self.mprint('[!] Error listing files in \'%s\', not enough privileges' % path)
             
         return response
             

@@ -26,7 +26,7 @@ class Webdir(Module):
     ])
     
 
-    params = ParametersList('Find first writable directory and corresponding URL', vectors,
+    params = ParametersList('Find a writable directory and corresponding URL', vectors,
                     P(arg='rpath', help='Remote starting path', default='auto', pos=0))
     
     
@@ -133,7 +133,8 @@ class Webdir(Module):
                     response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
                     if response != None:
                         self.params.set_and_check_parameters({'vector' : vector.name})
-                        return 
+                        return True
+                    
                  
         if not (self.url and self.dir):
             raise ModuleException(self.name,  "Writable web directory not found")

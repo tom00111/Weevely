@@ -41,7 +41,10 @@ class Sql_users(Module):
         
         
         if usersresponse:
-            users = [ u.name for u in self.modhandler.load('audit.etc_passwd').usersinfo ]
+            
+            usersdict = self.modhandler.load('audit.etc_passwd').usersinfo
+            
+            users = [ usersdict[u].name for u in usersdict ]
             
             for user in users:
                 
