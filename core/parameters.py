@@ -2,7 +2,7 @@ import ast
 
 class Parameter:
     
-    def __init__(self, arg, help='', required = False, pos=-1, default = None, choices = [], type = None, mutual_exclusion=[], passed = True):
+    def __init__(self, arg, help='', required = False, pos=-1, default = None, choices = [], type = None, mutual_exclusion=[], passed = True, hidden=False):
         self.arg = arg
         self.help = help
         self.required = required
@@ -15,6 +15,7 @@ class Parameter:
         self.passed = passed
         
         self.value = default
+        self.hidden = hidden
         
         
     def set_value(self, value):
@@ -64,6 +65,9 @@ class ParametersList:
         
         for parameter in self.parameters:
                 
+            if parameter.hidden:
+                continue
+                
             if parameter.required:
                 formatarg = '<%s%s%s>' 
             else:
@@ -80,6 +84,9 @@ class ParametersList:
         output=''
         
         for parameter in self.parameters:
+            
+            if parameter.hidden:
+                continue
             
             # Skip printing vectors from summaries
             if parameter.arg == 'vector':
@@ -101,6 +108,9 @@ class ParametersList:
         
         output = ''
         for parameter in self.parameters:
+            
+            if parameter.hidden:
+                continue
             output += '\n%s' % (parameter)
         return output
 

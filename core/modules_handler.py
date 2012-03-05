@@ -56,11 +56,11 @@ class ModHandler(Helper):
                 
     def get_default_interpreter(self):
         
-        for mod in self.loaded_shells:
-            for interp in self.interpreters_priorities:
-                if mod == interp:
-                    return mod
-            
+        
+        for interp in self.interpreters_priorities:
+            if interp in self.loaded_shells:
+                return interp
+        
                 
                 
     def load_interpreters(self):

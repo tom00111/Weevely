@@ -76,7 +76,7 @@ class Tcp(Module):
     def __check_module_state(self):
         if self.last_vector and not self.done:
             self.params.set_and_check_parameters({'vector' : self.last_vector})
-            self.mprint('[%s] Port \'%s\' seems open. Use telnet to connect end commands with semi-comma' % (self.name, self.last_vector))
+            self.mprint('[%s] Port \'%s\' seems open. Use telnet to connect end commands with semicolon' % (self.name, self.last_vector))
             self.done = True
            
     

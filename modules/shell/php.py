@@ -26,7 +26,6 @@ class Php(Module):
                              P(arg='proxy', help='HTTP proxy')
                         )
     
-#    available_modes = [ 'Cookie', 'Referer' ]
     
     def __init__(self, modhandler, url, password):
         
@@ -99,6 +98,9 @@ class Php(Module):
 
         if self.use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
+        
+        if cmd[-1] != ';':
+            self.mprint('[!] Warning: PHP command with no trailing semicolon')
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
