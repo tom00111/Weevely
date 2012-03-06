@@ -135,7 +135,7 @@ while ($i < mysql_num_rows ($tableQ))
         if table == 'any':
             table = ''
         
-        self.modhandler.set_verbosity(1)
+        self.modhandler.set_verbosity(2)
         
         self.structure[db] = {}
           
