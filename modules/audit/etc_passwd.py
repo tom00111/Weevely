@@ -75,27 +75,31 @@ class EtcPasswd(Module):
             
         pwdfile = ''
             
-        if response and ':0:0:' in response:
+        if response:
             
-            self.params.set_and_check_parameters({'vector' : vector.name})
+            response_splitted = response.split('\n')
             
-            for line in response.split('\n'):
-                if line:
-                    
-                    user = User(line)
-                    
-                    if filter_real_users:
-                        if (user.uid == 0) or (user.uid > 999) or (('false' not in user.shell) and ('/home/' in user.home)):
-                            pwdfile += line + '\n'
-                            self.usersinfo[user.name]=user
-                    else:
-                            pwdfile += line + '\n'
-                            self.usersinfo[user.name]=user
-            
-                    
-            
-            
-            return pwdfile
+            if response_splitted and response_splitted[0].count(':') >= 6:
+                
+                self.params.set_and_check_parameters({'vector' : vector.name})
+                
+                for line in response_splitted:
+                    if line:
+                        
+                        user = User(line)
+                        
+                        if filter_real_users:
+                            if (user.uid == 0) or (user.uid > 999) or (('false' not in user.shell) and ('/home/' in user.home)):
+                                pwdfile += line + '\n'
+                                self.usersinfo[user.name]=user
+                        else:
+                                pwdfile += line + '\n'
+                                self.usersinfo[user.name]=user
+                
+                        
+                
+                
+                return pwdfile
 
         
     def __prepare_payload( self, vector, parameters):
