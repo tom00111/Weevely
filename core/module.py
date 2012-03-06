@@ -24,8 +24,9 @@ class Module:
         
         self._probe()
     
-    def mprint(self, str, importance = 3):
-        if importance <= self.modhandler.verbosity:
+    def mprint(self, str, importance = 5):
+        
+        if importance >= self.modhandler.verbosity:
             print str
         
     

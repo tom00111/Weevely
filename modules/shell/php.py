@@ -23,7 +23,8 @@ class Php(Module):
     params = ParametersList('PHP command shell', [],
                              P(arg='cmd', help='PHP commands. Terminate with semi-comma', required=True, pos=0),
                              P(arg='mode', help='Obfuscation mode', choices = ['Cookie', 'Referer' ]),
-                             P(arg='proxy', help='HTTP proxy')
+                             P(arg='proxy', help='HTTP proxy'),
+                             P(arg='debug', help='Enable requests and response debug', type=bool, default=False, hidden=True)
                         )
     
     
@@ -86,7 +87,7 @@ class Php(Module):
         self.post_data = post_data
        
        
-    def run_module(self, cmd, mode = None, proxy = None):
+    def run_module(self, cmd, mode = None, proxy = None, debug = None):
 
         if mode:
             self.mode = mode
@@ -95,6 +96,9 @@ class Php(Module):
             self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
         
+        # Debug is equal to None only if called directly by run_module
+        if debug == None:
+            debug = self.params.get_parameter_value('debug')
 
         if self.use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
@@ -110,9 +114,12 @@ class Php(Module):
             self.post_data = {}
             
     
-        debug_level = 5
+        debug_level = 1
+        if debug:
+            debug_level = 5
+            
         self.mprint( "Request: %s" % (cmd), debug_level)
-        
+         
         
         try:
             resp = request.execute()

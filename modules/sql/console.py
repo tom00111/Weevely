@@ -43,7 +43,7 @@ class Console(Module):
                     if response:
                         print response
                     else:
-                        self.mprint('[%s] No data returned' % self.name, 2)
+                        self.mprint('[%s] No data returned' % self.name)
         
         except KeyboardInterrupt:
             self.modhandler.set_verbosity()
