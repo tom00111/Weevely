@@ -35,6 +35,8 @@ class Configs:
             print "[!] Error opening rc file."
         else:
             return [c for c in rcfile.read().split('\n') if c and c[0] != '#']
+        
+        return [] 
 
     def __historyfile(self):
         return self.dirpath + historyfilepath
