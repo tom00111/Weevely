@@ -52,16 +52,18 @@ class EtcPasswd(Module):
                 
     def run_module(self, filter_real_users):
         
-        
         vectors = self._get_default_vector2()
         if not vectors:
             vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
-        
+                
         for vector in vectors:
             response = self.__execute_payload(vector, [filter_real_users])
             if response != None:
                 return response
-        
+
+
+        raise ModuleException(self.name,  "Users enumeration failed")
+                        
 
     def __execute_payload(self, vector, parameters):
         
@@ -95,8 +97,6 @@ class EtcPasswd(Module):
             
             return pwdfile
 
-        raise ModuleException(self.name,  "Users enumeration failed")
-                
         
     def __prepare_payload( self, vector, parameters):
 

@@ -99,7 +99,7 @@ class Php(Module):
         if self.use_current_path and self.cwd_vector and self.path:
             cmd = self.cwd_vector % (self.path, cmd)
         
-        if cmd[-1] != ';':
+        if cmd.strip() and cmd.strip()[-1] not in (';', '}'):
             self.mprint('[!] Warning: PHP command with no trailing semicolon')
         
         request = CmdRequest( self.url, self.password, self.proxy)
@@ -110,7 +110,7 @@ class Php(Module):
             self.post_data = {}
             
     
-        debug_level = 5
+        debug_level = 3
         self.mprint( "Request: %s" % (cmd), debug_level)
         
         

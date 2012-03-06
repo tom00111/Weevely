@@ -7,6 +7,7 @@ class VectorList(list):
         for v in self:
             if v.interpreter in shells:
                 vect.append(v)
+                
         return vect
     
     def get_vector_by_name(self, name):
