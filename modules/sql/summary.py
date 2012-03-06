@@ -57,7 +57,7 @@ class Summary(Module):
         pwd = parameters[3]
         db = parameters[4]
         
-        self.modhandler.set_verbosity(1)
+        self.modhandler.set_verbosity(2)
         
         self.structure[db] = {}
           

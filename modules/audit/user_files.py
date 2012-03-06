@@ -63,7 +63,7 @@ class UserFiles(Module):
             print '[!] Error, required one of this parameters: %s' % (self.params.summary())
             return
         
-        self.modhandler.set_verbosity(1)
+        self.modhandler.set_verbosity(2)
         self.modhandler.load('audit.etc_passwd').run({'filter' : 'True'})
         self.modhandler.set_verbosity()
         

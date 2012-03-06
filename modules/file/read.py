@@ -34,7 +34,7 @@ class Read(Module):
         # Passing vector to file.download
         self.modhandler.load('file.download').params.set_and_check_parameters({'vector':self.params.get_parameter_value('vector')})
         
-        self.modhandler.set_verbosity(1)
+        self.modhandler.set_verbosity(2)
         self.modhandler.load('file.download').run({'rpath' : remote_path, 'lpath' : file.name})
         self.modhandler.set_verbosity()
         

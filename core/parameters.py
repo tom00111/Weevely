@@ -55,7 +55,7 @@ class ParametersList:
         self.module_description = module_description
         self.parameters = list(parameters)
         self.vectors = vectors
-        if vectors and len(vectors)>1:
+        if vectors:
             self.parameters.append(Parameter(arg='vector', help='Specify vector', choices = vectors.get_names_list(), passed = False))
       
       
@@ -119,7 +119,7 @@ class ParametersList:
             int(s)
             return 'at position %s' % s
         except ValueError:
-            return 'in parameter \'%s\'' % s
+            return 'in \'%s\'' % s
         
         
     def __repr__(self):

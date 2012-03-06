@@ -16,7 +16,7 @@ classname = 'Console'
 class Console(Module):
     '''Start SQL console'''
     
-    params = ParametersList('Start SQL console', None,
+    params = ParametersList('Start SQL console', [],
             P(arg='dbms', help='Database', choices=['mysql', 'postgres'], required=True, pos=0),
             P(arg='user', help='SQL user', required=True, pos=1),
             P(arg='pwd', help='SQL password', required=True, pos=2),
