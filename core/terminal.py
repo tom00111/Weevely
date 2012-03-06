@@ -12,8 +12,7 @@ import os, re, shlex
 module_trigger = ':'
 help_string = ':show'
 set_string = ':set'
-rcfile = '~/.weevely.rc'
-historyfile = '~/.weevely_history'
+load_string = ':load'
 
             
 class Terminal(Enviroinment):
@@ -68,6 +67,11 @@ class Terminal(Enviroinment):
                 modname = cmd_splitted[1]
                 self.set(modname, cmd_splitted[2:])
            
+        ## Load call
+        elif cmd_splitted[0] == load_string:   
+            if len(cmd_splitted)>=2:
+                self.__load_rcfile(cmd_splitted[1])
+                           
         ## Command call    
         else:
 
@@ -164,9 +168,9 @@ class Terminal(Enviroinment):
                 print '[!] [%s] Error: %s' % (e.module, e.error) 
            
 
-    def __load_rcfile(self):
+    def __load_rcfile(self, path = None):
             
-        for cmd in self.configs.rc_commands:
+        for cmd in self.configs.read_rc(path):
             
             cmd       = cmd.strip()
             

@@ -13,12 +13,12 @@ class Configs:
         if not os.path.exists(self.dirpath):
             os.mkdir(self.dirpath)
             
-        self.rc_commands = self.__load_rc()
         self.historyfile = self.__historyfile()
             
-    def __load_rc(self):
+    def read_rc(self, rcpath = None):
         
-        rcpath = self.dirpath + rcfilepath
+        if not rcpath:
+            rcpath = self.dirpath + rcfilepath
         
         if not os.path.exists(rcpath):
             

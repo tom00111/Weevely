@@ -84,7 +84,7 @@ class Upload(Module):
         file_encoded_content = b64encode(file_content)
 
         if self.modhandler.load('file.check').run({'rpath' : remote_path, 'mode' : 'exists'}):
-            raise ModuleException(self.name,  "Remote file %s exists" % (remote_path))
+            raise ModuleException(self.name,  "Remote file %s already exists" % (remote_path))
             
                 
         vectors = self._get_default_vector2()

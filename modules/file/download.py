@@ -74,7 +74,7 @@ class Download(Module):
     def __execute_payload(self, vector, parameters):
         
         remote_path = parameters[0]
-        
+
         if (vector.name == 'copy' or vector.name == 'symlink'):
     
             if not (self.transfer_dir and self.transfer_url_dir and self.file_path):
@@ -166,6 +166,11 @@ class Download(Module):
                 self.mprint('[%s] File correctly downloaded to \'%s\'.' % (self.name, local_path))
                 return response
 
+    def get_last_read_file(self):
+        """Get last read file and delete it"""
+        lastreadfile = self.lastreadfile[:]
+        self.lastreadfile=''
+        return lastreadfile
      
     def run_module(self, remote_path, local_path):
     

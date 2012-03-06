@@ -2,6 +2,7 @@
 
 from core.module import Module, ModuleException
 from core.parameters import ParametersList, Parameter as P
+import os
 
 classname = 'Paths'
 
@@ -11,6 +12,11 @@ class Paths(Module):
     params = ParametersList('Enumerate remote paths specified by wordlist', None,
                 P(arg='lpath', help='Path of local wordlist', required=True, pos=0))
 
+
+    def __init__(self, modhandler, url, password):
+        self.list = []
+        
+        Module.__init__(self, modhandler, url, password)
      
     def set_list(self, list):
         """Cleaned after use"""
@@ -19,8 +25,9 @@ class Paths(Module):
     def run_module(self, list_path):
         
         if not self.list and list_path:
+            
             try:
-                list=open(list_path,'r').read().splitlines()
+                list=open(os.path.expanduser(list_path),'r').read().splitlines()
             except:
                 raise ModuleException(self.name,  "Error opening path list \'%s\'" % list_path)
         else:

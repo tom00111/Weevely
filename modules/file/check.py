@@ -62,7 +62,7 @@ class Check(Module):
             else:
                 if mode != 'exists':
                     if not self.run({'rpath' : remote_path, 'mode' :  'exists'}):
-                        self.mprint('File not exists.', 4)
+                        self.mprint('File does not exists.', 4)
                     
             return False
             

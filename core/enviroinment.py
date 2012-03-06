@@ -28,7 +28,7 @@ class Enviroinment:
         if 'shell.sh' in self.modhandler.loaded_shells:
             self.prompt = "%s@%s:%s$ "
         else:
-            self.prompt = "%s@%s:%s php> "
+            self.prompt = "%s@%s:%s (PHP)> "
 
 
         try:
@@ -107,7 +107,7 @@ class Enviroinment:
             if ' ' in buffer:
                 return []
             
-            # show all commands
+            # show all commandspath
             if not line:
                 all_cmnds = [c + ' ' for c in self.matching_words]
                 if len(all_cmnds) > state:

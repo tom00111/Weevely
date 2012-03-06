@@ -38,8 +38,7 @@ class Read(Module):
         self.modhandler.load('file.download').run({'rpath' : remote_path, 'lpath' : file.name})
         self.modhandler.set_verbosity()
         
-        response = self.modhandler.load('file.download').lastreadfile[:]
-        self.modhandler.load('file.download').lastreadfile = None
+        response = self.modhandler.load('file.download').get_last_read_file()
         if response and path.exists(file.name):
             remove(file.name)
             return response
