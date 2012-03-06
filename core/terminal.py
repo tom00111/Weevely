@@ -147,11 +147,19 @@ class Terminal(Enviroinment):
     def run(self, module_name, module_arglist):        
         
         # TODO: use directly load_interpreters or get_best_interpreter
+        # The double choose of best inetrpreter and load_inerpreter call seems
+        # Redundant
+        
         if module_name == None:
+            
+            if not self.modhandler.interpreter:
+                self.modhandler.load_interpreters()
+            
             if 'shell.sh' in self.modhandler.loaded_shells:
                 module_name = 'shell.sh'
             else:
                 module_name = 'shell.php'
+            
             
         if module_name not in self.modhandler.module_info.keys():
             print '[!] Error module with name \'%s\' not found' % (module_name)
