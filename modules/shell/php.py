@@ -110,7 +110,7 @@ class Php(Module):
             self.post_data = {}
             
     
-        debug_level = 3
+        debug_level = 5
         self.mprint( "Request: %s" % (cmd), debug_level)
         
         
