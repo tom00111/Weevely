@@ -11,6 +11,8 @@ import readline, atexit, os, re, shlex
 help_string = ':show'
 cwd_extract = re.compile( "cd\s+(.+)", re.DOTALL )
 respace = re.compile('.*\s+$', re.M)
+set_string = ':set'
+load_string = ':load'
 
 class Enviroinment:
     
@@ -43,7 +45,7 @@ class Enviroinment:
         
         print '\n[+] List modules with <tab> and show help with %s [module name]\n' % help_string
         
-        self.matching_words =  self.modhandler.help_completion('') + [help_string]
+        self.matching_words =  self.modhandler.help_completion('') + [help_string, load_string, set_string]
         self.__init_completion()
              
  
