@@ -17,7 +17,7 @@ class Sql_users(Module):
     :bruteforce.sql_users mysql|postgres <local_file_list.txt>|auto <host> 
     '''
     
-    params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
+    params = ParametersList('Bruteforce SQL password of every system users using local wordlist', None,
             P(arg='dbms', help='DBMS', choices=['mysql', 'postgres'], required=True, pos=0),
             P(arg='lpath', help='Path of local wordlist. Use \'auto\' to use only user and its reverse as password.', required=True, pos=1),
             P(arg='host', help='SQL host or host:port', default='127.0.0.1', pos=2))

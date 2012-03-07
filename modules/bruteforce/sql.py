@@ -28,7 +28,7 @@ break;
 """)
             ])
 
-    params = ParametersList('Bruteforce single ftp user using a local wordlist', vectors,
+    params = ParametersList('Bruteforce single SQL user using a local wordlist', vectors,
             P(arg='dbms', help='DBMS', choices=['mysql', 'postgres'], required=True, pos=0),
             P(arg='user', help='SQL user to bruteforce', required=True, pos=1),
             P(arg='lpath', help='Path of local wordlist', required=True, pos=2),

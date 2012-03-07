@@ -13,11 +13,9 @@ from core.parameters import ParametersList, Parameter as P
 classname = 'Ftp_users'
  
 class Ftp_users(Module):
-    '''Bruteforce sql of system users. For user based password trying use 'auto'.
-    :bruteforce.ftp_users <host> <port> <local_file_list.txt>|auto
-    '''
+    '''Bruteforce sql of system users. '''
     
-    params = ParametersList('Bruteforce single ftp user using a local wordlist', None,
+    params = ParametersList('Bruteforce FTP password of every system users using a local wordlist', None,
             P(arg='lpath', help='Path of local wordlist. Use \'auto\' to use only user and its reverse as password.', required=True, pos=0),
             P(arg='host', help='FTP host', default='127.0.0.1', pos=1),
             P(arg='port', help='FTP port', default=21, type=int, pos=2))
