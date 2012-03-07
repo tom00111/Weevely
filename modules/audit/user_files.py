@@ -79,7 +79,7 @@ class UserFiles(Module):
                      
         if path_list:
             
-            self.modhandler.load('enum.paths').set_list(path_list)
-            self.modhandler.load('enum.paths').run({'lpath' : ''})
+            self.modhandler.load('file.enum').set_list(path_list)
+            self.modhandler.load('file.enum').run({'lpath' : ''})
         
             

@@ -4,9 +4,9 @@ from core.module import Module, ModuleException
 from core.parameters import ParametersList, Parameter as P
 import os
 
-classname = 'Paths'
+classname = 'Enum'
 
-class Paths(Module):
+class Enum(Module):
     """Enumerate paths on remote filesystem"""
      
     params = ParametersList('Enumerate remote paths specified by wordlist', None,

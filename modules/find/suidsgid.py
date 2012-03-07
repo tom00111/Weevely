@@ -17,7 +17,7 @@ class Suidsgid(Module):
        V('shell.sh', "find" , "find %s %s 2>/dev/null")
     ])
     
-    params = ParametersList('Find files by permissions', vectors,
+    params = ParametersList('Find files with suid and sgid flags', vectors,
                     P(arg='type', help='Suid, sgid or both', choices=['suid','sgid', 'any'], default='any', pos=0), 
                     P(arg='rpath', help='Remote starting path', default='.', pos=1)
                     )
