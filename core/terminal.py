@@ -177,18 +177,19 @@ class Terminal(Enviroinment):
            
 
     def __load_rcfile(self, path = None):
-            
-        for cmd in self.configs.read_rc(path):
-            
-            cmd       = cmd.strip()
-            
-            if cmd:
-                print '[rc] %s' % (cmd)
+        
+        if path:
+            for cmd in self.configs.read_rc(os.path.expanduser(path)):
                 
-                if cmd[0] == module_trigger:
-                    self.run_module_cmd(shlex.split(cmd))
-                else:
-                    self.run_line_cmd(cmd)    
+                cmd       = cmd.strip()
+                
+                if cmd:
+                    print '[rc] %s' % (cmd)
+                    
+                    if cmd[0] == module_trigger:
+                        self.run_module_cmd(shlex.split(cmd))
+                    else:
+                        self.run_line_cmd(cmd)    
     
         
         
