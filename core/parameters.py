@@ -143,18 +143,18 @@ class ParametersList:
                 if value:
 
                     if param.choices and (value not in param.choices):
-                        print '[!] Error using \'%s\' %s. Options: \'%s\'' % (value, self.__print_namepos(namepos), '\', \''.join(param.choices))             
+                        print '[!] Error, allowed values %s: \'%s\'' % (self.__print_namepos(namepos), '\', \''.join(param.choices))             
                         check=False
                     
                     if param.type:
                         try:
                             value = ast.literal_eval(value)
                         except ValueError:
-                            print '[!] Error, parameter invalid type (%s)' % (repr(param.type))             
+                            print '[!] Error, allowed type %s: %s' % (self.__print_namepos(namepos), repr(param.type))             
                             check=False
     
                         if not isinstance(value, param.type):
-                            print '[!] Error, parameter invalid type (%s)' % (repr(param.type)) 
+                            print '[!] Error, allowed type %s: %s' % (self.__print_namepos(namepos), repr(param.type)) 
                             check=False
                         
                     if param.mutual_exclusion:
@@ -166,6 +166,7 @@ class ParametersList:
                 
             else:
                 print '[!] Error, invalid parameter %s' % (self.__print_namepos(namepos))  
+                
                 check=False
                 
             if check:
