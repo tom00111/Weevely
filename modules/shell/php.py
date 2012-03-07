@@ -93,7 +93,8 @@ class Php(Module):
             self.mode = mode
             
         if proxy:
-            self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
+            if not self.proxy:
+                self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
         
         # Debug is equal to None only if called directly by run_module
