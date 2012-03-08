@@ -117,7 +117,7 @@ class Php(Module):
             debug_level = 5
         
         if self.post_data:
-            request.setPostData(self.post_data.copy())
+            request.setPostData(self.post_data)
             self.mprint( "Post data values:", debug_level)
             for p in self.post_data:
                 self.mprint("  %s (%i)" % (p, len(self.post_data[p])), debug_level)

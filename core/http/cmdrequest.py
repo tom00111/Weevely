@@ -85,7 +85,7 @@ class CmdRequest(Request):
 		
 		
 	def setPostData(self, data_dict):
-		self.data = data_dict
+		self.data = data_dict.copy()
 
 	def execute( self ):
 		response = self.read()
