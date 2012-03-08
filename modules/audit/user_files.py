@@ -11,7 +11,7 @@ class UserFiles(Module):
     """Enumerate common restricted files in home and public_html folders"""
     
     params = ParametersList('Enumerate common restricted files for every system user', [],
-                    P(arg='auto', help='Specify home for \'/home/*\', web for \'/home/*/public_html\', any for both'),
+                    P(arg='auto', help='Specify home for \'/home/*\', web for \'/home/*/public_html\', any for both', choices = ['home', 'web', 'any']),
                     P(arg='list', help='Path list from local file', mutual_exclusion=['auto', 'path']),
                     P(arg='path', help='Single path', mutual_exclusion=['list', 'auto'])
                     )
