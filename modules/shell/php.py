@@ -109,16 +109,18 @@ class Php(Module):
         
         request = CmdRequest( self.url, self.password, self.proxy)
         request.setPayload(cmd, self.current_mode)
-        
-        if self.post_data:
-            request.setPostData(self.post_data.copy())
-            self.mprint( "Post data size: %i" % len(self.post_data), debug_level)
-            self.post_data = {}
+
             
     
         debug_level = 1
         if debug:
             debug_level = 5
+        
+        if self.post_data:
+            request.setPostData(self.post_data.copy())
+            self.mprint( "Post data size: %i" % len(self.post_data), debug_level)
+            self.post_data = {}
+
             
         self.mprint( "Request: %s" % (cmd), debug_level)
          
