@@ -27,8 +27,8 @@ from core.helper import Helper
 import sys
     
 print '''
-Weevely 0.5.1 - Generate and manage stealth PHP backdoors
-                Emilio Pinna 2011-2012            
+Weevely 0.6 - Generate and manage stealth PHP backdoors
+              Emilio Pinna 2011-2012            
 '''
    
 general_usage = '''Start telnet-like session
