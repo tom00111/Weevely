@@ -112,6 +112,7 @@ class Php(Module):
         
         if self.post_data:
             request.setPostData(self.post_data.copy())
+            self.mprint( "Post data size: %i" % len(self.post_data), debug_level)
             self.post_data = {}
             
     
