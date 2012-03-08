@@ -26,9 +26,11 @@ class UserFiles(Module):
                               ".ssh/known_hosts"
                               ],
                     "web" : [ "public_html/", 
-                             "public_html/wp-config.php", 
+                             "public_html/wp-config.php", # wordpress
                              "public_html/config.php", 
                              "public_html/uploads",
+                             "public_html/configuration.php", # joomla
+                             "public_html/sites/default/settings.php", # drupal
                              "public_html/.htaccess" ] 
                     
                     }
