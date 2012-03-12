@@ -6,7 +6,7 @@ Created on 22/ago/2011
 
 from core.module import ModuleException
 from core.enviroinment import Enviroinment
-from core.configs import Configs
+from core.configs import Configs, dirpath, rcfilepath
 import os, re, shlex
 
 module_trigger = ':'
@@ -28,7 +28,7 @@ class Terminal(Enviroinment):
         self.one_shot = one_shot
 
         self.configs = Configs()
-        self.__load_rcfile()
+        self.__load_rcfile(dirpath + rcfilepath)
     
         if not one_shot:
             Enviroinment.__init__(self)
