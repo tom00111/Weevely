@@ -20,6 +20,7 @@ class Configs:
         if not rcpath:
             rcpath = self.dirpath + rcfilepath
         
+        
         if not os.path.exists(rcpath):
             
             try:
