@@ -24,6 +24,7 @@ class Request:
     def __init__(self, url, proxy={}):
         self.url = url
         self.data = {}
+        
         self.opener = URLOpener(proxies = proxy)
         
     def __setitem__(self, key, value):

@@ -30,6 +30,7 @@ class CmdRequest(Request):
 
 	def __init__( self, url, password, proxy = None ):
 		
+		
 		Request.__init__( self, url, proxy)
 			
 		self.password  = password

@@ -51,6 +51,7 @@ class Php(Module):
             self.modes = self.available_modes
 
         proxy = self.params.get_parameter_value('proxy')
+        
         if proxy:
             self.mprint('[!] Proxies can break weevely requests, if possibile use proxychains')
             self.proxy = { 'http' : proxy }
