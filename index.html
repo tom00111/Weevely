@@ -18,27 +18,32 @@
       <header>
         <h1>Weevely</h1>
         <p>Stealth tiny web shell</p>
-        <p class="view"><a href="https://github.com/epinna/Weevely">View the Project on GitHub <small>epinna/Weevely</small></a></p>
+        <p class="view"><a href="https://github.com/epinna/Weevely">View the Project on GitHub</a></p>
         <ul>
-          <li><a href="https://github.com/epinna/Weevely/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/epinna/Weevely/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/epinna/Weevely">Fork On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
-        <p>Weevely is a stealth PHP web shell that simulate telnet-like connection. It is an essential tool for web application post exploitation, and could be used like a backdoor or as a stealth access to manage web accounts, even if hosted in free hosting services. Just generate and upload the "server" PHP code on the target web server, and run Weevely client locally to transmit shell commands. Main features: </p>
+        <p>Weevely is a stealth PHP <strong>web shell</strong> that simulate <strong>telnet-like</strong> connection. It is an essential tool for web application <strong>post exploitation</strong>, and can be used as <strong>stealth backdoor</strong> or as a web shell to manage legit web accounts, even <strong>free hosted</strong> ones. </p>
+        
+		<p class="highlighted"><big>Getting started with a quick <big><a href="https://github.com/epinna/Weevely/wiki/Tutorial">Tutorial</a></big></big> or show list of available <a href="https://github.com/epinna/Weevely/wiki/Modules-list">Modules</a>.</p>
+        
+        <p>Main features: </p>
 
 <ul>
-<li>Backdoor communications are hidden in Cookie requests</li>
-<li>Communications are encoded using NIDS evasion techniques (any request is randomly obfuscated to bypass signature detection)</li>
-<li>Backdoor PHP code is polymorphic to obfuscate functions commonly used in backdoors</li>
-<li>Modular architecture have about 30 modules for every kind of maintain access/post exploit task</li>
-<li>Modules implement different techniques to accomplish single tasks to mitigate disabled_functions, safe_mode and other PHP restrictions</li>
+<li>Backdoor communications are hidden in HTTP Cookies</li>
+<li>Messages are encoded with NIDS evasion techniques (randomly obfuscated to bypass signature detection)</li>
+<li>Backdoor PHP code is polymorphic to obfuscate common used functions</li>
+<li>Modular architecture with more than 30 modules for every kind of administration, maintaining access and post exploitation task</li>
 </ul>
+
+        <p><small>Weevely author keep <big><a href="http://disse.cting.org">Dissecting</a></big>, a security related blog in italian language. </small></p>
+
+
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/epinna">epinna</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on GitHub Pages </p>
       </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
