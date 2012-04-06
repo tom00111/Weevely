@@ -9,13 +9,19 @@ from core.module import Module, ModuleException
 from core.vector import VectorList, Vector as V
 from core.parameters import ParametersList, Parameter as P
 import re
+from external.ipaddr import IPNetwork
+
 
 classname = 'Ifaces'
     
 class Ifaces(Module):
 
     params = ParametersList('Print network interfaces and corresponding IP/MASK', [])
-    
+
+    def __init__(self, modhandler, url, password):
+        self.ifaces = {}
+        
+        Module.__init__(self, modhandler, url, password)    
     
     def __find_ifconfig_path(self):
         
@@ -45,10 +51,14 @@ class Ifaces(Module):
         if response:
             ifaces = re.findall(r'^(\S+).*?inet addr:(\S+).*?Mask:(\S+)', response, re.S | re.M)
             
-            for i in ifaces:
-                print '%s: %s/%s' % i
+            if ifaces:
+                
+                for i in ifaces:
+                    ipnet = IPNetwork('%s/%s' % (i[1], i[2]))
+                    self.ifaces[i[0]] = ipnet
+                    print '%s: %s' % (i[0], ipnet)
         
         else:
-            raise ModuleException(self.name,  "No interfaces found")
+            raise ModuleException(self.name,  "No interfaces infos found")
                 
         
