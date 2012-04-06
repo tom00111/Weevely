@@ -16,7 +16,7 @@ classname = 'Ifaces'
     
 class Ifaces(Module):
 
-    params = ParametersList('Print network interfaces and corresponding IP/MASK', [])
+    params = ParametersList('Print network interfaces IP/mask', [])
 
     def __init__(self, modhandler, url, password):
         self.ifaces = {}

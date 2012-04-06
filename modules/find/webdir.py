@@ -19,6 +19,11 @@ class Webdir(Module):
     :find.webdir auto | <start dir>
     '''
     
+    """
+    TODO: the check if dir is writable is unnecessary, or 
+    to move in file.check
+    """
+    
     vectors = VectorList([
        V('shell.php', 'fwrite', "fwrite(fopen('%s','w'),'1');"),
        V('shell.php', "file_put_contents" , "file_put_contents('%s', '1');"),
