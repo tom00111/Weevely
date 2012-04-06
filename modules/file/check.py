@@ -1,4 +1,4 @@
-"$f='%s'; (file_exists($f) || is_readable($f) || is_writable($f) || is_file($f) || is_dir($f)) && print(1);"'''
+'''
 Created on 20/set/2011
 
 @author: norby
