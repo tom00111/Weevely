@@ -64,8 +64,8 @@ class Upload(Module):
         
         self.file_content = content
 
+
     def run_module( self, local_path, remote_path):
-        
                 
         if not self.file_content:
         
@@ -95,6 +95,6 @@ class Upload(Module):
             response = self.__execute_payload(vector, [file_encoded_content,  file_local_md5, remote_path])
             if response:
                 self.params.set_and_check_parameters({'vector' : vector.name})
-                return
+                return response
 
         

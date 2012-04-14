@@ -15,24 +15,14 @@ from urlparse import urlparse
 classname = 'Webdir'
     
 class Webdir(Module):
-    '''Find first writable directory and corresponding URL
-    :find.webdir auto | <start dir>
-    '''
-    
     """
     TODO: the check if dir is writable is unnecessary, or 
     to move in file.check
     """
     
-    vectors = VectorList([
-       V('shell.php', 'fwrite', "fwrite(fopen('%s','w'),'1');"),
-       V('shell.php', "file_put_contents" , "file_put_contents('%s', '1');"),
-       V('shell.sh', "echo" , "echo '1' > %s"),
-    ])
-    
 
-    params = ParametersList('Find a writable directory and corresponding URL', vectors,
-                    P(arg='rpath', help='Remote starting path', default='auto', pos=0))
+    params = ParametersList('Find a writable directory and corresponding URL',  [],
+                    P(arg='rpath', help='Remote directory or \'find\' automatically', default='find', pos=0))
     
     
     def __init__( self, modhandler , url, password):
@@ -44,102 +34,97 @@ class Webdir(Module):
 
         Module.__init__(self, modhandler, url, password)
         
-
-
-
-    def __prepare_payload( self, vector, parameters ):
-
-        if vector.payloads[0].count( '%s' ) == len(parameters):
-            return vector.payloads[0] % tuple(parameters)
-        else:
-            raise ModuleException(self.name,  "Error payload parameter number does not corresponds")
-        
     
+    def __upload_file_content(self, content, rpath):
+        self.modhandler.load('file.upload').set_file_content(content)
+        self.modhandler.set_verbosity(6)
+        response = self.modhandler.load('file.upload').run({ 'lpath' : 'fake', 'rpath' : rpath })
+        self.modhandler.set_verbosity()
+        
+        return response
 
-    def __execute_payload(self, vector, parameters):
-        
-        dir_path = parameters[0] 
-        file_path = parameters[1] 
-        file_url = parameters[2] 
-        dir_url = parameters[3]
-        
-        payload = self.__prepare_payload(vector, [ file_path ])
-        
-        self.modhandler.load(vector.interpreter).run({0 : payload})
 
-        if self.modhandler.load('file.check').run({'rpath' : file_path, 'mode' : 'exists'}):
+    def __check_remote_test_file(self, file_path):
+        
+        return self.modhandler.load('file.check').run({'rpath' : file_path, 'mode' : 'exists'})
+
+
+    def __check_remote_test_url(self, file_url):
+        
+        file_content = Request(file_url).read()
+        
+        if( file_content == '1'):
+            return True
             
-                
-            file_content = Request(file_url).read()
+
+    def __remove_remote_test_file(self, file_path):
+        
+        if self.modhandler.load('shell.php').run( { 0 : "unlink('%s') && print('1');" % file_path }) != '1':
+            self.mprint("[!] [find.webdir] Error cleaning test file %s" % (file_path))
             
-            if( file_content == '1'):
-                self.dir = dir_path
-                self.url = dir_url
-                
-            
-            if self.modhandler.load('shell.php').run( { 0 : "unlink('%s') && print('1');" % file_path }) != '1':
-                print "[!] [find.webdir] Error cleaning test file %s" % (file_path)
-                
-            if self.dir and self.url:
-                print "[find.webdir] Writable web dir found with method '%s': %s -> %s" % (vector.name, self.dir, self.url)
-                return True
-                
-            
-        return False    
                 
                         
+    def __enumerate_writable_dirs(self, root_dir):
 
+        if not root_dir[-1]=='/': 
+            root_dir += '/'
+        
+        try:
+            writable_dirs_string = self.modhandler.load('find.perms').run({'qty' :  'any','type' : 'd', 'perm' : 'w', 'rpath' : root_dir })
+            writable_dirs = [ d for d in writable_dirs_string.split('\n') if d]
+        except ModuleException as e:
+            self.mprint('[!] [' + e.module + '] ' + e.error)
+            writable_dirs = []
+            
+        return writable_dirs
+           
 
-    def run_module(self, start_dir):
+    def run_module(self, path):
+
+        
         if self.url and self.dir:
             self.mprint("[%s] Writable web dir: %s -> %s" % (self.name, self.dir, self.url))
             return
-            
-        if start_dir == 'auto':
+        
+        start_path = None
+        
+        if path == 'find':
             try:
-                root_find_dir = self.modhandler.load('system.info').run({ 0 : 'basedir' })
+                start_path = self.modhandler.load('system.info').run({ 0 : 'basedir' })
             except ModuleException, e:
                 self.mprint('[!] [' + e.module + '] ' + e.error)
-                root_find_dir = None
-                
+
         else:
-            root_find_dir = start_dir
+            start_path = path
         
-        if root_find_dir:
+        http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
+        
+        
+        if start_path:
             
-            if not root_find_dir[-1]=='/': root_find_dir += '/'
-            
-            http_root = '%s://%s/' % (urlparse(self.url).scheme, urlparse(self.url).netloc) 
-            
-            try:
-                writable_dirs_string = self.modhandler.load('find.perms').run({'qty' :  'any','type' : 'd', 'perm' : 'w', 'rpath' : root_find_dir })
-                writable_dirs = [ d for d in writable_dirs_string.split('\n') if d]
-            except ModuleException as e:
-                self.mprint('[!] [' + e.module + '] ' + e.error)
-                writable_dirs = []
-                
-               
+            writable_dirs = self.__enumerate_writable_dirs(start_path)
+
             for dir_path in writable_dirs:
-            
-            
-                if not dir_path[-1]=='/': dir_path += '/'
+
+                
+                if not dir_path[-1]=='/': 
+                    dir_path += '/'
+                
                 file_path = dir_path + self.probe_filename
     
-                file_url = http_root + file_path.replace(root_find_dir,'')
-                dir_url = http_root + dir_path.replace(root_find_dir,'')
+                file_url = http_root + file_path.replace(start_path,'')
+                dir_url = http_root + dir_path.replace(start_path,'')
             
             
-                vectors = self._get_default_vector2()
-                if not vectors:
-                    vectors  = self.vectors.get_vectors_by_interpreters(self.modhandler.loaded_shells)
+                if self.__upload_file_content('1', file_path) and self.__check_remote_test_file(file_path) and self.__check_remote_test_url(file_url):
+                    
+                    self.dir = dir_path
+                    self.url = dir_url
+                    
+                self.__remove_remote_test_file(file_path)
                 
-                for vector in vectors:
-                    
-                    response = self.__execute_payload(vector, [dir_path, file_path, file_url, dir_url])
-                    if response != None:
-                        self.params.set_and_check_parameters({'vector' : vector.name})
-                        return True
-                    
-                 
-        if not (self.url and self.dir):
-            raise ModuleException(self.name,  "Writable web directory not found")
+                if self.dir and self.url:
+                   self.mprint("[find.webdir] Found writable web dir %s -> %s" % (self.dir, self.url))
+                   return True
+        
+        raise ModuleException(self.name,  "Writable web directory not found")
