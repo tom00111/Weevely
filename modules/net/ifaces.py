@@ -56,7 +56,7 @@ class Ifaces(Module):
                 for i in ifaces:
                     ipnet = IPNetwork('%s/%s' % (i[1], i[2]))
                     self.ifaces[i[0]] = ipnet
-                    print '%s: %s' % (i[0], ipnet)
+                    self.mprint('%s: %s' % (i[0], ipnet))
         
         else:
             raise ModuleException(self.name,  "No interfaces infos found")

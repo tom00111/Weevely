@@ -26,7 +26,7 @@ class Module:
     
     def mprint(self, str, importance = 5):
         
-        if importance >= self.modhandler.verbosity:
+        if importance >= self.modhandler.verbosity[-1]:
             print str
         
     

@@ -25,12 +25,10 @@ class ModHandler(Helper):
         Helper.__init__(self)
         
         
-        self.verbosity=3
+        self.verbosity=[ 3 ]
         
         self.interpreter = None
             
-#        self.__load_interpreters()
-        
         
     def load(self, module_name, init_module = True, disable_interpreter_probe=False):
         
@@ -51,16 +49,15 @@ class ModHandler(Helper):
         return self.modules[module_name]
          
                     
-    def set_verbosity(self, v = 3):
-        self.verbosity = v        
-#                
-#    def get_default_interpreter(self):
-#        
-#        
-#        for interp in self.interpreters_priorities:
-#            if interp in self.loaded_shells:
-#                return interp
-#        
+    def set_verbosity(self, v = None):
+        
+        if not v:
+            if self.verbosity:
+                self.verbosity.pop()
+            else:
+                self.verbosity = [ 3 ]
+        else:
+            self.verbosity.append(v)        
                 
                 
     def load_interpreters(self):
