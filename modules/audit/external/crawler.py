@@ -22,7 +22,11 @@ from cgi import escape
 from traceback import format_exc
 from Queue import Queue, Empty as QueueEmpty
 
-from BeautifulSoup import BeautifulSoup
+try:
+    from BeautifulSoup import BeautifulSoup
+except ImportError:
+    print '[!] Error, BeautifulSoup python module required. In Ubuntu linux run\n[!] sudo apt-get install python-beautifulsoup'
+    sys.exit(1)
 
 __version__ = "0.2"
 __copyright__ = "CopyRight (C) 2008-2011 by James Mills"
